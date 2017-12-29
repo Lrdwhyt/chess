@@ -9,13 +9,11 @@
 #include "piecetype.h"
 #include "square.h"
 
-Board::Board()
-{
+Board::Board() {
     squares = {0};
 }
 
-Board Board::startingPosition()
-{
+Board Board::startingPosition() {
     Board b;
     b.squares[Square::get(Column::A, 8)] = Piece::get(Side::Black, PieceType::Rook);
     b.squares[Square::get(Column::B, 8)] = Piece::get(Side::Black, PieceType::Knight);
@@ -33,7 +31,6 @@ Board Board::startingPosition()
     b.squares[Square::get(Column::F, 7)] = Piece::get(Side::Black, PieceType::Pawn);
     b.squares[Square::get(Column::G, 7)] = Piece::get(Side::Black, PieceType::Pawn);
     b.squares[Square::get(Column::H, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-
     b.squares[Square::get(Column::A, 2)] = Piece::get(Side::White, PieceType::Pawn);
     b.squares[Square::get(Column::B, 2)] = Piece::get(Side::White, PieceType::Pawn);
     b.squares[Square::get(Column::C, 2)] = Piece::get(Side::White, PieceType::Pawn);
@@ -54,23 +51,18 @@ Board Board::startingPosition()
     return b;
 }
 
-void Board::clearSquare(int sq)
-{
+void Board::clearSquare(int sq) {
     squares[sq] = Piece::None;
 }
 
-void Board::updateSquare(int square, int piece)
-{
+void Board::updateSquare(int square, int piece) {
     squares[square] = piece;
 }
 
-std::string Board::toString()
-{
+std::string Board::toString() {
     std::string s = "";
-    for (int i = 8; i >= 1; --i) // Rows
-    {
-        for (int r = Column::A; r <= Column::H; ++r) // Columns
-        {
+    for (int i = 8; i >= 1; --i) { // Rows
+        for (int r = Column::A; r <= Column::H; ++r) { // Columns
             s += Piece::getString(squares[Square::get(r, i)]);
         }
         s += "\n";
@@ -78,12 +70,10 @@ std::string Board::toString()
     return s;
 }
 
-void Board::print()
-{
+void Board::print() {
     std::cout << Board::toString() << std::endl;
 }
 
-int Board::at(int square)
-{
+int Board::at(int square) {
     return squares[square];
 }

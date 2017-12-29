@@ -2,54 +2,42 @@
 
 #include <iostream>
 
-Game::Game(Agent *p1, Agent *p2)
-{
+Game::Game(Agent* p1, Agent* p2) {
     white = p1;
     black = p2;
     side = Side::White;
     print();
-    handleTurn(white->requestMove());
+    handleTurn(white->requestMove(state));
 }
 
-void Game::handleTurn(Move m)
-{
-    if (false)
-    { // Check if move is valid
+void Game::handleTurn(Move m) {
+    if (false) { // Check if move is valid
         return;
     }
     state.processMove(m);
     // Change turns
-    if (side == Side::White)
-    {
+    if (side == Side::White) {
         side = Side::Black;
-    }
-    else
-    {
+    } else {
         side = Side::White;
     }
     print();
-    if (false)
-    {
+    if (false) {
         delete this;
         return;
     }
-    if (side == Side::White)
-    {
-        handleTurn(white->requestMove());
-    }
-    else
-    {
-        handleTurn(black->requestMove());
+    if (side == Side::White) {
+        handleTurn(white->requestMove(state));
+    } else {
+        handleTurn(black->requestMove(state));
     }
 }
 
-void Game::print()
-{
+void Game::print() {
     state.getBoard().print();
 }
 
-Game::~Game()
-{
+Game::~Game() {
     delete white;
     delete black;
 }

@@ -1,8 +1,7 @@
 #include "gamestate.h"
 
 /* Initialise game state in the starting position */
-GameState::GameState()
-{
+GameState::GameState() {
     board = Board::startingPosition();
     canWhiteCastleKingside = true;
     canWhiteCastleQueenside = true;
@@ -10,13 +9,11 @@ GameState::GameState()
     canBlackCastleQueenside = true;
 }
 
-Board &GameState::getBoard()
-{
+Board& GameState::getBoard() {
     return board;
 }
 
-void GameState::processMove(Move move)
-{
+void GameState::processMove(Move move) {
     int piece = board.at(move.origin);
     board.clearSquare(move.origin);
     board.updateSquare(move.destination, piece);

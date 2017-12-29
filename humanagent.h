@@ -1,9 +1,8 @@
 #include "agent.h"
 
-class HumanAgent : public Agent
-{
-  public:
+class HumanAgent : public Agent {
+public:
     HumanAgent();
     ~HumanAgent();
-    Move requestMove();
+    Move requestMove(GameState&);
 };

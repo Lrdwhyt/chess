@@ -10,19 +10,18 @@
 #include "piece.h"
 #include "square.h"
 
-class Game
-{
+class Game {
 private:
-  Side side;
-  Agent *white;
-  Agent *black;
-  GameState state;
+    Side side;
+    Agent* white;
+    Agent* black;
+    GameState state;
 
 public:
-  Game(Agent *, Agent *);
-  ~Game();
-  void handleTurn(Move m);
-  void print();
+    Game(Agent*, Agent*);
+    ~Game();
+    void handleTurn(Move m);
+    void print();
 };
 
 #endif

@@ -6,9 +6,8 @@
 #include "piece.h"
 #include "square.h"
 
-class Move
-{
-  public:
+class Move {
+public:
     int origin, destination;
     Move();
     Move(int, int);

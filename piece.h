@@ -5,9 +5,8 @@
 
 #include "side.h"
 
-struct Piece
-{
-  public:
+struct Piece {
+public:
     static constexpr int None = 0;
     static std::string getString(int piece);
     static int get(Side, int pieceType);

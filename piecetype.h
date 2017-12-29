@@ -1,9 +1,8 @@
 #ifndef PIECETYPE_H
 #define PIECETYPE_H
 
-class PieceType
-{
-  public:
+class PieceType {
+public:
     static constexpr int Pawn = 1;
     static constexpr int Knight = 2;
     static constexpr int Bishop = 3;

@@ -13,21 +13,20 @@ Used to check what pieces exist and where pieces are
 #include "piece.h"
 #include "square.h"
 
-class Board
-{
+class Board {
 private:
-  std::array<int, 64> squares = {0};
-  std::forward_list<Square> whitePieces;
-  std::forward_list<Square> blackPieces;
+    std::array<int, 64> squares = {0};
+    std::forward_list<Square> whitePieces;
+    std::forward_list<Square> blackPieces;
 
 public:
-  Board();
-  void print();
-  static Board startingPosition();
-  void clearSquare(int);
-  void updateSquare(int square, int piece);
-  int at(int square);
-  std::string toString();
+    Board();
+    void print();
+    static Board startingPosition();
+    void clearSquare(int);
+    void updateSquare(int square, int piece);
+    int at(int square);
+    std::string toString();
 };
 
 #endif

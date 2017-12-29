@@ -5,9 +5,8 @@
 
 #include "column.h"
 
-class Square
-{
-  public:
+class Square {
+public:
     static int get(int, int);
     static int fromString(std::string str);
 };

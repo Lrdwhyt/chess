@@ -11,9 +11,8 @@ Used for move generation
 #include "board.h"
 #include "move.h"
 
-class GameState
-{
-  private:
+class GameState {
+private:
     Board board;
     bool canWhiteCastleQueenside, canWhiteCastleKingside;
     bool canBlackCastleQueenside, canBlackCastleKingside;
@@ -21,10 +20,11 @@ class GameState
     std::vector<Move> moveHistory;
     bool whiteInCheck, blackInCheck;
 
-  public:
+public:
     GameState();
-    Board &getBoard();
+    Board& getBoard();
     void processMove(Move);
+    bool isValidMove(Move, Side);
 };
 
 #endif

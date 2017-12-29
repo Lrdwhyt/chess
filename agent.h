@@ -3,13 +3,13 @@
 
 #include <string>
 
+#include "gamestate.h"
 #include "move.h"
 
-class Agent
-{
-  public:
+class Agent {
+public:
     virtual ~Agent(){};
-    virtual Move requestMove() = 0;
+    virtual Move requestMove(GameState&) = 0;
 };
 
 #endif
