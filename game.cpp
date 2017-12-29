@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Game::Game(Agent* p1, Agent* p2) {
+Game::Game(Agent *p1, Agent *p2) {
     white = p1;
     black = p2;
     side = Side::White;
@@ -12,6 +12,7 @@ Game::Game(Agent* p1, Agent* p2) {
 
 void Game::handleTurn(Move m) {
     if (state.isValidMove(m, side) == false) {
+        handleTurn(getCurrentAgent()->requestMove(state));
         return;
     }
     state.processMove(m);
@@ -35,6 +36,14 @@ void Game::handleTurn(Move m) {
 
 void Game::print() {
     state.getBoard().print();
+}
+
+Agent *Game::getCurrentAgent() {
+    if (side == Side::White) {
+        return white;
+    } else {
+        return black;
+    }
 }
 
 Game::~Game() {

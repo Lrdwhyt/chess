@@ -22,7 +22,7 @@ private:
 
 public:
     GameState();
-    Board& getBoard();
+    Board &getBoard();
     void processMove(Move);
     bool isValidMove(Move, Side);
 };

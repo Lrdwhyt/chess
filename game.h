@@ -13,13 +13,14 @@
 class Game {
 private:
     Side side;
-    Agent* white;
-    Agent* black;
+    Agent *white;
+    Agent *black;
     GameState state;
 
 public:
-    Game(Agent*, Agent*);
+    Game(Agent *, Agent *);
     ~Game();
+    Agent *getCurrentAgent();
     void handleTurn(Move m);
     void print();
 };
