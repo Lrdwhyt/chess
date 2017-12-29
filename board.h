@@ -1,3 +1,8 @@
+/*
+Representation of the game board
+Used to check what pieces exist and where pieces are
+*/
+
 #ifndef BOARD_H
 #define BOARD_H
 

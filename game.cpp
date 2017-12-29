@@ -6,9 +6,7 @@ Game::Game(Agent *p1, Agent *p2)
 {
     white = p1;
     black = p2;
-    turn = 1;
     side = Side::White;
-    board = Board::startingPosition();
     print();
     handleTurn(white->requestMove());
 }
@@ -19,9 +17,7 @@ void Game::handleTurn(Move m)
     { // Check if move is valid
         return;
     }
-    int piece = board.at(m.origin);
-    board.clearSquare(m.origin);
-    board.updateSquare(m.destination, piece);
+    state.processMove(m);
     // Change turns
     if (side == Side::White)
     {
@@ -30,7 +26,6 @@ void Game::handleTurn(Move m)
     else
     {
         side = Side::White;
-        ++turn;
     }
     print();
     if (false)
@@ -50,7 +45,7 @@ void Game::handleTurn(Move m)
 
 void Game::print()
 {
-    board.print();
+    state.getBoard().print();
 }
 
 Game::~Game()

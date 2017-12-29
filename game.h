@@ -5,6 +5,7 @@
 
 #include "agent.h"
 #include "board.h"
+#include "gamestate.h"
 #include "move.h"
 #include "piece.h"
 #include "square.h"
@@ -12,11 +13,10 @@
 class Game
 {
 private:
-  int turn;
   Side side;
-  Board board;
   Agent *white;
   Agent *black;
+  GameState state;
 
 public:
   Game(Agent *, Agent *);
