@@ -19,3 +19,14 @@ void GameState::processMove(Move move) {
     board.updateSquare(move.destination, piece);
     moveHistory.push_back(move);
 }
+
+bool GameState::isValidMove(Move move, Side side) {
+    if (board.isEmpty(move.origin) == true) {
+        return false; // Trying to move invalid piece
+    }
+    if (board.getSideAt(move.origin) != side) {
+        return false; // Trying to move opponent piece
+    }
+
+    return true;
+}

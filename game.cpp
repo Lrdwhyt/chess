@@ -11,7 +11,7 @@ Game::Game(Agent* p1, Agent* p2) {
 }
 
 void Game::handleTurn(Move m) {
-    if (false) { // Check if move is valid
+    if (state.isValidMove(m, side) == false) {
         return;
     }
     state.processMove(m);

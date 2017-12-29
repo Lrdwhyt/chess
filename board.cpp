@@ -77,3 +77,15 @@ void Board::print() {
 int Board::at(int square) {
     return squares[square];
 }
+
+bool Board::isEmpty(int square) {
+    return (squares[square] == Piece::None);
+}
+
+Side Board::getSideAt(int square) {
+    if (squares[square] > 0) {
+        return Side::White;
+    } else {
+        return Side::Black;
+    }
+}

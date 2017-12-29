@@ -26,6 +26,8 @@ public:
     void clearSquare(int);
     void updateSquare(int square, int piece);
     int at(int square);
+    Side getSideAt(int square);
+    bool isEmpty(int square);
     std::string toString();
 };
 
