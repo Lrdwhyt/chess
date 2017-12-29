@@ -4,8 +4,12 @@
 
 HumanAgent::HumanAgent() {}
 
+HumanAgent::HumanAgent(std::string name_) {
+    name = name_;
+}
+
 Move HumanAgent::requestMove(GameState& gameState) {
-    std::cout << "Enter move" << std::endl;
+    std::cout << name << " - enter move" << std::endl;
     std::string input;
     Move move;
     while (std::cin >> input) {

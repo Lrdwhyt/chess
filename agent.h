@@ -7,6 +7,9 @@
 #include "move.h"
 
 class Agent {
+private:
+    std::string name;
+
 public:
     virtual ~Agent(){};
     virtual Move requestMove(GameState&) = 0;

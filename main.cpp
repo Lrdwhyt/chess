@@ -6,8 +6,8 @@
 #include "humanagent.h"
 
 int main() {
-    Agent* p1 = new HumanAgent();
-    Agent* p2 = new HumanAgent();
+    Agent* p1 = new HumanAgent("White");
+    Agent* p2 = new HumanAgent("Black");
     Game g = Game(p1, p2);
     g.print();
     return 0;
