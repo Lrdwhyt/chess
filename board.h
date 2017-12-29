@@ -10,10 +10,12 @@
 
 class Board
 {
-public:
+private:
   std::array<int, 64> squares = {0};
   std::forward_list<Square> whitePieces;
   std::forward_list<Square> blackPieces;
+
+public:
   Board();
   void print();
   static Board startingPosition();

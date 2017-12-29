@@ -11,12 +11,14 @@
 
 class Game
 {
-public:
+private:
   int turn;
   Side side;
   Board board;
   Agent *white;
   Agent *black;
+
+public:
   Game(Agent *, Agent *);
   ~Game();
   void handleTurn(Move m);
