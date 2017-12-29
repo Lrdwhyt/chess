@@ -12,6 +12,10 @@
 Board::Board()
 {
     squares = {0};
+    bool whiteQueenside = true;
+    bool whiteKingside = true;
+    bool blackQueenside = true;
+    bool blackKingside = true;
 }
 
 Board Board::startingPosition()

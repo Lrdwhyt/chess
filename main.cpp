@@ -1,24 +1,15 @@
 #include <string>
 #include <iostream>
 
+#include "agent.h"
 #include "game.h"
-
-class CastleAbility
-{
-    bool whiteQueenside = true;
-    bool whiteKingside = true;
-    bool blackQueenside = true;
-    bool blackKingside = true;
-};
+#include "humanagent.h"
 
 int main()
 {
-    Game g = Game();
+    Agent *p1 = new HumanAgent();
+    Agent *p2 = new HumanAgent();
+    Game g = Game(p1, p2);
     g.print();
-    std::string inp;
-    while (std::cin >> inp)
-    {
-        g.handleRaw(inp);
-    }
     return 0;
 }

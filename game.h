@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "agent.h"
 #include "board.h"
 #include "move.h"
 #include "piece.h"
@@ -14,8 +15,10 @@ public:
   int turn;
   Side side;
   Board board;
-  Game();
-  void handleRaw(std::string);
+  Agent *white;
+  Agent *black;
+  Game(Agent *, Agent *);
+  ~Game();
   void handleTurn(Move m);
   void print();
 };

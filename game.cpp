@@ -2,22 +2,49 @@
 
 #include <iostream>
 
-Game::Game()
+Game::Game(Agent *p1, Agent *p2)
 {
+    white = p1;
+    black = p2;
     turn = 1;
     side = Side::White;
     board = Board::startingPosition();
+    print();
+    handleTurn(white->requestMove());
 }
 
 void Game::handleTurn(Move m)
 {
+    if (false)
+    { // Check if move is valid
+        return;
+    }
+    int piece = board.at(m.origin);
+    board.clearSquare(m.origin);
+    board.updateSquare(m.destination, piece);
+    // Change turns
     if (side == Side::White)
     {
         side = Side::Black;
     }
     else
     {
+        side = Side::White;
         ++turn;
+    }
+    print();
+    if (false)
+    {
+        delete this;
+        return;
+    }
+    if (side == Side::White)
+    {
+        handleTurn(white->requestMove());
+    }
+    else
+    {
+        handleTurn(black->requestMove());
     }
 }
 
@@ -26,26 +53,8 @@ void Game::print()
     board.print();
 }
 
-void Game::handleRaw(std::string s)
+Game::~Game()
 {
-    if (s.length() >= 4)
-    {
-        std::string originSquareString = s.substr(0, 2);
-        std::string destSquareString = s.substr(2, 2);
-        int destSquare, originSquare;
-        try
-        {
-            originSquare = Square::fromString(originSquareString);
-            destSquare = Square::fromString(destSquareString);
-        }
-        catch (std::runtime_error err)
-        {
-            std::cout << err.what() << std::endl;
-            return;
-        }
-        int piece = board.at(originSquare);
-        board.clearSquare(originSquare);
-        board.updateSquare(destSquare, piece);
-        print();
-    }
+    delete white;
+    delete black;
 }
