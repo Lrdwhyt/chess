@@ -1,3 +1,5 @@
+/* Helper class for the representation of squares on the game board */
+
 #ifndef SQUARE_H
 #define SQUARE_H
 

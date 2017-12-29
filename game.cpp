@@ -12,6 +12,7 @@ Game::Game(Agent *p1, Agent *p2) {
 
 void Game::handleTurn(Move m) {
     if (state.isValidMove(m, side) == false) {
+        print();
         handleTurn(getCurrentAgent()->requestMove(state));
         return;
     }

@@ -8,7 +8,7 @@ HumanAgent::HumanAgent(std::string name_) {
     name = name_;
 }
 
-Move HumanAgent::requestMove(GameState& gameState) {
+Move HumanAgent::requestMove(GameState &gameState) {
     std::cout << name << " - enter move" << std::endl;
     std::string input;
     Move move;

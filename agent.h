@@ -12,7 +12,7 @@ private:
 
 public:
     virtual ~Agent(){};
-    virtual Move requestMove(GameState&) = 0;
+    virtual Move requestMove(GameState &) = 0;
 };
 
 #endif

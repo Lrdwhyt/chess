@@ -9,7 +9,7 @@ GameState::GameState() {
     canBlackCastleQueenside = true;
 }
 
-Board& GameState::getBoard() {
+Board &GameState::getBoard() {
     return board;
 }
 

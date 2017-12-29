@@ -8,5 +8,5 @@ public:
     HumanAgent();
     HumanAgent(std::string name);
     ~HumanAgent();
-    Move requestMove(GameState&);
+    Move requestMove(GameState &);
 };

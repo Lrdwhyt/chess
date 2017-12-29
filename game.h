@@ -1,3 +1,9 @@
+/*
+Holds pointers to agent objects,
+Manages flow of the game by requesting agents to move,
+Manages whose turn it is,
+*/
+
 #ifndef GAME_H
 #define GAME_H
 
