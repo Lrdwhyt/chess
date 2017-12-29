@@ -43,7 +43,7 @@ std::string Piece::getString(int piece) {
             return "p";
 
         default:
-            return ".";
+            return " ";
     }
 }
 

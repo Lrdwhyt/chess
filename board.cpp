@@ -60,13 +60,19 @@ void Board::updateSquare(int square, int piece) {
 }
 
 std::string Board::toString() {
-    std::string s = "";
+    std::string s = "|---+---+---+---+---+---+---+---|";
+    s += "\n";
     for (int i = 8; i >= 1; --i) { // Rows
+        s += "|";
         for (int r = Column::A; r <= Column::H; ++r) { // Columns
-            s += Piece::getString(squares[Square::get(r, i)]);
+            s += " " + Piece::getString(squares[Square::get(r, i)]) + " |";
         }
+        s += " " + std::to_string(i);
+        s += "\n";
+        s += "|---+---+---+---+---+---+---+---|";
         s += "\n";
     }
+    s += "  A   B  -C   D   E   F   G   H";
     return s;
 }
 
