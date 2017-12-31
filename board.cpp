@@ -72,7 +72,7 @@ std::string Board::toString() {
         s += "|---+---+---+---+---+---+---+---|";
         s += "\n";
     }
-    s += "  A   B  -C   D   E   F   G   H";
+    s += "  A   B   C   D   E   F   G   H";
     return s;
 }
 
