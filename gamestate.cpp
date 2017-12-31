@@ -141,6 +141,7 @@ bool GameState::isValidMovement(Move move, Side side) {
                         return false;
                     }
                 }
+                return true;
             } else {
                 return false;
             }
