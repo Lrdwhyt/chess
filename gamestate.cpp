@@ -205,6 +205,20 @@ bool GameState::isValidMovement(Move move, Side side) {
                 if (!move.isCastleMove()) {
                     return false;
                 }
+                const int kingRow = (side == Side::White) ? 1 : 8;
+                // Return false if there are pieces between king and rook
+                if (move.destination == Square::get(Column::G, kingRow)) { // Kingside
+                    if (!board.isEmpty(Square::get(Column::F, kingRow)) ||
+                        !board.isEmpty(Square::get(Column::G, kingRow))) {
+                        return false; // Squares between king and rook are occupied
+                    }
+                } else if (move.destination == Square::get(Column::C, kingRow)) { // Queenside
+                    if (!board.isEmpty(Square::get(Column::D, kingRow)) ||
+                        !board.isEmpty(Square::get(Column::C, kingRow)) ||
+                        !board.isEmpty(Square::get(Column::B, kingRow))) {
+                        return false;
+                    }
+                }
                 int destinationColumn = Square::getColumn(move.destination);
                 if (destinationColumn == Column::G) {
                     // Kingside
