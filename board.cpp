@@ -91,7 +91,9 @@ bool Board::isEmpty(int square) {
 Side Board::getSideAt(int square) {
     if (squares[square] > 0) {
         return Side::White;
-    } else {
+    } else if (squares[square] < 0) {
         return Side::Black;
+    } else {
+        return Side::None;
     }
 }

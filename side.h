@@ -2,6 +2,7 @@
 #define SIDE_H
 
 enum class Side {
+    None,
     White,
     Black
 };
