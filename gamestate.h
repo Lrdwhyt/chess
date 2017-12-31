@@ -14,6 +14,7 @@
 class GameState {
 private:
     Board board;
+    Side side;
     bool canWhiteCastleQueenside, canWhiteCastleKingside;
     bool canBlackCastleQueenside, canBlackCastleKingside;
     int movesSinceCaptureOrPawnMove; // used in calculation of 50 move rule
@@ -26,6 +27,7 @@ public:
     void processMove(Move);
     bool isValidMove(Move, Side);
     bool isValidMovement(Move, Side);
+    std::vector<Move> getPossibleMoves(Side);
 };
 
 #endif

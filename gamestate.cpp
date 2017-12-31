@@ -5,6 +5,7 @@
 /* Initialise game state in the starting position */
 GameState::GameState() {
     board = Board::startingPosition();
+    side = Side::White;
     canWhiteCastleKingside = true;
     canWhiteCastleQueenside = true;
     canBlackCastleKingside = true;
@@ -17,9 +18,59 @@ Board &GameState::getBoard() {
 
 void GameState::processMove(Move move) {
     int piece = board.at(move.origin);
+
+    if (Piece::getType(piece) == PieceType::King && move.isCastleMove()) {
+        // Place rook
+        if (move.destination == Square::get(Column::G, 1)) {
+            board.clearSquare(Square::get(Column::H, 1));
+            board.updateSquare(Square::get(Column::F, 1), Piece::get(Side::White, PieceType::Rook));
+        } else if (move.destination == Square::get(Column::G, 8)) {
+            board.clearSquare(Square::get(Column::H, 8));
+            board.updateSquare(Square::get(Column::F, 8), Piece::get(Side::Black, PieceType::Rook));
+        } else if (move.destination == Square::get(Column::C, 1)) {
+            board.clearSquare(Square::get(Column::A, 1));
+            board.updateSquare(Square::get(Column::D, 1), Piece::get(Side::White, PieceType::Rook));
+        } else if (move.destination == Square::get(Column::C, 8)) {
+            board.clearSquare(Square::get(Column::A, 8));
+            board.updateSquare(Square::get(Column::D, 8), Piece::get(Side::Black, PieceType::Rook));
+        }
+    } else if (Piece::getType(piece) == PieceType::Pawn && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
+        // Remove pawn captured via en passant
+        int pawnDirection = side == Side::White ? 1 : -1;
+        board.clearSquare(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
+    }
     board.clearSquare(move.origin);
     board.updateSquare(move.destination, piece);
+    // Update ability to castle
+    if (side == Side::White && (canWhiteCastleKingside || canBlackCastleQueenside)) {
+        if (Piece::getType(piece) == PieceType::King) {
+            canWhiteCastleKingside = false;
+            canWhiteCastleQueenside = false;
+        } else if (Piece::getType(piece) == PieceType::Rook) {
+            if (move.origin == Square::get(Column::A, 1)) {
+                canWhiteCastleQueenside = false;
+            } else if (move.origin == Square::get(Column::H, 1)) {
+                canWhiteCastleKingside = false;
+            }
+        }
+    } else if (side == Side::Black && (canBlackCastleKingside || canBlackCastleQueenside)) {
+        if (Piece::getType(piece) == PieceType::King) {
+            canBlackCastleKingside = false;
+            canBlackCastleQueenside = false;
+        } else if (Piece::getType(piece) == PieceType::Rook) {
+            if (move.origin == Square::get(Column::A, 8)) {
+                canBlackCastleQueenside = false;
+            } else if (move.origin == Square::get(Column::H, 8)) {
+                canBlackCastleKingside = false;
+            }
+        }
+    }
     moveHistory.push_back(move);
+    if (side == Side::White) {
+        side = Side::Black;
+    } else {
+        side = Side::White;
+    }
 }
 
 /*
