@@ -22,6 +22,9 @@ public:
     /* Checks whether an int representing a piece is a certain colour,
        i.e. white or black */
     static bool isSide(int piece, Side);
+
+    /* Get piece type of piece */
+    static int getType(int piece);
 };
 
 #endif

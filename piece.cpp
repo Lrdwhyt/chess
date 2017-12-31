@@ -54,3 +54,7 @@ int Piece::get(Side s, int pieceType) {
     }
     return pieceType * side_multiplier;
 }
+
+int Piece::getType(int piece) {
+    return abs(piece);
+}
