@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 int Square::get(int x, int y) {
-    return (y - 1) * 8 + x;
+    return (y - 1) * 8 + x - 1;
 }
 
 int Square::fromString(std::string str) {
