@@ -1,7 +1,7 @@
 /*
-Encapsulates game state, such as ability to castle, history of moves, etc.
-Used for move generation
-*/
+ * Encapsulates game state, such as ability to castle, history of moves, etc.
+ * Used for move generation
+ */
 
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
@@ -25,6 +25,7 @@ public:
     Board &getBoard();
     void processMove(Move);
     bool isValidMove(Move, Side);
+    bool isValidMovement(Move, Side);
 };
 
 #endif
