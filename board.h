@@ -7,8 +7,8 @@ Used to check what pieces exist and where pieces are
 #define BOARD_H
 
 #include <array>
-#include <forward_list>
 #include <string>
+#include <vector>
 
 #include "piece.h"
 #include "square.h"
@@ -16,19 +16,20 @@ Used to check what pieces exist and where pieces are
 class Board {
 private:
     std::array<int, 64> squares;
-    std::forward_list<Square> whitePieces;
-    std::forward_list<Square> blackPieces;
+    std::vector<int> whitePieceLocations;
+    std::vector<int> blackPieceLocations;
 
 public:
     Board();
-    void print();
     static Board startingPosition();
-    void clearSquare(int);
-    void updateSquare(int square, int piece);
+    void print();
     int at(int square);
     Side getSideAt(int square);
     bool isEmpty(int square);
     std::string toString();
+    void addPiece(int square, int piece);
+    void movePiece(int origin, int destination);
+    void deletePiece(int square);
 };
 
 #endif

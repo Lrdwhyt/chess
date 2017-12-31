@@ -23,19 +23,16 @@ void GameState::processMove(Move move) {
         // Place rook
         const int kingRow = (side == Side::White) ? 1 : 8;
         if (Square::getColumn(move.destination) == Column::G) {
-            board.clearSquare(Square::get(Column::H, kingRow));
-            board.updateSquare(Square::get(Column::F, kingRow), Piece::get(side, PieceType::Rook));
+            board.movePiece(Square::get(Column::H, kingRow), Square::get(Column::F, kingRow));
         } else if (Square::getColumn(move.destination) == Column::C) {
-            board.clearSquare(Square::get(Column::A, kingRow));
-            board.updateSquare(Square::get(Column::D, kingRow), Piece::get(side, PieceType::Rook));
+            board.movePiece(Square::get(Column::A, kingRow), Square::get(Column::D, kingRow));
         }
     } else if (Piece::getType(piece) == PieceType::Pawn && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
         // Remove pawn captured via en passant
         int pawnDirection = side == Side::White ? 1 : -1;
-        board.clearSquare(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
+        board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
     }
-    board.clearSquare(move.origin);
-    board.updateSquare(move.destination, piece);
+    board.movePiece(move.origin, move.destination);
     // Update ability to castle
     if (side == Side::White && (canWhiteCastleKingside || canBlackCastleQueenside)) {
         if (Piece::getType(piece) == PieceType::King) {

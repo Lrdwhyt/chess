@@ -25,6 +25,8 @@ public:
 
     /* Get piece type of piece */
     static int getType(int piece);
+
+    static Side getSide(int piece);
 };
 
 #endif

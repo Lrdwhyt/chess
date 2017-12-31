@@ -48,13 +48,18 @@ std::string Piece::getString(int piece) {
 }
 
 int Piece::get(Side s, int pieceType) {
-    int side_multiplier = 1;
-    if (s == Side::Black) {
-        side_multiplier = -1;
-    }
-    return pieceType * side_multiplier;
+    const int sideMultiplier = (s == Side::White) ? 1 : -1;
+    return pieceType * sideMultiplier;
 }
 
 int Piece::getType(int piece) {
     return abs(piece);
+}
+
+Side Piece::getSide(int piece) {
+    if (piece > 0) {
+        return Side::White;
+    } else if (piece < 0) {
+        return Side::Black;
+    }
 }

@@ -1,5 +1,6 @@
 #include "board.h"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -15,48 +16,40 @@ Board::Board() {
 
 Board Board::startingPosition() {
     Board b;
-    b.squares[Square::get(Column::A, 8)] = Piece::get(Side::Black, PieceType::Rook);
-    b.squares[Square::get(Column::B, 8)] = Piece::get(Side::Black, PieceType::Knight);
-    b.squares[Square::get(Column::C, 8)] = Piece::get(Side::Black, PieceType::Bishop);
-    b.squares[Square::get(Column::D, 8)] = Piece::get(Side::Black, PieceType::Queen);
-    b.squares[Square::get(Column::E, 8)] = Piece::get(Side::Black, PieceType::King);
-    b.squares[Square::get(Column::F, 8)] = Piece::get(Side::Black, PieceType::Bishop);
-    b.squares[Square::get(Column::G, 8)] = Piece::get(Side::Black, PieceType::Knight);
-    b.squares[Square::get(Column::H, 8)] = Piece::get(Side::Black, PieceType::Rook);
-    b.squares[Square::get(Column::A, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::B, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::C, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::D, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::E, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::F, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::G, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::H, 7)] = Piece::get(Side::Black, PieceType::Pawn);
-    b.squares[Square::get(Column::A, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::B, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::C, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::D, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::E, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::F, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::G, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::H, 2)] = Piece::get(Side::White, PieceType::Pawn);
-    b.squares[Square::get(Column::A, 1)] = Piece::get(Side::White, PieceType::Rook);
-    b.squares[Square::get(Column::B, 1)] = Piece::get(Side::White, PieceType::Knight);
-    b.squares[Square::get(Column::C, 1)] = Piece::get(Side::White, PieceType::Bishop);
-    b.squares[Square::get(Column::D, 1)] = Piece::get(Side::White, PieceType::Queen);
-    b.squares[Square::get(Column::E, 1)] = Piece::get(Side::White, PieceType::King);
-    b.squares[Square::get(Column::F, 1)] = Piece::get(Side::White, PieceType::Bishop);
-    b.squares[Square::get(Column::G, 1)] = Piece::get(Side::White, PieceType::Knight);
-    b.squares[Square::get(Column::H, 1)] = Piece::get(Side::White, PieceType::Rook);
+    b.addPiece(Square::get(Column::A, 8), Piece::get(Side::Black, PieceType::Rook));
+    b.addPiece(Square::get(Column::B, 8), Piece::get(Side::Black, PieceType::Knight));
+    b.addPiece(Square::get(Column::C, 8), Piece::get(Side::Black, PieceType::Bishop));
+    b.addPiece(Square::get(Column::D, 8), Piece::get(Side::Black, PieceType::Queen));
+    b.addPiece(Square::get(Column::E, 8), Piece::get(Side::Black, PieceType::King));
+    b.addPiece(Square::get(Column::F, 8), Piece::get(Side::Black, PieceType::Bishop));
+    b.addPiece(Square::get(Column::G, 8), Piece::get(Side::Black, PieceType::Knight));
+    b.addPiece(Square::get(Column::H, 8), Piece::get(Side::Black, PieceType::Rook));
+    b.addPiece(Square::get(Column::A, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::B, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::C, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::D, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::E, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::F, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::G, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::H, 7), Piece::get(Side::Black, PieceType::Pawn));
+    b.addPiece(Square::get(Column::A, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::B, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::C, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::D, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::E, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::F, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::G, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::H, 2), Piece::get(Side::White, PieceType::Pawn));
+    b.addPiece(Square::get(Column::A, 1), Piece::get(Side::White, PieceType::Rook));
+    b.addPiece(Square::get(Column::B, 1), Piece::get(Side::White, PieceType::Knight));
+    b.addPiece(Square::get(Column::C, 1), Piece::get(Side::White, PieceType::Bishop));
+    b.addPiece(Square::get(Column::D, 1), Piece::get(Side::White, PieceType::Queen));
+    b.addPiece(Square::get(Column::E, 1), Piece::get(Side::White, PieceType::King));
+    b.addPiece(Square::get(Column::F, 1), Piece::get(Side::White, PieceType::Bishop));
+    b.addPiece(Square::get(Column::G, 1), Piece::get(Side::White, PieceType::Knight));
+    b.addPiece(Square::get(Column::H, 1), Piece::get(Side::White, PieceType::Rook));
 
     return b;
-}
-
-void Board::clearSquare(int sq) {
-    squares[sq] = Piece::None;
-}
-
-void Board::updateSquare(int square, int piece) {
-    squares[square] = piece;
 }
 
 std::string Board::toString() {
@@ -96,4 +89,44 @@ Side Board::getSideAt(int square) {
     } else {
         return Side::None;
     }
+}
+
+void Board::addPiece(int square, int piece) {
+    squares[square] = piece;
+    if (Piece::getSide(piece) == Side::White) {
+        whitePieceLocations.push_back(square);
+    } else {
+        blackPieceLocations.push_back(square);
+    }
+}
+
+void Board::deletePiece(int square) {
+    if (Piece::getSide(at(square)) == Side::White) {
+        whitePieceLocations.erase(std::remove(whitePieceLocations.begin(), whitePieceLocations.end(), square), whitePieceLocations.end());
+    } else {
+        blackPieceLocations.erase(std::remove(blackPieceLocations.begin(), blackPieceLocations.end(), square), blackPieceLocations.end());
+    }
+    squares[square] = Piece::None;
+}
+
+void Board::movePiece(int origin, int destination) {
+    const Side side = Piece::getSide(at(origin));
+    squares[destination] = squares[origin];
+    squares[origin] = 0;
+    if (side == Side::White) {
+        for (int i = 0; i < whitePieceLocations.size(); ++i) {
+            if (whitePieceLocations[i] == origin) {
+                whitePieceLocations[i] = destination;
+                return;
+            }
+        }
+    } else {
+        for (int i = 0; i < blackPieceLocations.size(); ++i) {
+            if (blackPieceLocations[i] == origin) {
+                blackPieceLocations[i] = destination;
+                return;
+            }
+        }
+    }
+    throw std::runtime_error("Piece not found");
 }
