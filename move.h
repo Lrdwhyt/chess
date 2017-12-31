@@ -31,6 +31,11 @@ public:
     bool isRookMove();
     bool isQueenMove();
     bool isKingMove();
+
+    /*
+     * Checks if origin is either of the starting king positions (E1/E8)
+     * and that the destination is 2 squares to the left or right of that
+     */
     bool isCastleMove();
 };
 

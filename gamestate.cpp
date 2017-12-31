@@ -17,22 +17,17 @@ Board &GameState::getBoard() {
 }
 
 void GameState::processMove(Move move) {
-    int piece = board.at(move.origin);
+    const int piece = board.at(move.origin);
 
     if (Piece::getType(piece) == PieceType::King && move.isCastleMove()) {
         // Place rook
-        if (move.destination == Square::get(Column::G, 1)) {
-            board.clearSquare(Square::get(Column::H, 1));
-            board.updateSquare(Square::get(Column::F, 1), Piece::get(Side::White, PieceType::Rook));
-        } else if (move.destination == Square::get(Column::G, 8)) {
-            board.clearSquare(Square::get(Column::H, 8));
-            board.updateSquare(Square::get(Column::F, 8), Piece::get(Side::Black, PieceType::Rook));
-        } else if (move.destination == Square::get(Column::C, 1)) {
-            board.clearSquare(Square::get(Column::A, 1));
-            board.updateSquare(Square::get(Column::D, 1), Piece::get(Side::White, PieceType::Rook));
-        } else if (move.destination == Square::get(Column::C, 8)) {
-            board.clearSquare(Square::get(Column::A, 8));
-            board.updateSquare(Square::get(Column::D, 8), Piece::get(Side::Black, PieceType::Rook));
+        const int kingRow = (side == Side::White) ? 1 : 8;
+        if (Square::getColumn(move.destination) == Column::G) {
+            board.clearSquare(Square::get(Column::H, kingRow));
+            board.updateSquare(Square::get(Column::F, kingRow), Piece::get(side, PieceType::Rook));
+        } else if (Square::getColumn(move.destination) == Column::C) {
+            board.clearSquare(Square::get(Column::A, kingRow));
+            board.updateSquare(Square::get(Column::D, kingRow), Piece::get(side, PieceType::Rook));
         }
     } else if (Piece::getType(piece) == PieceType::Pawn && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
         // Remove pawn captured via en passant
@@ -77,26 +72,28 @@ void GameState::processMove(Move move) {
  * Used to validate actual moves, not used for engine calculations
  * Feel free to make this inefficient
  */
-bool GameState::isValidMove(Move move, Side side) {
-    if (!isValidMovement(move, side)) {
+bool GameState::isValidMove(Move move) {
+    if (!isValidMovement(move)) {
         return false;
     }
-    int piece = board.at(move.origin);
+    const int piece = board.at(move.origin);
     if (Piece::getType(piece) == PieceType::King && move.isCastleMove()) {
+
         if (false) {
             // Check that king doesn't pass through check
+            // Loop through opponent pieces and check if it attacks D or F 1/8
             return false;
         }
     }
     //now  simulate move on board
-    if (false) { // Check if final position goes through check
+    if (false) { // Check if simulated position results in check
         return false;
     } else {
         return true;
     }
 }
 
-bool GameState::isValidMovement(Move move, Side side) {
+bool GameState::isValidMovement(Move move) {
     if (move.origin == move.destination) {
         return false; // Not a move; origin and destination are same
     }
@@ -109,7 +106,7 @@ bool GameState::isValidMovement(Move move, Side side) {
     if (board.getSideAt(move.destination) == side) {
         return false; // Trying to capture own piece
     }
-    int pawnDirection = side == Side::White ? 1 : -1; // TODO: rewrite
+    const int pawnDirection = (side == Side::White) ? 1 : -1;
     int x, y;
     std::tie(x, y) = Square::diff(move.origin, move.destination);
     switch (Piece::getType(board.at(move.origin))) { // What piece is being moved

@@ -25,8 +25,8 @@ public:
     GameState();
     Board &getBoard();
     void processMove(Move);
-    bool isValidMove(Move, Side);
-    bool isValidMovement(Move, Side);
+    bool isValidMove(Move);
+    bool isValidMovement(Move);
     std::vector<Move> getPossibleMoves(Side);
 };
 

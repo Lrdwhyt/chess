@@ -15,7 +15,7 @@ Used to check what pieces exist and where pieces are
 
 class Board {
 private:
-    std::array<int, 64> squares = {0};
+    std::array<int, 64> squares;
     std::forward_list<Square> whitePieces;
     std::forward_list<Square> blackPieces;
 
