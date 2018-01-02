@@ -94,8 +94,14 @@ Side Board::getSideAt(int square) {
 void Board::addPiece(int square, int piece) {
     squares[square] = piece;
     if (Piece::getSide(piece) == Side::White) {
+        if (Piece::getType(piece) == PieceType::King) {
+            whiteKingLocation = square;
+        }
         whitePieceLocations.push_back(square);
     } else {
+        if (Piece::getType(piece) == PieceType::King) {
+            blackKingLocation = square;
+        }
         blackPieceLocations.push_back(square);
     }
 }
@@ -114,6 +120,9 @@ void Board::movePiece(int origin, int destination) {
     squares[destination] = squares[origin];
     squares[origin] = 0;
     if (side == Side::White) {
+        if (Piece::getType(at(origin)) == PieceType::King) {
+            whiteKingLocation = destination;
+        }
         for (int i = 0; i < whitePieceLocations.size(); ++i) {
             if (whitePieceLocations[i] == origin) {
                 whitePieceLocations[i] = destination;
@@ -121,6 +130,9 @@ void Board::movePiece(int origin, int destination) {
             }
         }
     } else {
+        if (Piece::getType(at(origin)) == PieceType::King) {
+            blackKingLocation = destination;
+        }
         for (int i = 0; i < blackPieceLocations.size(); ++i) {
             if (blackPieceLocations[i] == origin) {
                 blackPieceLocations[i] = destination;
@@ -129,4 +141,14 @@ void Board::movePiece(int origin, int destination) {
         }
     }
     throw std::runtime_error("Piece not found");
+}
+
+bool Board::willResultInCheck(Move move, Side side) {
+    int kingLocation = (side == Side::White) ? whiteKingLocation : blackKingLocation;
+    int northeast, northwest;
+    // Branch out in all 8 directions
+    while (true) {
+
+    }
+    return true;
 }
