@@ -99,3 +99,13 @@ int Square::getRow(int square) {
 int Square::getColumn(int square) {
     return square % 8 + 1;
 }
+
+int Square::getInDirection(int square, int x, int y) {
+    const int newX = Square::getColumn(square) + x;
+    const int newY = Square::getRow(square) + y;
+    if (newX <= 0 || newX > 8 || newY <= 0 || newY > 8) {
+        return -1; // Square is out of range
+    } else {
+        return Square::get(newX, newY);
+    }
+}

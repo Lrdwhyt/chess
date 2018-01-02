@@ -19,6 +19,9 @@ public:
     static int getRow(int);
     static int getColumn(int);
     static std::vector<int> between(int, int);
+
+    /* Returns -1 if square is out of range */
+    static int getInDirection(int square, int x, int y);
 };
 
 #endif
