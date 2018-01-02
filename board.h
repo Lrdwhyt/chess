@@ -34,7 +34,8 @@ public:
     void addPiece(int square, int piece);
     void movePiece(int origin, int destination);
     void deletePiece(int square);
-    bool willResultInCheck(Move move, Side side);
+    bool isInCheck(Side side);
+    bool existsRayAttackerInDirection(int square, Side side, int x, int y);
 };
 
 #endif
