@@ -35,6 +35,7 @@ public:
     void addPiece(int square, int piece);
     void movePiece(int origin, int destination);
     void deletePiece(int square);
+    bool isUnderAttack(int square, Side side);
     bool isInCheck(Side side);
     bool existsRayAttackerInDirection(int square, Side side, int x, int y);
     Board simulateMove(Move move, Side side);

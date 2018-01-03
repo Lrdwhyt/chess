@@ -153,20 +153,19 @@ void Board::movePiece(int origin, int destination) {
     throw std::runtime_error("Piece not found");
 }
 
-bool Board::isInCheck(Side side) {
-    const int kingLocation = (side == Side::White) ? whiteKingLocation : blackKingLocation;
+bool Board::isUnderAttack(int square, Side side) {
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     // Check all knight spots
     const int enemyKnight = Piece::get(enemySide, PieceType::Knight);
     std::array<int, 8> knightSquares = {
-        Square::getInDirection(kingLocation, 1, 2),
-        Square::getInDirection(kingLocation, 1, -2),
-        Square::getInDirection(kingLocation, -1, 2),
-        Square::getInDirection(kingLocation, -1, -2),
-        Square::getInDirection(kingLocation, 2, 1),
-        Square::getInDirection(kingLocation, 2, -1),
-        Square::getInDirection(kingLocation, -2, 1),
-        Square::getInDirection(kingLocation, -2, -1)};
+        Square::getInDirection(square, 1, 2),
+        Square::getInDirection(square, 1, -2),
+        Square::getInDirection(square, -1, 2),
+        Square::getInDirection(square, -1, -2),
+        Square::getInDirection(square, 2, 1),
+        Square::getInDirection(square, 2, -1),
+        Square::getInDirection(square, -2, 1),
+        Square::getInDirection(square, -2, -1)};
     for (int knightSquare : knightSquares) {
         // Loop through all locations where a knight could be checking king
         if (knightSquare != -1) { // Square is outside of board
@@ -175,26 +174,31 @@ bool Board::isInCheck(Side side) {
             }
         }
     }
-    // Check the two possible squares that an enemy pawn can be at
+    // Check the two possible squares that an enemy pawn could be checking from
     const int enemyPawn = Piece::get(enemySide, PieceType::Pawn);
     const int pawnDirection = (side == Side::White) ? 1 : -1;
-    const int pawnLocationFirst = Square::getInDirection(kingLocation, -1, pawnDirection);
-    const int pawnLocationSecond = Square::getInDirection(kingLocation, 1, pawnDirection);
+    const int pawnLocationFirst = Square::getInDirection(square, -1, pawnDirection);
+    const int pawnLocationSecond = Square::getInDirection(square, 1, pawnDirection);
     if (pawnLocationFirst != -1 && at(pawnLocationFirst) == enemyPawn) {
         return true;
     }
     if (pawnLocationSecond != -1 && at(pawnLocationSecond) == enemyPawn) {
         return true;
     }
-    // If any ray attacker exists in the corresponding direction, we are in check.
-    return (existsRayAttackerInDirection(kingLocation, side, 0, 1) ||
-            existsRayAttackerInDirection(kingLocation, side, 0, -1) ||
-            existsRayAttackerInDirection(kingLocation, side, 1, 0) ||
-            existsRayAttackerInDirection(kingLocation, side, -1, 0) ||
-            existsRayAttackerInDirection(kingLocation, side, 1, -1) ||
-            existsRayAttackerInDirection(kingLocation, side, 1, 1) ||
-            existsRayAttackerInDirection(kingLocation, side, -1, -1) ||
-            existsRayAttackerInDirection(kingLocation, side, -1, 1));
+    // If any ray attacker exists in any corresponding direction, we are in check.
+    return (existsRayAttackerInDirection(square, side, 0, 1) ||
+            existsRayAttackerInDirection(square, side, 0, -1) ||
+            existsRayAttackerInDirection(square, side, 1, 0) ||
+            existsRayAttackerInDirection(square, side, -1, 0) ||
+            existsRayAttackerInDirection(square, side, 1, -1) ||
+            existsRayAttackerInDirection(square, side, 1, 1) ||
+            existsRayAttackerInDirection(square, side, -1, -1) ||
+            existsRayAttackerInDirection(square, side, -1, 1));
+}
+
+bool Board::isInCheck(Side side) {
+    const int kingLocation = (side == Side::White) ? whiteKingLocation : blackKingLocation;
+    return isUnderAttack(kingLocation, side);
 }
 
 bool Board::existsRayAttackerInDirection(int square, Side side, int x, int y) {

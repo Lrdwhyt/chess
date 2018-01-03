@@ -75,11 +75,20 @@ bool GameState::isValidMove(Move move) {
     }
     const int piece = board.at(move.origin);
     if (Piece::getType(piece) == PieceType::King && move.isCastleMove()) {
-
-        if (false) {
-            // Check that king doesn't pass through check
-            // Loop through opponent pieces and check if it attacks D or F 1/8
-            return false;
+        if (board.isInCheck(side)) {
+            return false; // Can't castle while in check
+        }
+        // Check that king doesn't pass through check
+        // Loop through opponent pieces and check if it attacks D or F 1/8
+        const int castleRow = (side == Side::White) ? 1 : 8;
+        if (Square::getColumn(move.destination) == Column::C) { // Queenside
+            if (board.isUnderAttack(Square::get(Column::D, castleRow), side)) {
+                return false;
+            }
+        } else {
+            if (board.isUnderAttack(Square::get(Column::F, castleRow), side)) {
+                return false;
+            }
         }
     }
     //now simulate move on board
