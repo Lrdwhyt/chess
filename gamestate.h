@@ -19,15 +19,16 @@ private:
     bool canBlackCastleQueenside, canBlackCastleKingside;
     int movesSinceCaptureOrPawnMove; // used in calculation of 50 move rule
     std::vector<Move> moveHistory;
-    bool whiteInCheck, blackInCheck;
 
 public:
     GameState();
-    Board &getBoard();
+    const Board &getBoard() const;
     void processMove(Move);
-    bool isValidMove(Move);
-    bool isValidMovement(Move);
-    std::vector<Move> getPossibleMoves(Side);
+    bool isValidMove(Move) const;
+    bool isValidMovement(Move) const;
+    std::vector<Move> getPossibleMoves() const;
+    std::vector<Move> getPossiblePieceMoves(int square) const;
+    bool movingIntoCheck(Move);
 };
 
 #endif

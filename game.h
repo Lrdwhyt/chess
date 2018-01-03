@@ -26,9 +26,9 @@ private:
 public:
     Game(Agent *, Agent *);
     ~Game();
-    Agent *getCurrentAgent();
+    Agent *getCurrentAgent() const;
     void handleTurn(Move m);
-    void print();
+    void print() const;
 };
 
 #endif

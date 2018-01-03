@@ -12,7 +12,7 @@ GameState::GameState() {
     canBlackCastleQueenside = true;
 }
 
-Board &GameState::getBoard() {
+const Board &GameState::getBoard() const {
     return board;
 }
 
@@ -29,7 +29,7 @@ void GameState::processMove(Move move) {
         }
     } else if (Piece::getType(piece) == PieceType::Pawn && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
         // Remove pawn captured via en passant
-        int pawnDirection = side == Side::White ? 1 : -1;
+        const int pawnDirection = side == Side::White ? 1 : -1;
         board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
     }
     board.movePiece(move.origin, move.destination);
@@ -69,7 +69,7 @@ void GameState::processMove(Move move) {
  * Used to validate actual moves, not used for engine calculations
  * Feel free to make this inefficient
  */
-bool GameState::isValidMove(Move move) {
+bool GameState::isValidMove(Move move) const {
     if (!isValidMovement(move)) {
         return false;
     }
@@ -79,7 +79,6 @@ bool GameState::isValidMove(Move move) {
             return false; // Can't castle while in check
         }
         // Check that king doesn't pass through check
-        // Loop through opponent pieces and check if it attacks D or F 1/8
         const int castleRow = (side == Side::White) ? 1 : 8;
         if (Square::getColumn(move.destination) == Column::C) { // Queenside
             if (board.isUnderAttack(Square::get(Column::D, castleRow), side)) {
@@ -99,7 +98,7 @@ bool GameState::isValidMove(Move move) {
     }
 }
 
-bool GameState::isValidMovement(Move move) {
+bool GameState::isValidMovement(Move move) const {
     if (move.origin == move.destination) {
         return false; // Not a move; origin and destination are same
     }
@@ -245,3 +244,85 @@ bool GameState::isValidMovement(Move move) {
             break;
     }
 }
+
+std::vector<Move> GameState::getPossibleMoves() const {
+    std::vector<Move> results;
+    if (side == Side::White) {
+        for (int square : board.whitePieceLocations) {
+            std::vector<Move> pieceMoves = getPossiblePieceMoves(square);
+            results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
+        }
+    } else {
+        for (int square : board.blackPieceLocations) {
+            std::vector<Move> pieceMoves = getPossiblePieceMoves(square);
+            results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
+        }
+    }
+    return results;
+}
+
+std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
+    std::vector<Move> results;
+    switch (Piece::getType(board.at(square))) {
+        case PieceType::Pawn:
+            // 4 different possibilities excluding promotions
+            break;
+
+        case PieceType::Knight:
+            // 8 different possibilities
+            break;
+
+        case PieceType::Bishop:
+            // up to 13 different possibilities on the diagonals
+            break;
+
+        case PieceType::Rook:
+            // up to 14 different possibilities on the straights
+            break;
+
+        case PieceType::Queen:
+            // up to 27 different possibilities on the diagonals and straights
+            break;
+
+        case PieceType::King:
+            // check 8 surrounding squares + both castles
+            break;
+    }
+    return results;
+}
+
+// The following is an algorithm to check if one is moving from out of check into check.
+// It is a more efficient alternative to checking every final position for check
+/*bool GameState::movingIntoCheck(Move move) {
+    if (1) { // Not en passant or castle
+        if (2) { // King move
+            // Manually calculate if position is in check ?
+        } else { //Non-king move
+            // Diff move.origin and king.position
+            if (4) { // Could be a piece vector
+                // Iterate, starting from king, until hitting a piece or edge of board
+                if (5) { // If something is attacking
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    } else {
+        if (3) { // Castle
+            // Manually calculate if position is in check
+        } else { // En passant
+            // Check if move.origin and king.position on same row
+            if (6) {
+                // Check for attackers on the sides of the king,
+                // making sure to ignore origin pawn + captured pawn
+            } else {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}*/

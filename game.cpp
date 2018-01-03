@@ -10,13 +10,13 @@ Game::Game(Agent *p1, Agent *p2) {
     handleTurn(white->requestMove(state));
 }
 
-void Game::handleTurn(Move m) {
-    if (state.isValidMove(m) == false) {
+void Game::handleTurn(Move move) {
+    if (state.isValidMove(move) == false) {
         print();
         handleTurn(getCurrentAgent()->requestMove(state));
         return;
     }
-    state.processMove(m);
+    state.processMove(move);
     // Change turns
     if (side == Side::White) {
         side = Side::Black;
@@ -35,11 +35,11 @@ void Game::handleTurn(Move m) {
     }
 }
 
-void Game::print() {
+void Game::print() const {
     state.getBoard().print();
 }
 
-Agent *Game::getCurrentAgent() {
+Agent *Game::getCurrentAgent() const {
     if (side == Side::White) {
         return white;
     } else {

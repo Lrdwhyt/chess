@@ -62,7 +62,7 @@ Board Board::startingPosition() {
     return b;
 }
 
-std::string Board::toString() {
+std::string Board::toString() const {
     std::string s = "|---+---+---+---+---+---+---+---|";
     s += "\n";
     for (int i = 8; i >= 1; --i) { // Rows
@@ -79,19 +79,19 @@ std::string Board::toString() {
     return s;
 }
 
-void Board::print() {
+void Board::print() const {
     std::cout << Board::toString() << std::endl;
 }
 
-int Board::at(int square) {
+int Board::at(int square) const {
     return squares[square];
 }
 
-bool Board::isEmpty(int square) {
+bool Board::isEmpty(int square) const {
     return (squares[square] == Piece::None);
 }
 
-Side Board::getSideAt(int square) {
+Side Board::getSideAt(int square) const {
     if (squares[square] > 0) {
         return Side::White;
     } else if (squares[square] < 0) {
@@ -154,11 +154,11 @@ void Board::movePiece(int origin, int destination) {
     throw std::runtime_error("Piece not found");
 }
 
-bool Board::isUnderAttack(int square, Side side) {
+bool Board::isUnderAttack(int square, Side side) const {
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     // Check all knight spots
     const int enemyKnight = Piece::get(enemySide, PieceType::Knight);
-    std::array<int, 8> knightSquares = {
+    const std::array<int, 8> knightSquares = {
         Square::getInDirection(square, 1, 2),
         Square::getInDirection(square, 1, -2),
         Square::getInDirection(square, -1, 2),
@@ -197,12 +197,12 @@ bool Board::isUnderAttack(int square, Side side) {
             existsRayAttackerInDirection(square, side, -1, 1));
 }
 
-bool Board::isInCheck(Side side) {
+bool Board::isInCheck(Side side) const {
     const int kingLocation = (side == Side::White) ? whiteKingLocation : blackKingLocation;
     return isUnderAttack(kingLocation, side);
 }
 
-bool Board::existsRayAttackerInDirection(int square, Side side, int x, int y) {
+bool Board::existsRayAttackerInDirection(int square, Side side, int x, int y) const {
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     // Determine if we are looking for bishop or rook based on the direction vector
     const int enemyVariablePiece = (x == 0 || y == 0) ? PieceType::Rook : PieceType::Bishop;
@@ -225,7 +225,7 @@ bool Board::existsRayAttackerInDirection(int square, Side side, int x, int y) {
     return false;
 }
 
-Board Board::simulateMove(Move move, Side side) {
+Board Board::simulateMove(Move move, Side side) const {
     Board result = Board(*this);
     const int piece = result.at(move.origin);
     if (Piece::getType(piece) == PieceType::King && move.isCastleMove()) {

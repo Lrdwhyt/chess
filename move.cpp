@@ -2,12 +2,11 @@
 
 #include <stdexcept>
 
-Move::Move() {}
+Move::Move(int o, int d)
+    : origin(o), destination(d), promotion(Piece::None) {}
 
-Move::Move(int o, int d) {
-    origin = o;
-    destination = d;
-}
+Move::Move(int o, int d, int piece)
+    : origin(o), destination(d), promotion(piece) {}
 
 Move Move::fromString(std::string str) {
     std::string originSquareString = str.substr(0, 2);
@@ -22,7 +21,7 @@ Move Move::fromString(std::string str) {
     return Move(originSquare, destSquare);
 }
 
-bool Move::isRookMove() {
+bool Move::isRookMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (x == 0 || y == 0) {
@@ -34,7 +33,7 @@ bool Move::isRookMove() {
     }
 }
 
-bool Move::isBishopMove() {
+bool Move::isBishopMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (abs(x) == abs(y)) {
@@ -46,19 +45,17 @@ bool Move::isBishopMove() {
     }
 }
 
-bool Move::isQueenMove() {
+bool Move::isQueenMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (x == 0 || y == 0 || abs(x) == abs(y)) {
-        // This includes cases where both x and y are 0, i.e. origin == destination
-        // That is checked elsewhere to reduce redundancy
         return true;
     } else {
         return false;
     }
 }
 
-bool Move::isKnightMove() {
+bool Move::isKnightMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if ((abs(x) == 2 && abs(y) == 1) || (abs(x) == 1 && abs(y) == 2)) {
@@ -68,19 +65,17 @@ bool Move::isKnightMove() {
     }
 }
 
-bool Move::isKingMove() {
+bool Move::isKingMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (abs(x) <= 1 && abs(y) <= 1) {
-        // This includes cases where both x and y are 0, i.e. origin == destination
-        // That is checked elsewhere to reduce redundancy
         return true;
     } else {
         return false;
     }
 }
 
-bool Move::isCastleMove() {
+bool Move::isCastleMove() const {
     if (origin == Square::get(Column::E, 1)) {
         if (destination == Square::get(Column::C, 1) || destination == Square::get(Column::G, 1)) {
             return true;
@@ -98,7 +93,7 @@ bool Move::isCastleMove() {
     }
 }
 
-bool Move::isPawnMove() {
+bool Move::isPawnMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (x != 0) {
@@ -125,7 +120,7 @@ bool Move::isPawnMove() {
     }
 }
 
-bool Move::isPawnCapture() {
+bool Move::isPawnCapture() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (abs(x) == 1 && abs(y) == 1) {

@@ -14,9 +14,11 @@
 
 class Move {
 public:
-    int origin, destination;
-    Move();
+    const int origin;
+    const int destination;
+    const int promotion;
     Move(int, int);
+    Move(int, int, int);
     static Move fromString(std::string);
 
     /*
@@ -24,19 +26,19 @@ public:
      * They evaluate whether a certain move /could/ be a legal move of that piece,
      * not whether it actually is one or not
      */
-    bool isPawnMove();
-    bool isPawnCapture();
-    bool isBishopMove();
-    bool isKnightMove();
-    bool isRookMove();
-    bool isQueenMove();
-    bool isKingMove();
+    bool isPawnMove() const;
+    bool isPawnCapture() const;
+    bool isBishopMove() const;
+    bool isKnightMove() const;
+    bool isRookMove() const;
+    bool isQueenMove() const;
+    bool isKingMove() const;
 
     /*
      * Checks if origin is either of the starting king positions (E1/E8)
      * and that the destination is 2 squares to the left or right of that
      */
-    bool isCastleMove();
+    bool isCastleMove() const;
 };
 
 #endif
