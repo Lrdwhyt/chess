@@ -126,11 +126,12 @@ void Board::deletePiece(int square) {
 }
 
 void Board::movePiece(int origin, int destination) {
-    const Side side = Piece::getSide(at(origin));
+    const int piece = at(origin);
+    const Side side = Piece::getSide(piece);
     squares[destination] = squares[origin];
     squares[origin] = 0;
     if (side == Side::White) {
-        if (Piece::getType(at(origin)) == PieceType::King) {
+        if (Piece::getType(piece) == PieceType::King) {
             whiteKingLocation = destination;
         }
         for (int i = 0; i < whitePieceLocations.size(); ++i) {
@@ -140,7 +141,7 @@ void Board::movePiece(int origin, int destination) {
             }
         }
     } else {
-        if (Piece::getType(at(origin)) == PieceType::King) {
+        if (Piece::getType(piece) == PieceType::King) {
             blackKingLocation = destination;
         }
         for (int i = 0; i < blackPieceLocations.size(); ++i) {
