@@ -82,8 +82,8 @@ bool GameState::isValidMove(Move move) {
             return false;
         }
     }
-    //now  simulate move on board
-    if (false) { // Check if simulated position results in check
+    //now simulate move on board
+    if (board.simulateMove(move, side).isInCheck(side)) { // Check if simulated position results in check
         return false;
     } else {
         return true;

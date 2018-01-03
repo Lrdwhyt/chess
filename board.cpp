@@ -14,6 +14,16 @@ Board::Board() {
     squares = {0};
 }
 
+Board::Board(Board const &old) {
+    for (int i = 0; i < squares.size(); ++i) {
+        squares[i] = old.at(i);
+    }
+    whiteKingLocation = old.whiteKingLocation;
+    blackKingLocation = old.blackKingLocation;
+    whitePieceLocations = old.whitePieceLocations;
+    blackPieceLocations = old.blackPieceLocations;
+}
+
 Board Board::startingPosition() {
     Board b;
     b.addPiece(Square::get(Column::A, 8), Piece::get(Side::Black, PieceType::Rook));
@@ -208,4 +218,24 @@ bool Board::existsRayAttackerInDirection(int square, Side side, int x, int y) {
         }
     }
     return false;
+}
+
+Board Board::simulateMove(Move move, Side side) {
+    Board result = Board(*this);
+    const int piece = result.at(move.origin);
+    if (Piece::getType(piece) == PieceType::King && move.isCastleMove()) {
+        // Place rook
+        const int kingRow = (side == Side::White) ? 1 : 8;
+        if (Square::getColumn(move.destination) == Column::G) {
+            result.movePiece(Square::get(Column::H, kingRow), Square::get(Column::F, kingRow));
+        } else if (Square::getColumn(move.destination) == Column::C) {
+            result.movePiece(Square::get(Column::A, kingRow), Square::get(Column::D, kingRow));
+        }
+    } else if (Piece::getType(piece) == PieceType::Pawn && move.isPawnCapture() && result.isEmpty(move.destination)) { // en passant
+        // Remove pawn captured via en passant
+        int pawnDirection = side == Side::White ? 1 : -1;
+        result.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
+    }
+    result.movePiece(move.origin, move.destination);
+    return result;
 }

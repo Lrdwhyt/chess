@@ -25,17 +25,19 @@ public:
     int whiteKingLocation;
     int blackKingLocation;
     Board();
+    Board(Board const &);
     static Board startingPosition();
-    void print();
-    int at(int square);
-    Side getSideAt(int square);
-    bool isEmpty(int square);
-    std::string toString();
+    void print() const;
+    int at(int square) const;
+    Side getSideAt(int square) const;
+    bool isEmpty(int square) const;
+    std::string toString() const;
     void addPiece(int square, int piece);
     void movePiece(int origin, int destination);
     void deletePiece(int square);
     bool isInCheck(Side side);
     bool existsRayAttackerInDirection(int square, Side side, int x, int y);
+    Board simulateMove(Move move, Side side);
 };
 
 #endif
