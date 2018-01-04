@@ -34,6 +34,9 @@ void GameState::processMove(Move move) {
         const int pawnDirection = side == Side::White ? 1 : -1;
         board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
     }
+    if (!board.isEmpty(move.destination)) {
+        board.deletePiece(move.destination);
+    }
     board.movePiece(move.origin, move.destination);
     // Update ability to castle
     if (side == Side::White && (canWhiteCastleKingside || canBlackCastleQueenside)) {
