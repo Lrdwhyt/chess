@@ -28,7 +28,7 @@ public:
     bool isValidMovement(Move) const;
     std::vector<Move> getPossibleMoves() const;
     std::vector<Move> getPossiblePieceMoves(int square) const;
-    bool movingIntoCheck(Move);
+    bool canEnPassant(int square) const;
 };
 
 #endif
