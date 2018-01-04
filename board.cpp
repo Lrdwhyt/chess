@@ -187,14 +187,124 @@ bool Board::isUnderAttack(int square, Side side) const {
         return true;
     }
     // If any ray attacker exists in any corresponding direction, we are in check.
-    return (existsRayAttackerInDirection(square, side, 0, 1) ||
-            existsRayAttackerInDirection(square, side, 0, -1) ||
-            existsRayAttackerInDirection(square, side, 1, 0) ||
-            existsRayAttackerInDirection(square, side, -1, 0) ||
-            existsRayAttackerInDirection(square, side, 1, -1) ||
-            existsRayAttackerInDirection(square, side, 1, 1) ||
-            existsRayAttackerInDirection(square, side, -1, -1) ||
-            existsRayAttackerInDirection(square, side, -1, 1));
+    return (isAttackedInDirection(square, side, 0, 1) ||
+            isAttackedInDirection(square, side, 0, -1) ||
+            isAttackedInDirection(square, side, 1, 0) ||
+            isAttackedInDirection(square, side, -1, 0) ||
+            isAttackedInDirection(square, side, 1, -1) ||
+            isAttackedInDirection(square, side, 1, 1) ||
+            isAttackedInDirection(square, side, -1, -1) ||
+            isAttackedInDirection(square, side, -1, 1));
+}
+
+std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
+    bool directAttacker = false;
+    int attackerSquare = -1;
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    const int square = (side == Side::White) ? whiteKingLocation : blackKingLocation;
+    // Check all knight spots
+    const int enemyKnight = Piece::get(enemySide, PieceType::Knight);
+    const std::array<int, 8> knightSquares = {
+        Square::getInDirection(square, 1, 2),
+        Square::getInDirection(square, 1, -2),
+        Square::getInDirection(square, -1, 2),
+        Square::getInDirection(square, -1, -2),
+        Square::getInDirection(square, 2, 1),
+        Square::getInDirection(square, 2, -1),
+        Square::getInDirection(square, -2, 1),
+        Square::getInDirection(square, -2, -1)};
+    for (int knightSquare : knightSquares) {
+        // Loop through all locations where a knight could be checking king
+        if (knightSquare != -1) { // Square is outside of board
+            if (at(knightSquare) == enemyKnight) {
+                directAttacker = true;
+                attackerSquare = knightSquare;
+                break;
+                // return true;
+            }
+        }
+    }
+    if (!directAttacker) {
+        // Check the two possible squares that an enemy pawn could be checking from
+        const int enemyPawn = Piece::get(enemySide, PieceType::Pawn);
+        const int pawnDirection = (side == Side::White) ? 1 : -1;
+        const int pawnLocationFirst = Square::getInDirection(square, -1, pawnDirection);
+        const int pawnLocationSecond = Square::getInDirection(square, 1, pawnDirection);
+        if (pawnLocationFirst != -1 && at(pawnLocationFirst) == enemyPawn) {
+            directAttacker = true;
+        }
+        if (pawnLocationSecond != -1 && at(pawnLocationSecond) == enemyPawn) {
+            directAttacker = true;
+        }
+    }
+    // If any ray attacker exists in any corresponding direction, we are in check.
+    if (directAttacker) {
+        if (isAttackedInDirection(square, side, 0, 1) ||
+            isAttackedInDirection(square, side, 0, -1) ||
+            isAttackedInDirection(square, side, 1, 0) ||
+            isAttackedInDirection(square, side, -1, 0) ||
+            isAttackedInDirection(square, side, 1, -1) ||
+            isAttackedInDirection(square, side, 1, 1) ||
+            isAttackedInDirection(square, side, -1, -1) ||
+            isAttackedInDirection(square, side, -1, 1)) {
+            return std::make_tuple(CheckType::Double, -1);
+        } else {
+            return std::make_tuple(CheckType::Direct, attackerSquare);
+        }
+    } else {
+        // Check number of ray attackers
+        // The directions are paired in opposites because it is impossible
+        // to be double checked from both sides in a line
+        int attackerCount = 0;
+        int attackerSquareTemp;
+        attackerSquareTemp = squareAttackingInDirection(square, side, -1, -1);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        attackerSquareTemp = squareAttackingInDirection(square, side, -1, 1);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        attackerSquareTemp = squareAttackingInDirection(square, side, 0, -1);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        attackerSquareTemp = squareAttackingInDirection(square, side, 0, 1);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        attackerSquareTemp = squareAttackingInDirection(square, side, 1, -1);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        attackerSquareTemp = squareAttackingInDirection(square, side, 1, 1);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        attackerSquareTemp = squareAttackingInDirection(square, side, -1, 0);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        attackerSquareTemp = squareAttackingInDirection(square, side, 1, 0);
+        if (attackerSquareTemp != -1) {
+            ++attackerCount;
+            attackerSquare = attackerSquareTemp;
+        }
+        if (attackerCount == 0) {
+            return std::make_tuple(CheckType::None, -1);
+        } else if (attackerCount == 1) {
+            return std::make_tuple(CheckType::Ray, attackerSquare);
+        } else {
+            return std::make_tuple(CheckType::Double, attackerSquare);
+        }
+    }
 }
 
 bool Board::isInCheck(Side side) const {
@@ -202,7 +312,30 @@ bool Board::isInCheck(Side side) const {
     return isUnderAttack(kingLocation, side);
 }
 
-bool Board::existsRayAttackerInDirection(int square, Side side, int x, int y) const {
+int Board::squareAttackingInDirection(int square, Side side, int x, int y) const {
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    // Determine if we are looking for bishop or rook based on the direction vector
+    const int enemyVariablePiece = (x == 0 || y == 0) ? PieceType::Rook : PieceType::Bishop;
+    while (true) {
+        square = Square::getInDirection(square, x, y);
+        if (square == -1) {
+            return -1;
+        }
+        const int piece = at(square);
+        if (Piece::getSide(piece) == side) {
+            break;
+        } else if (Piece::getSide(piece) == enemySide) {
+            if (Piece::getType(piece) == PieceType::Queen || Piece::getType(piece) == enemyVariablePiece) {
+                return square;
+            } else {
+                return -1;
+            }
+        }
+    }
+    return -1;
+}
+
+bool Board::isAttackedInDirection(int square, Side side, int x, int y) const {
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     // Determine if we are looking for bishop or rook based on the direction vector
     const int enemyVariablePiece = (x == 0 || y == 0) ? PieceType::Rook : PieceType::Bishop;

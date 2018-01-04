@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "checktype.h"
 #include "move.h"
 #include "piece.h"
 #include "square.h"
@@ -37,8 +38,10 @@ public:
     void deletePiece(int square);
     bool isUnderAttack(int square, Side side) const;
     bool isInCheck(Side side) const;
-    bool existsRayAttackerInDirection(int square, Side side, int x, int y) const;
+    int squareAttackingInDirection(int square, Side side, int x, int y) const;
+    bool isAttackedInDirection(int square, Side side, int x, int y) const;
     Board simulateMove(Move move, Side side) const;
+    std::tuple<CheckType, int> getInCheckStatus(Side side) const;
 };
 
 #endif
