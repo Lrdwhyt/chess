@@ -1,3 +1,6 @@
+#ifndef HUMANAGENT_H
+#define HUMANAGENT_H
+
 #include "agent.h"
 
 class HumanAgent : public Agent {
@@ -10,3 +13,5 @@ public:
     ~HumanAgent();
     Move requestMove(GameState &);
 };
+
+#endif
