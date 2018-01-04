@@ -14,9 +14,10 @@
 
 class Move {
 public:
-    const int origin;
-    const int destination;
-    const int promotion;
+    int origin;
+    int destination;
+    int promotion;
+    Move();
     Move(int, int);
     Move(int, int, int);
     static Move fromString(std::string);
@@ -27,7 +28,10 @@ public:
      * not whether it actually is one or not
      */
     bool isPawnMove() const;
+    bool isPawnMove(Side side) const;
+    bool isTwoSquarePawnMove() const;
     bool isPawnCapture() const;
+    bool isPawnCapture(Side side) const;
     bool isBishopMove() const;
     bool isKnightMove() const;
     bool isRookMove() const;

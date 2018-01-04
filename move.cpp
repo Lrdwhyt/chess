@@ -120,11 +120,76 @@ bool Move::isPawnMove() const {
     }
 }
 
+bool Move::isPawnMove(Side side) const {
+    int x, y;
+    std::tie(x, y) = Square::diff(origin, destination);
+    if (x != 0) {
+        return false;
+    }
+    if (side == Side::White) {
+        if (y == 1) {
+            return true;
+        } else if (y == 2 && Square::getRow(origin) == 2) {
+            return true;
+        } else {
+            return false;
+        }
+    } else if (side == Side::Black) {
+        if (y == -1) {
+            return true;
+        } else if (y == -2 && Square::getRow(origin) == 7) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
+
+bool Move::isTwoSquarePawnMove() const {
+    int x, y;
+    std::tie(x, y) = Square::diff(origin, destination);
+    if (x != 0) {
+        return false;
+    }
+    if (y == 2) {
+        if (Square::getRow(origin) == 2) {
+            // Pawns have to be in original position to be moved up twice
+            return true; // White move forward two spaces
+        } else {
+            return false;
+        }
+    } else if (y == -2) {
+        if (Square::getRow(origin) == 7) {
+            return true; // Black move forward two spaces
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 bool Move::isPawnCapture() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (abs(x) == 1 && abs(y) == 1) {
         return true; // Pawn capture
+    } else {
+        return false;
+    }
+}
+
+bool Move::isPawnCapture(Side side) const {
+    const int pawnDirection = (side == Side::White) ? 1 : -1;
+    int x, y;
+    std::tie(x, y) = Square::diff(origin, destination);
+    if (abs(x) == 1 && abs(y) == 1) {
+        if (y == pawnDirection) {
+            return true;
+        } else {
+            return false;
+        }
     } else {
         return false;
     }

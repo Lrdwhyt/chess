@@ -101,6 +101,18 @@ Side Board::getSideAt(int square) const {
     }
 }
 
+int Board::getPieceAt(int square) const {
+    return std::abs(at(square));
+}
+
+int Board::getKingLocation(Side side) const {
+    if (side == Side::White) {
+        return whiteKingLocation;
+    } else {
+        return blackKingLocation;
+    }
+}
+
 void Board::addPiece(int square, int piece) {
     squares[square] = piece;
     if (Piece::getSide(piece) == Side::White) {
@@ -197,11 +209,54 @@ bool Board::isUnderAttack(int square, Side side) const {
             isAttackedInDirection(square, side, -1, 1));
 }
 
+bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    // Check all knight spots
+    const int enemyKnight = Piece::get(enemySide, PieceType::Knight);
+    const std::array<int, 8> knightSquares = {
+        Square::getInDirection(square, 1, 2),
+        Square::getInDirection(square, 1, -2),
+        Square::getInDirection(square, -1, 2),
+        Square::getInDirection(square, -1, -2),
+        Square::getInDirection(square, 2, 1),
+        Square::getInDirection(square, 2, -1),
+        Square::getInDirection(square, -2, 1),
+        Square::getInDirection(square, -2, -1)};
+    for (int knightSquare : knightSquares) {
+        // Loop through all locations where a knight could be checking king
+        if (knightSquare != -1) { // Square is outside of board
+            if (at(knightSquare) == enemyKnight) {
+                return true;
+            }
+        }
+    }
+    // Check the two possible squares that an enemy pawn could be checking from
+    const int enemyPawn = Piece::get(enemySide, PieceType::Pawn);
+    const int pawnDirection = (side == Side::White) ? 1 : -1;
+    const int pawnLocationFirst = Square::getInDirection(square, -1, pawnDirection);
+    const int pawnLocationSecond = Square::getInDirection(square, 1, pawnDirection);
+    if (pawnLocationFirst != -1 && at(pawnLocationFirst) == enemyPawn) {
+        return true;
+    }
+    if (pawnLocationSecond != -1 && at(pawnLocationSecond) == enemyPawn) {
+        return true;
+    }
+    // If any ray attacker exists in any corresponding direction, we are in check.
+    return (wouldBeAttackedInDirection(square, origin, side, 0, 1) ||
+            wouldBeAttackedInDirection(square, origin, side, 0, -1) ||
+            wouldBeAttackedInDirection(square, origin, side, 1, 0) ||
+            wouldBeAttackedInDirection(square, origin, side, -1, 0) ||
+            wouldBeAttackedInDirection(square, origin, side, 1, -1) ||
+            wouldBeAttackedInDirection(square, origin, side, 1, 1) ||
+            wouldBeAttackedInDirection(square, origin, side, -1, -1) ||
+            wouldBeAttackedInDirection(square, origin, side, -1, 1));
+}
+
 std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
     bool directAttacker = false;
     int attackerSquare = -1;
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
-    const int square = (side == Side::White) ? whiteKingLocation : blackKingLocation;
+    const int square = getKingLocation(side);
     // Check all knight spots
     const int enemyKnight = Piece::get(enemySide, PieceType::Knight);
     const std::array<int, 8> knightSquares = {
@@ -308,7 +363,7 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
 }
 
 bool Board::isInCheck(Side side) const {
-    const int kingLocation = (side == Side::White) ? whiteKingLocation : blackKingLocation;
+    const int kingLocation = getKingLocation(side);
     return isUnderAttack(kingLocation, side);
 }
 
@@ -323,7 +378,7 @@ int Board::squareAttackingInDirection(int square, Side side, int x, int y) const
         }
         const int piece = at(square);
         if (Piece::getSide(piece) == side) {
-            break;
+            return -1;
         } else if (Piece::getSide(piece) == enemySide) {
             if (Piece::getType(piece) == PieceType::Queen || Piece::getType(piece) == enemyVariablePiece) {
                 return square;
@@ -332,7 +387,42 @@ int Board::squareAttackingInDirection(int square, Side side, int x, int y) const
             }
         }
     }
-    return -1;
+}
+
+int Board::squareAttackingInDirectionOfSquare(int square, int movingPiece, Side side) const {
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    // Determine if we are looking for bishop or rook based on the direction vector
+    int x, y;
+    std::tie(x, y) = Square::diff(square, movingPiece);
+    if (x < 0) {
+        x = -1;
+    } else if (x > 0) {
+        x = 1;
+    }
+    if (y < 0) {
+        y = -1;
+    } else if (y > 0) {
+        y = 1;
+    }
+    const int enemyVariablePiece = (x == 0 || y == 0) ? PieceType::Rook : PieceType::Bishop;
+    while (true) {
+        square = Square::getInDirection(square, x, y);
+        if (square == -1) {
+            return -1;
+        }
+        if (square == movingPiece) {
+            continue;
+        }
+        if (getSideAt(square) == side) {
+            return -1;
+        } else if (getSideAt(square) == enemySide) {
+            if (getPieceAt(square) == PieceType::Queen || getPieceAt(square) == enemyVariablePiece) {
+                return square;
+            } else {
+                return -1;
+            }
+        }
+    }
 }
 
 bool Board::isAttackedInDirection(int square, Side side, int x, int y) const {
@@ -346,7 +436,7 @@ bool Board::isAttackedInDirection(int square, Side side, int x, int y) const {
         }
         const int piece = at(square);
         if (Piece::getSide(piece) == side) {
-            break;
+            return false;
         } else if (Piece::getSide(piece) == enemySide) {
             if (Piece::getType(piece) == PieceType::Queen || Piece::getType(piece) == enemyVariablePiece) {
                 return true;
@@ -355,7 +445,31 @@ bool Board::isAttackedInDirection(int square, Side side, int x, int y) const {
             }
         }
     }
-    return false;
+}
+
+bool Board::wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const {
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    // Determine if we are looking for bishop or rook based on the direction vector
+    const int enemyVariablePiece = (x == 0 || y == 0) ? PieceType::Rook : PieceType::Bishop;
+    while (true) {
+        square = Square::getInDirection(square, x, y);
+        if (square == -1) {
+            return false;
+        }
+        if (square == origin) {
+            continue;
+        }
+        const int piece = at(square);
+        if (Piece::getSide(piece) == side) {
+            return false;
+        } else if (Piece::getSide(piece) == enemySide) {
+            if (Piece::getType(piece) == PieceType::Queen || Piece::getType(piece) == enemyVariablePiece) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 }
 
 Board Board::simulateMove(Move move, Side side) const {
@@ -376,4 +490,82 @@ Board Board::simulateMove(Move move, Side side) const {
     }
     result.movePiece(move.origin, move.destination);
     return result;
+}
+
+bool Board::isLegalPieceMove(int origin, int destination) const {
+    const int piece = getPieceAt(origin);
+    const Move move = Move(origin, destination);
+    switch (piece) {
+        case PieceType::Pawn: {
+            if (isEmpty(destination)) {
+                return  move.isPawnMove();
+            } else {
+                return move.isPawnCapture();
+            }
+            // Doesn't account for en passant
+        }
+
+        case PieceType::Knight: {
+            return move.isKnightMove();
+        }
+
+        case PieceType::Bishop: {
+            return move.isBishopMove();
+        }
+
+        case PieceType::Rook: {
+            return move.isRookMove();
+        }
+
+        case PieceType::Queen: {
+            return move.isQueenMove();
+        }
+    }
+}
+
+bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
+    const int kingLocation = getKingLocation(side);
+    if (Square::getRow(kingLocation) != Square::getRow(capturer)) {
+        return false;
+    }
+    const int x = (Square::getColumn(kingLocation) > Square::getColumn(capturer)) ? 1 : -1;
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    int square = kingLocation;
+    while (true) {
+        square = Square::getInDirection(square, x, 0);
+        if (square == -1) {
+            return false;
+        }
+        if (square == capturer || square == capturee) {
+            continue;
+        }
+        if (getSideAt(square) == side) {
+            return false;
+        } else if (getSideAt(square) == enemySide) {
+            if (getPieceAt(square) == PieceType::Queen || getPieceAt(square) == PieceType::Rook) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+}
+
+std::vector<int> Board::getUnobstructedInDirection(int square, Side side, int x, int y) const {
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    std::vector<int> results;
+    while (true) {
+        square = Square::getInDirection(square, x, y);
+        if (square == -1) {
+            break;
+        }
+        if (getSideAt(square) == side) {
+            break;
+        }
+        results.push_back(square);
+        if (getSideAt(square) == enemySide) {
+            break;
+        }
+    }
+    return results;
 }

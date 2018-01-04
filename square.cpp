@@ -109,3 +109,38 @@ int Square::getInDirection(int square, int x, int y) {
         return Square::get(newX, newY);
     }
 }
+
+bool Square::inLine(int a, int b) {
+    int x1 = a % 8;
+    int x2 = b % 8;
+    int y1 = a / 8;
+    int y2 = b / 8;
+    int x = x2 - x1;
+    int y = y2 - y1;
+    return (x == 0 || y == 0 || std::abs(x) == std::abs(y));
+}
+
+bool Square::isBetweenInclusive(int square, int a, int b) {
+    int x, y;
+    std::tie(x, y) = Square::diff(a, b);
+    x = x / std::abs(x);
+    y = y / std::abs(y);
+    int sq = a;
+    while (true) {
+        sq = Square::getInDirection(sq, x, y);
+        if (sq == -1) {
+            return false;
+        }
+        if (sq == square) {
+            return true;
+        }
+        if (sq == b) {
+            return false;
+        }
+    }
+}
+
+std::string Square::toString(int square) {
+    char col = Square::getColumn(square) + 'a' - 1;
+    return std::string(1, col) + std::to_string(Square::getRow(square));
+}

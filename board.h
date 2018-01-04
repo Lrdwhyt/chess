@@ -31,17 +31,25 @@ public:
     void print() const;
     int at(int square) const;
     Side getSideAt(int square) const;
+    int getPieceAt(int square) const;
     bool isEmpty(int square) const;
     std::string toString() const;
     void addPiece(int square, int piece);
     void movePiece(int origin, int destination);
     void deletePiece(int square);
     bool isUnderAttack(int square, Side side) const;
+    bool wouldBeUnderAttack(int square, int origin, Side side) const;
     bool isInCheck(Side side) const;
     int squareAttackingInDirection(int square, Side side, int x, int y) const;
     bool isAttackedInDirection(int square, Side side, int x, int y) const;
+    bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
+    int squareAttackingInDirectionOfSquare(int square, int movingPiece, Side side) const;
     Board simulateMove(Move move, Side side) const;
     std::tuple<CheckType, int> getInCheckStatus(Side side) const;
+    int getKingLocation(Side side) const;
+    bool isLegalPieceMove(int origin, int destination) const;
+    bool willEnPassantCheck(int capturer, int capturee, Side side) const;
+    std::vector<int> getUnobstructedInDirection(int square, Side side, int x, int y) const;
 };
 
 #endif
