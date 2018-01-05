@@ -22,6 +22,7 @@ private:
 
 public:
     GameState();
+    GameState(GameState const &);
     GameState(std::string fenString);
     const Board &getBoard() const;
     void processMove(Move);
@@ -29,6 +30,7 @@ public:
     bool isValidMovement(Move) const;
     std::vector<Move> getPossibleMoves() const;
     std::vector<Move> getPossiblePieceMoves(int square) const;
+    std::vector<Move> getPossibleKingMoves(Side side) const;
     bool canEnPassant(int square) const;
 };
 

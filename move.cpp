@@ -11,14 +11,25 @@ Move::Move(int o, int d, int piece)
 Move Move::fromString(std::string str) {
     std::string originSquareString = str.substr(0, 2);
     std::string destSquareString = str.substr(2, 2);
-    int destSquare, originSquare;
+    int destSquare;
+    int originSquare;
     try {
         originSquare = Square::fromString(originSquareString);
         destSquare = Square::fromString(destSquareString);
     } catch (std::runtime_error err) {
         throw err;
     }
-    return Move(originSquare, destSquare);
+    if (str.length() >= 5) {
+        const char promotionChar = str.at(4);
+        const int piece = std::abs(Piece::fromString(promotionChar));
+        return Move(originSquare, destSquare, piece);
+    } else {
+        return Move(originSquare, destSquare);
+    }
+}
+
+std::string Move::toString() const {
+    return Square::toString(origin) + Square::toString(destination);
 }
 
 bool Move::isRookMove() const {
@@ -167,6 +178,19 @@ bool Move::isTwoSquarePawnMove() const {
         }
     } else {
         return false;
+    }
+}
+
+bool Move::isTwoSquarePawnMove(Side side) const {
+    int x, y;
+    std::tie(x, y) = Square::diff(origin, destination);
+    if (x != 0) {
+        return false;
+    }
+    if (side == Side::White) {
+        return (y == 2 && Square::getRow(origin) == 2);
+    } else {
+        return (y == -2 && Square::getRow(origin) == 7);
     }
 }
 

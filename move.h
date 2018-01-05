@@ -21,6 +21,7 @@ public:
     Move(int, int);
     Move(int, int, int);
     static Move fromString(std::string);
+    std::string toString() const;
 
     /*
      * The following functions are used for move validation
@@ -30,6 +31,7 @@ public:
     bool isPawnMove() const;
     bool isPawnMove(Side side) const;
     bool isTwoSquarePawnMove() const;
+    bool isTwoSquarePawnMove(Side side) const;
     bool isPawnCapture() const;
     bool isPawnCapture(Side side) const;
     bool isBishopMove() const;
