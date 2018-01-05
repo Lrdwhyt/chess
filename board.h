@@ -26,6 +26,7 @@ public:
     int whiteKingLocation;
     int blackKingLocation;
     Board();
+    Board(std::string fenString);
     Board(Board const &);
     static Board startingPosition();
     void print() const;

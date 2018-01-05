@@ -22,6 +22,7 @@ private:
 
 public:
     GameState();
+    GameState(std::string fenString);
     const Board &getBoard() const;
     void processMove(Move);
     bool isValidMove(Move) const;

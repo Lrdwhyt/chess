@@ -14,6 +14,48 @@ GameState::GameState() {
     canBlackCastleQueenside = true;
 }
 
+GameState::GameState(std::string fenString) {
+    int index = fenString.find(" ");
+    std::string pieceString = fenString.substr(0, index);
+    board = Board(pieceString);
+    fenString.erase(0, index + 1);
+    index = fenString.find(" ");
+    std::string sideString = fenString.substr(0, index);
+    side = (sideString == "w") ? Side::White : Side::Black;
+    fenString.erase(0, index + 1);
+    index = fenString.find(" ", index + 1);
+    std::string castleString = fenString.substr(0, index);
+    canWhiteCastleKingside = false;
+    canWhiteCastleQueenside = false;
+    canBlackCastleKingside = false;
+    canBlackCastleQueenside = false;
+    if (castleString.find("K") != std::string::npos) {
+        canWhiteCastleKingside = true;
+    }
+    if (castleString.find("Q") != std::string::npos) {
+        canWhiteCastleQueenside = true;
+    }
+    if (castleString.find("k") != std::string::npos) {
+        canBlackCastleKingside = true;
+    }
+    if (castleString.find("q") != std::string::npos) {
+        canBlackCastleQueenside = true;
+    }
+    fenString.erase(0, index + 1);
+    index = fenString.find(" ");
+    std::string enPassantString = fenString.substr(0, index);
+    if (enPassantString.length() == 2) {
+        int enPassantSquare = Square::fromString(enPassantString);
+        if (Square::getRow(enPassantSquare) == 3) {
+            moveHistory.push_back(Move(Square::getInDirection(enPassantSquare, 0, -1),
+                                       Square::getInDirection(enPassantSquare, 0, 1)));
+        } else { // 5
+            moveHistory.push_back(Move(Square::getInDirection(enPassantSquare, 0, 1),
+                                       Square::getInDirection(enPassantSquare, 0, -1)));
+        }
+    }
+}
+
 const Board &GameState::getBoard() const {
     return board;
 }

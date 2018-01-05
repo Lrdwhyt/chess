@@ -14,6 +14,40 @@ Board::Board() {
     squares = {0};
 }
 
+Board::Board(std::string fenString) {
+    squares = {0}; // Necessary
+    int x = 0;
+    int y = 8;
+    for (int i = 0; i < fenString.length(); ++i) {
+        ++x;
+        const char c = fenString.at(i);
+        if (c == '/') {
+            --y;
+            x = 0;
+            continue;
+        } else {
+            if (isdigit(c)) {
+                x += (c - '0' - 1);
+                continue;
+            } else {
+                const int piece = Piece::fromString(c);
+                const int square = Square::get(x, y);
+                squares[square] = piece;
+                if (c == 'k') {
+                    blackKingLocation = square;
+                } else if (c == 'K') {
+                    whiteKingLocation = square;
+                }
+                if (Piece::getSide(piece) == Side::White) {
+                    whitePieceLocations.push_back(square);
+                } else {
+                    blackPieceLocations.push_back(square);
+                }
+            }
+        }
+    }
+}
+
 Board::Board(Board const &old) {
     for (int i = 0; i < squares.size(); ++i) {
         squares[i] = old.at(i);
@@ -498,7 +532,7 @@ bool Board::isLegalPieceMove(int origin, int destination) const {
     switch (piece) {
         case PieceType::Pawn: {
             if (isEmpty(destination)) {
-                return  move.isPawnMove();
+                return move.isPawnMove();
             } else {
                 return move.isPawnCapture();
             }

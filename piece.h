@@ -11,6 +11,9 @@ struct Piece {
 public:
     static constexpr int None = 0;
 
+    /* Take 1 char representation of piece (per FEN) and convert to piece int */
+    static int fromString(char pieceChar);
+
     /* String representation of a piece,
        used for rendering the game as ASCII */
     static std::string getString(int piece);
