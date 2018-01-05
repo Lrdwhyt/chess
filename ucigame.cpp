@@ -1,10 +1,12 @@
 #include "ucigame.h"
 
 #include <ctime>
+#include <fstream>
 #include <iostream>
 
-UciGame::UciGame() {
-}
+const std::string LOGFILE = "debug.log";
+
+UciGame::UciGame() {}
 
 void UciGame::updateState(Move move) {
     state.processMove(move);
@@ -21,11 +23,13 @@ void UciGame::fromFen(std::string fenString) {
 Move UciGame::getBestMove() {
     moves = state.getPossibleMoves();
     /* Start debug */
-    std::cout << moves.size();
+    std::ofstream outputFile(LOGFILE, std::ios::app);
+    outputFile << moves.size();
     for (Move move : moves) {
-        std::cout << " " << Square::toString(move.origin) << Square::toString(move.destination);
+        outputFile << " " << Square::toString(move.origin) << Square::toString(move.destination);
     }
-    std::cout << std::endl;
+    outputFile << std::endl;
+    outputFile.close();
     /* end debug */
     std::srand(std::time(0));
     int index = std::rand() % moves.size();

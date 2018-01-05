@@ -88,7 +88,7 @@ std::vector<int> Square::between(int a, int b) {
         }
         return results;
     } else {
-        throw std::runtime_error("No straight line between squares");
+        throw std::runtime_error("No straight line between squares" + Square::toString(a) + Square::toString(b));
     }
 }
 
