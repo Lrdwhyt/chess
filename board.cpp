@@ -197,6 +197,7 @@ void Board::movePiece(int origin, int destination) {
             }
         }
     }
+    print();
     throw std::runtime_error("Piece not found");
 }
 
@@ -321,9 +322,11 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
         const int pawnLocationSecond = Square::getInDirection(square, 1, pawnDirection);
         if (pawnLocationFirst != -1 && at(pawnLocationFirst) == enemyPawn) {
             directAttacker = true;
+            attackerSquare = pawnLocationFirst;
         }
         if (pawnLocationSecond != -1 && at(pawnLocationSecond) == enemyPawn) {
             directAttacker = true;
+            attackerSquare = pawnLocationSecond;
         }
     }
     // If any ray attacker exists in any corresponding direction, we are in check.
@@ -562,7 +565,7 @@ bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
     if (Square::getRow(kingLocation) != Square::getRow(capturer)) {
         return false;
     }
-    const int x = (Square::getColumn(kingLocation) > Square::getColumn(capturer)) ? 1 : -1;
+    const int x = (Square::getColumn(kingLocation) > Square::getColumn(capturer)) ? -1 : 1;
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     int square = kingLocation;
     while (true) {
