@@ -7,6 +7,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <cstdint>
 #include <array>
 #include <string>
 #include <vector>
@@ -18,7 +19,14 @@
 
 class Board {
 private:
-    std::array<int, 64> squares;
+    std::uint64_t whites;
+    std::uint64_t blacks;
+    std::uint64_t pawns;
+    std::uint64_t knights;
+    std::uint64_t bishops;
+    std::uint64_t rooks;
+    std::uint64_t queens;
+    std::uint64_t kings;
 
 public:
     std::vector<int> whitePieceLocations;

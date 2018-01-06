@@ -14,7 +14,7 @@ void startUciMode() {
 }
 
 void startDebugMode() {
-    Agent *p1 = new ComputerAgent();
+    Agent *p1 = new HumanAgent("White");
     Agent *p2 = new HumanAgent("Black");
     Game g(p1, p2);
     g.print();
