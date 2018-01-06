@@ -26,8 +26,6 @@ public:
     GameState(std::string fenString);
     const Board &getBoard() const;
     void processMove(Move);
-    bool isValidMove(Move) const;
-    bool isValidMovement(Move) const;
     std::vector<Move> getPossibleMoves() const;
     std::vector<Move> getPossiblePieceMoves(int square) const;
     std::vector<Move> getPossibleKingMoves(Side side) const;

@@ -12,11 +12,12 @@ Game::Game(Agent *p1, Agent *p2) {
 }
 
 void Game::handleTurn(Move move) {
-    if (state.isValidMove(move) == false) {
+    /*std::vector<Move> validMoves = state.getPossibleMoves();
+    if (std::find(validMoves.begin(), validMoves.end(), move) == validMoves.end()) {
         print();
         handleTurn(getCurrentAgent()->requestMove(state));
         return;
-    }
+    }*/
     state.processMove(move);
     // Change turns
     if (side == Side::White) {
