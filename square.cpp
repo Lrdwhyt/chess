@@ -61,11 +61,10 @@ int Square::fromString(std::string str) {
 }
 
 std::tuple<int, int> Square::diff(int a, int b) {
-    int x1, y1, x2, y2;
-    x1 = a % 8;
-    x2 = b % 8;
-    y1 = a / 8;
-    y2 = b / 8;
+    const int x1 = static_cast<unsigned int>(a) % 8;
+    const int x2 = static_cast<unsigned int>(b) % 8;
+    const int y1 = static_cast<unsigned int>(a) / 8;
+    const int y2 = static_cast<unsigned int>(b) / 8;
     return std::tuple<int, int>(x2 - x1, y2 - y1);
 }
 
@@ -88,16 +87,16 @@ std::vector<int> Square::between(int a, int b) {
         }
         return results;
     } else {
-        throw std::runtime_error("No straight line between squares" + Square::toString(a) + Square::toString(b));
+        throw std::runtime_error("No straight line between squares " + Square::toString(a) + Square::toString(b));
     }
 }
 
 int Square::getRow(int square) {
-    return square / 8 + 1;
+    return static_cast<unsigned int>(square) / 8 + 1;
 }
 
 int Square::getColumn(int square) {
-    return square % 8 + 1;
+    return static_cast<unsigned int>(square) % 8 + 1;
 }
 
 int Square::getInDirection(int square, int x, int y) {
@@ -120,10 +119,10 @@ int Square::getInYDirection(int square, int y) {
 }
 
 bool Square::inLine(int a, int b) {
-    int x1 = a % 8;
-    int x2 = b % 8;
-    int y1 = a / 8;
-    int y2 = b / 8;
+    int x1 = static_cast<unsigned int>(a) % 8;
+    int x2 = static_cast<unsigned int>(b) % 8;
+    int y1 = static_cast<unsigned int>(a) / 8;
+    int y2 = static_cast<unsigned int>(b) / 8;
     int x = x2 - x1;
     int y = y2 - y1;
     return (x == 0 || y == 0 || std::abs(x) == std::abs(y));
