@@ -320,7 +320,7 @@ bool Board::isAttackedByKnight(int square, Side side) const {
     for (int knightSquare : knightSquares) {
         // Loop through all locations where a knight could be attacking
         if (knightSquare != -1) { // Square is outside of board
-            if (knights & getSquareMask(knightSquare) && !isSide(square, side)) {
+            if (knights & getSquareMask(knightSquare) && !isSide(knightSquare, side)) {
                 return true;
             }
         }
@@ -329,7 +329,6 @@ bool Board::isAttackedByKnight(int square, Side side) const {
 }
 
 bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
-    const std::uint64_t enemySide = (side == Side::White) ? blacks : whites;
     // Check all knight spots
     if (isAttackedByKnight(square, side)) {
         return true;
@@ -338,10 +337,10 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
     const int pawnDirection = (side == Side::White) ? 1 : -1;
     const int pawnLocationFirst = Square::getInDirection(square, -1, pawnDirection);
     const int pawnLocationSecond = Square::getInDirection(square, 1, pawnDirection);
-    if (pawnLocationFirst != -1 && pawns & getSquareMask(pawnLocationFirst) && enemySide & getSquareMask(pawnLocationFirst)) {
+    if (pawnLocationFirst != -1 && pawns & getSquareMask(pawnLocationFirst) && !isSide(pawnLocationFirst, side)) {
         return true;
     }
-    if (pawnLocationSecond != -1 && pawns & getSquareMask(pawnLocationSecond) && enemySide & getSquareMask(pawnLocationSecond)) {
+    if (pawnLocationSecond != -1 && pawns & getSquareMask(pawnLocationSecond) && !isSide(pawnLocationSecond, side)) {
         return true;
     }
     // If any ray attacker exists in any corresponding direction, we are in check.
@@ -613,7 +612,7 @@ bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
         if (square == capturer || square == capturee) {
             continue;
         }
-        if (isSide(square, enemySide)) {
+        if (isSide(square, side)) {
             return false;
         } else if (isSide(square, enemySide)) {
             if (queens & getSquareMask(square) || rooks & getSquareMask(square)) {
