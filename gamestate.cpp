@@ -21,7 +21,10 @@ GameState::GameState(GameState const &state) {
     canWhiteCastleQueenside = state.canWhiteCastleQueenside;
     canBlackCastleKingside = state.canBlackCastleKingside;
     canBlackCastleQueenside = state.canBlackCastleQueenside;
-    moveHistory = state.moveHistory;
+    //moveHistory = state.moveHistory;
+    if (state.moveHistory.size() >= 1) {
+        moveHistory.push_back(state.moveHistory.back());
+    }
 }
 
 GameState::GameState(std::string fenString) {
@@ -125,12 +128,16 @@ std::vector<Move> GameState::getPossibleMoves() const {
     std::vector<Move> results;
     CheckType checkStatus;
     int checkingSquare;
-    const std::vector<int> &pieceLocations = (side == Side::White) ? board.whitePieceLocations : board.blackPieceLocations;
+    //const std::vector<int> &pieceLocations = (side == Side::White) ? board.whitePieceLocations : board.blackPieceLocations;
     std::tie(checkStatus, checkingSquare) = board.getInCheckStatus(side);
     switch (checkStatus) {
         case CheckType::None: {
             const int kingLocation = board.getKingLocation(side);
-            for (int square : pieceLocations) {
+            //for (int square : pieceLocations) {
+            for (int square = 0; square < 64; ++square) {
+                if (!(((side == Side::White) ? board.whites : board.blacks) & (1ULL << square))) {
+                    continue;
+                }
                 if (square != kingLocation && Square::inLine(square, kingLocation)) {
                     // Straight line exists between king and piece, meaning
                     // it could be pinned
@@ -192,7 +199,11 @@ std::vector<Move> GameState::getPossibleMoves() const {
 
         case CheckType::Ray: {
             const int kingLocation = board.getKingLocation(side);
-            for (int square : pieceLocations) {
+            //for (int square : pieceLocations) {
+            for (int square = 0; square < 64; ++square) {
+                if (!(((side == Side::White) ? board.whites : board.blacks) & (1ULL << square))) {
+                    continue;
+                }
                 if (square == kingLocation) {
                     std::vector<Move> kingMoves = getPossibleKingMoves(side);
                     results.insert(results.end(), kingMoves.begin(), kingMoves.end());
@@ -248,7 +259,11 @@ std::vector<Move> GameState::getPossibleMoves() const {
 
         case CheckType::Direct: {
             // Can evade check by capturing attacking piece or moving king
-            for (int square : pieceLocations) {
+            //for (int square : pieceLocations) {
+            for (int square = 0; square < 64; ++square) {
+                if (!(((side == Side::White) ? board.whites : board.blacks) & (1ULL << square))) {
+                    continue;
+                }
                 const int piece = board.getPieceAt(square);
                 if (piece == PieceType::King) {
                     std::vector<Move> kingMoves = getPossibleKingMoves(side);

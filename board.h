@@ -7,8 +7,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <cstdint>
 #include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -18,7 +18,7 @@
 #include "square.h"
 
 class Board {
-private:
+public:
     std::uint64_t whites;
     std::uint64_t blacks;
     std::uint64_t pawns;
@@ -27,10 +27,6 @@ private:
     std::uint64_t rooks;
     std::uint64_t queens;
     std::uint64_t kings;
-
-public:
-    std::vector<int> whitePieceLocations;
-    std::vector<int> blackPieceLocations;
     int whiteKingLocation;
     int blackKingLocation;
     Board();
@@ -59,6 +55,7 @@ public:
     bool isLegalPieceMove(int origin, int destination) const;
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;
     std::vector<int> getUnobstructedInDirection(int square, Side side, int x, int y) const;
+    std::uint64_t getSquareMask(int square) const;
 };
 
 #endif

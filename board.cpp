@@ -12,7 +12,18 @@
 
 #include <bitset>
 
-Board::Board() {}
+Board::Board() {
+    whites = 0;
+    blacks = 0;
+    pawns = 0;
+    knights = 0;
+    bishops = 0;
+    rooks = 0;
+    queens = 0;
+    kings = 0;
+    whiteKingLocation = -1;
+    blackKingLocation = -1;
+}
 
 Board::Board(std::string fenString) {
     int x = 0;
@@ -48,8 +59,6 @@ Board::Board(Board const &old) {
     kings = old.kings;
     whiteKingLocation = old.whiteKingLocation;
     blackKingLocation = old.blackKingLocation;
-    whitePieceLocations = old.whitePieceLocations;
-    blackPieceLocations = old.blackPieceLocations;
 }
 
 Board Board::startingPosition() {
@@ -62,8 +71,6 @@ Board Board::startingPosition() {
     b.rooks = 9295429630892703873ULL;
     b.queens = 576460752303423496ULL;
     b.kings = 1152921504606846992ULL;
-    b.whitePieceLocations = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    b.blackPieceLocations = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
     b.whiteKingLocation = 4;
     b.blackKingLocation = 60;
     return b;
@@ -130,9 +137,10 @@ bool Board::isEmpty(int square) const {
 }
 
 Side Board::getSideAt(int square) const {
-    if (at(square) > 0) {
+    const std::uint64_t squareMask = 1ULL << square;
+    if (whites & squareMask) {
         return Side::White;
-    } else if (at(square) < 0) {
+    } else if (blacks & squareMask) {
         return Side::Black;
     } else {
         return Side::None;
@@ -140,7 +148,22 @@ Side Board::getSideAt(int square) const {
 }
 
 int Board::getPieceAt(int square) const {
-    return std::abs(at(square));
+    const std::uint64_t squareMask = 1ULL << square;
+    if (pawns & squareMask) {
+        return PieceType::Pawn;
+    } else if (knights & squareMask) {
+        return PieceType::Knight;
+    } else if (bishops & squareMask) {
+        return PieceType::Bishop;
+    } else if (rooks & squareMask) {
+        return PieceType::Rook;
+    } else if (queens & squareMask) {
+        return PieceType::Queen;
+    } else if (kings & squareMask) {
+        return PieceType::King;
+    } else {
+        return Piece::None;
+    }
 }
 
 int Board::getKingLocation(Side side) const {
@@ -158,13 +181,11 @@ void Board::addPiece(int square, int piece) {
         if (Piece::getType(piece) == PieceType::King) {
             whiteKingLocation = square;
         }
-        whitePieceLocations.push_back(square);
     } else {
         blacks = blacks | squareMask;
         if (Piece::getType(piece) == PieceType::King) {
             blackKingLocation = square;
         }
-        blackPieceLocations.push_back(square);
     }
     switch (Piece::getType(piece)) {
         case PieceType::Pawn:
@@ -194,14 +215,13 @@ void Board::addPiece(int square, int piece) {
 }
 
 void Board::deletePiece(int square) {
-    const int piece = at(square);
     const std::uint64_t squareMask = 1ULL << square;
-    if (Piece::getSide(piece) == Side::White) {
+    if (getSideAt(square) == Side::White) {
         whites = whites ^ squareMask;
     } else {
         blacks = blacks ^ squareMask;
     }
-    switch (Piece::getType(piece)) {
+    switch (getPieceAt(square)) {
         case PieceType::Pawn:
             pawns = pawns ^ squareMask;
             break;
@@ -226,19 +246,24 @@ void Board::deletePiece(int square) {
             kings = kings ^ squareMask;
             break;
     }
-    if (Piece::getSide(piece) == Side::White) {
-        whitePieceLocations.erase(std::remove(whitePieceLocations.begin(), whitePieceLocations.end(), square), whitePieceLocations.end());
-    } else {
-        blackPieceLocations.erase(std::remove(blackPieceLocations.begin(), blackPieceLocations.end(), square), blackPieceLocations.end());
-    }
 }
 
 void Board::movePiece(int origin, int destination) {
-    const int piece = at(origin);
-    const Side side = Piece::getSide(piece);
+    const int piece = getPieceAt(origin);
     const std::uint64_t originMask = 1ULL << origin;
     const std::uint64_t destinationMask = 1ULL << destination;
-    switch (Piece::getType(piece)) {
+    if (getSideAt(origin) == Side::White) {
+        whites = (whites ^ originMask) ^ destinationMask;
+        if (piece == PieceType::King) {
+            whiteKingLocation = destination;
+        }
+    } else {
+        blacks = (blacks ^ originMask) ^ destinationMask;
+        if (piece == PieceType::King) {
+            blackKingLocation = destination;
+        }
+    }
+    switch (piece) {
         case PieceType::Pawn:
             pawns = (pawns ^ originMask) ^ destinationMask;
             break;
@@ -263,31 +288,6 @@ void Board::movePiece(int origin, int destination) {
             kings = (kings ^ originMask) ^ destinationMask;
             break;
     }
-    if (side == Side::White) {
-        whites = (whites ^ originMask) ^ destinationMask;
-        if (Piece::getType(piece) == PieceType::King) {
-            whiteKingLocation = destination;
-        }
-        for (int i = 0; i < whitePieceLocations.size(); ++i) {
-            if (whitePieceLocations[i] == origin) {
-                whitePieceLocations[i] = destination;
-                return;
-            }
-        }
-    } else {
-        blacks = (blacks ^ originMask) ^ destinationMask;
-        if (Piece::getType(piece) == PieceType::King) {
-            blackKingLocation = destination;
-        }
-        for (int i = 0; i < blackPieceLocations.size(); ++i) {
-            if (blackPieceLocations[i] == origin) {
-                blackPieceLocations[i] = destination;
-                return;
-            }
-        }
-    }
-    print();
-    throw std::runtime_error("Piece not found" + Square::toString(origin) + Square::toString(destination));
 }
 
 bool Board::isUnderAttack(int square, Side side) const {
@@ -542,7 +542,7 @@ int Board::squareAttackingInDirectionOfSquare(int square, int movingPiece, Side 
         if (getSideAt(square) == side) {
             return -1;
         } else if (getSideAt(square) == enemySide) {
-            if (getPieceAt(square) == PieceType::Queen || getPieceAt(square) == enemyVariablePiece) {
+            if (queens & getSquareMask(square) || getPieceAt(square) == enemyVariablePiece) {
                 return square;
             } else {
                 return -1;
@@ -668,7 +668,7 @@ bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
         if (getSideAt(square) == side) {
             return false;
         } else if (getSideAt(square) == enemySide) {
-            if (getPieceAt(square) == PieceType::Queen || getPieceAt(square) == PieceType::Rook) {
+            if (queens & getSquareMask(square) || rooks & getSquareMask(square)) {
                 return true;
             } else {
                 return false;
@@ -694,4 +694,8 @@ std::vector<int> Board::getUnobstructedInDirection(int square, Side side, int x,
         }
     }
     return results;
+}
+
+std::uint64_t Board::getSquareMask(int square) const {
+    return 1ULL << square;
 }
