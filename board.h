@@ -47,7 +47,7 @@ public:
     int squareAttackingInDirection(int square, Side side, int x, int y) const;
     bool isAttackedInDirection(int square, Side side, int x, int y) const;
     bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
-    int squareAttackingInDirectionOfSquare(int square, int movingPiece, Side side) const;
+    int getPinningOrAttackingSquare(int square, int movingPiece, Side side) const;
     std::tuple<CheckType, int> getInCheckStatus(Side side) const;
     int getKingLocation(Side side) const;
     bool isLegalPieceMove(int origin, int destination) const;

@@ -140,7 +140,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                 if (square != kingLocation && Square::inLine(square, kingLocation)) {
                     // Straight line exists between king and piece, meaning
                     // it could be pinned
-                    const int pinningPieceLocation = board.squareAttackingInDirectionOfSquare(kingLocation, square, side);
+                    const int pinningPieceLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
                     if (pinningPieceLocation != -1) {
                         // Piece is pinned
                         // But we can still move along the line of the pin
@@ -208,7 +208,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                     results.insert(results.end(), kingMoves.begin(), kingMoves.end());
                 } else { // add switch statement
                     if (Square::inLine(kingLocation, square)) {
-                        if (board.squareAttackingInDirectionOfSquare(kingLocation, square, side) != -1) {
+                        if (board.getPinningOrAttackingSquare(kingLocation, square, side) != -1) {
                             // Piece is pinned and can't move
                             continue;
                         }
@@ -284,13 +284,13 @@ std::vector<Move> GameState::getPossibleMoves() const {
                                     if (!board.willEnPassantCheck(square, checkingSquare, side)) {
                                         getBoard().print();
                                         const int pawnDirection = (side == Side::White) ? 1 : -1;
-                                        const Move enPassant = Move(square, Square::getInDirection(checkingSquare, 0, pawnDirection));
+                                        const Move enPassant = Move(square, Square::getInYDirection(checkingSquare, pawnDirection));
                                         results.push_back(enPassant);
                                     }
                                 }
                             } else if (move.isPawnCapture(side)) {
                                 if (Square::inLine(kingLocation, square)) {
-                                    const int potentialAttackingPieceLocation = board.squareAttackingInDirectionOfSquare(kingLocation, square, side);
+                                    const int potentialAttackingPieceLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
                                     if (potentialAttackingPieceLocation != -1) {
                                         getBoard().print();
                                         if (!Square::isBetweenInclusive(checkingSquare, square, potentialAttackingPieceLocation)) {
@@ -307,7 +307,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                         case PieceType::Knight: {
                             if (move.isKnightMove()) {
                                 if (Square::inLine(kingLocation, square)) {
-                                    if (board.squareAttackingInDirectionOfSquare(kingLocation, square, side) != -1) {
+                                    if (board.getPinningOrAttackingSquare(kingLocation, square, side) != -1) {
                                         // Pinned
                                         getBoard().print();
                                         continue;
@@ -334,7 +334,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                                     continue;
                                 }
                                 if (Square::inLine(kingLocation, square)) {
-                                    const int potentialAttackingPieceLocation = board.squareAttackingInDirectionOfSquare(kingLocation, square, side);
+                                    const int potentialAttackingPieceLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
                                     if (potentialAttackingPieceLocation != -1) {
                                         // Piece must be pinned
                                         // Line to king is therefore unobstructed

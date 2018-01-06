@@ -485,7 +485,8 @@ int Board::squareAttackingInDirection(int square, Side side, int x, int y) const
     }
 }
 
-int Board::squareAttackingInDirectionOfSquare(int square, int movingPiece, Side side) const {
+//We assume that square and movingPiece are in line.
+int Board::getPinningOrAttackingSquare(int square, int movingPiece, Side side) const {
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     // Determine if we are looking for bishop or rook based on the direction vector
     int x, y;
