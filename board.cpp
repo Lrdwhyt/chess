@@ -486,11 +486,6 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
     }
 }
 
-bool Board::isInCheck(Side side) const {
-    const int kingLocation = getKingLocation(side);
-    return isUnderAttack(kingLocation, side);
-}
-
 int Board::squareAttackingInDirection(int square, Side side, int x, int y) const {
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     // Determine if we are looking for bishop or rook based on the direction vector
@@ -591,26 +586,6 @@ bool Board::wouldBeAttackedInDirection(int square, int origin, Side side, int x,
             }
         }
     }
-}
-
-Board Board::simulateMove(Move move, Side side) const {
-    Board result = Board(*this);
-    const int piece = result.at(move.origin);
-    if (Piece::getType(piece) == PieceType::King && move.isCastleMove()) {
-        // Place rook
-        const int kingRow = (side == Side::White) ? 1 : 8;
-        if (Square::getColumn(move.destination) == Column::G) {
-            result.movePiece(Square::get(Column::H, kingRow), Square::get(Column::F, kingRow));
-        } else if (Square::getColumn(move.destination) == Column::C) {
-            result.movePiece(Square::get(Column::A, kingRow), Square::get(Column::D, kingRow));
-        }
-    } else if (Piece::getType(piece) == PieceType::Pawn && move.isPawnCapture() && result.isEmpty(move.destination)) { // en passant
-        // Remove pawn captured via en passant
-        int pawnDirection = side == Side::White ? 1 : -1;
-        result.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
-    }
-    result.movePiece(move.origin, move.destination);
-    return result;
 }
 
 bool Board::isLegalPieceMove(int origin, int destination) const {
