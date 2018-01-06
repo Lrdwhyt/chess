@@ -147,7 +147,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                         // But we can still move along the line of the pin
                         std::vector<int> validDestinations = Square::between(square, pinningPieceLocation);
                         validDestinations.push_back(pinningPieceLocation);
-                        if (board.getPieceAt(square) == PieceType::Pawn) {
+                        if (board.pawns & board.getSquareMask(square)) {
                             for (int destination : validDestinations) {
                                 const Move move = Move(square, destination);
                                 if (!board.isEmpty(destination)) {
@@ -220,7 +220,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                     for (int destination : validDestinations) {
                         const Move move = Move(square, destination);
                         if (board.isLegalPieceMove(square, destination)) {
-                            if (board.getPieceAt(square) == PieceType::Knight) {
+                            if (board.knights & board.getSquareMask(square)) {
                                 // Don't need/shouldn't check for obstructions as knight
                                 results.push_back(move);
                             } else {
@@ -236,7 +236,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                                     // Piece in the way, can't move to destination
                                     continue;
                                 }
-                                if (board.getPieceAt(square) == PieceType::Pawn) {
+                                if (board.pawns & board.getSquareMask(square)) {
                                     if (board.isEmpty(destination)) {
                                         if (move.isPawnMove(side)) {
                                             results.push_back(move);
@@ -525,7 +525,7 @@ std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
 }
 
 bool GameState::canEnPassant(int square) const {
-    if (board.getPieceAt(square) != PieceType::Pawn) {
+    if (!(board.pawns & board.getSquareMask(square))) {
         return false;
     }
     if (moveHistory.size() == 0) {
