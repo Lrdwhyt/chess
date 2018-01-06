@@ -24,6 +24,8 @@ public:
     /* Returns -1 if square is out of range */
     static int getInDirection(int square, int x, int y);
 
+    static int getInYDirection(int square, int y);
+
     static bool isBetweenInclusive(int square, int a, int b);
 
     static std::string toString(int square);

@@ -110,6 +110,15 @@ int Square::getInDirection(int square, int x, int y) {
     }
 }
 
+int Square::getInYDirection(int square, int y) {
+    const int result = square + y * 8;
+    if (result < 0 || result > 63) {
+        return -1; // Square is out of range
+    } else {
+        return result;
+    }
+}
+
 bool Square::inLine(int a, int b) {
     int x1 = a % 8;
     int x2 = b % 8;

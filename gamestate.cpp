@@ -60,11 +60,11 @@ GameState::GameState(std::string fenString) {
     if (enPassantString.length() == 2) {
         int enPassantSquare = Square::fromString(enPassantString);
         if (Square::getRow(enPassantSquare) == 3) {
-            moveHistory.push_back(Move(Square::getInDirection(enPassantSquare, 0, -1),
-                                       Square::getInDirection(enPassantSquare, 0, 1)));
+            moveHistory.push_back(Move(Square::getInYDirection(enPassantSquare, -1),
+                                       Square::getInYDirection(enPassantSquare, 1)));
         } else { // 5
-            moveHistory.push_back(Move(Square::getInDirection(enPassantSquare, 0, 1),
-                                       Square::getInDirection(enPassantSquare, 0, -1)));
+            moveHistory.push_back(Move(Square::getInYDirection(enPassantSquare, 1),
+                                       Square::getInYDirection(enPassantSquare, -1)));
         }
     }
 }
@@ -158,7 +158,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                                     if (move.isPawnMove(side)) {
                                         results.push_back(move);
                                     } else if (move.isTwoSquarePawnMove(side) &&
-                                               board.isEmpty(Square::getInDirection(destination, 0, -pawnDirection))) {
+                                               board.isEmpty(Square::getInYDirection(destination, -pawnDirection))) {
                                         results.push_back(move);
                                     }
                                 }
@@ -367,8 +367,8 @@ std::vector<Move> GameState::getPossibleKingMoves(Side side) const {
     std::vector<Move> results;
     const int origin = board.getKingLocation(side);
     const std::vector<int> candidateDestinations = {
-        Square::getInDirection(origin, 0, -1),
-        Square::getInDirection(origin, 0, 1),
+        Square::getInYDirection(origin, -1),
+        Square::getInYDirection(origin, 1),
         Square::getInDirection(origin, 1, -1),
         Square::getInDirection(origin, 1, 1),
         Square::getInDirection(origin, -1, -1),
@@ -395,7 +395,7 @@ std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
             if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
                 // Can capture by en passant
                 const int pawnDirection = (side == Side::White) ? 1 : -1;
-                results.push_back(Move(square, Square::getInDirection(moveHistory.back().destination, 0, pawnDirection)));
+                results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
             }
         }
         const int originalPawnRow = (side == Side::White) ? 2 : 7;
@@ -409,11 +409,11 @@ std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
         if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
             results.push_back(Move(square, rightCaptureSquare));
         }
-        const int forwardSquare = Square::getInDirection(square, 0, pawnDirection);
+        const int forwardSquare = Square::getInYDirection(square, pawnDirection);
         if (board.isEmpty(forwardSquare)) {
             results.push_back(Move(square, forwardSquare));
             if (Square::getRow(square) == originalPawnRow) {
-                const int forwardTwoSquares = Square::getInDirection(square, 0, pawnDirection * 2);
+                const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
                 if (board.isEmpty(forwardTwoSquares)) {
                     results.push_back(Move(square, forwardTwoSquares));
                 }
@@ -486,8 +486,8 @@ std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
     } else if (board.kings & squareMask) {
         int origin = board.getKingLocation(side);
         std::vector<int> candidateDestinations = {
-            Square::getInDirection(origin, 0, -1),
-            Square::getInDirection(origin, 0, 1),
+            Square::getInYDirection(origin, -1),
+            Square::getInYDirection(origin, 1),
             Square::getInDirection(origin, 1, -1),
             Square::getInDirection(origin, 1, 1),
             Square::getInDirection(origin, -1, -1),
