@@ -128,7 +128,6 @@ std::vector<Move> GameState::getPossibleMoves() const {
     std::vector<Move> results;
     CheckType checkStatus;
     int checkingSquare;
-    //const std::vector<int> &pieceLocations = (side == Side::White) ? board.whitePieceLocations : board.blackPieceLocations;
     std::tie(checkStatus, checkingSquare) = board.getInCheckStatus(side);
     switch (checkStatus) {
         case CheckType::None: {
@@ -378,7 +377,7 @@ std::vector<Move> GameState::getPossibleKingMoves(Side side) const {
         Square::getInDirection(origin, 1, 0),
     };
     for (int destination : candidateDestinations) {
-        if (destination == -1 || board.getSideAt(destination) == side || board.wouldBeUnderAttack(destination, origin, side)) {
+        if (destination == -1 || board.isSide(destination, side) || board.wouldBeUnderAttack(destination, origin, side)) {
             continue;
         } else {
             results.push_back(Move(origin, destination));
@@ -390,136 +389,120 @@ std::vector<Move> GameState::getPossibleKingMoves(Side side) const {
 std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
     std::vector<Move> results;
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
-    switch (board.getPieceAt(square)) {
-        case PieceType::Pawn: {
-            if (canEnPassant(square)) {
-                if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
-                    // Can capture by en passant
-                    const int pawnDirection = (side == Side::White) ? 1 : -1;
-                    results.push_back(Move(square, Square::getInDirection(moveHistory.back().destination, 0, pawnDirection)));
+    const std::uint64_t squareMask = board.getSquareMask(square);
+    if (board.pawns & squareMask) {
+        if (canEnPassant(square)) {
+            if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
+                // Can capture by en passant
+                const int pawnDirection = (side == Side::White) ? 1 : -1;
+                results.push_back(Move(square, Square::getInDirection(moveHistory.back().destination, 0, pawnDirection)));
+            }
+        }
+        const int originalPawnRow = (side == Side::White) ? 2 : 7;
+        const int pawnDirection = (side == Side::White) ? 1 : -1;
+        const int prePromotionRow = (side == Side::White) ? 7 : 2;
+        const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
+        const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
+        if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
+            results.push_back(Move(square, leftCaptureSquare));
+        }
+        if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
+            results.push_back(Move(square, rightCaptureSquare));
+        }
+        const int forwardSquare = Square::getInDirection(square, 0, pawnDirection);
+        if (board.isEmpty(forwardSquare)) {
+            results.push_back(Move(square, forwardSquare));
+            if (Square::getRow(square) == originalPawnRow) {
+                const int forwardTwoSquares = Square::getInDirection(square, 0, pawnDirection * 2);
+                if (board.isEmpty(forwardTwoSquares)) {
+                    results.push_back(Move(square, forwardTwoSquares));
                 }
             }
-            const int originalPawnRow = (side == Side::White) ? 2 : 7;
-            const int pawnDirection = (side == Side::White) ? 1 : -1;
-            const int prePromotionRow = (side == Side::White) ? 7 : 2;
-            const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
-            const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
-            if (leftCaptureSquare != -1 && board.getSideAt(leftCaptureSquare) == enemySide) {
-                results.push_back(Move(square, leftCaptureSquare));
-            }
-            if (rightCaptureSquare != -1 && board.getSideAt(rightCaptureSquare) == enemySide) {
-                results.push_back(Move(square, rightCaptureSquare));
-            }
-            const int forwardSquare = Square::getInDirection(square, 0, pawnDirection);
-            if (board.isEmpty(forwardSquare)) {
-                results.push_back(Move(square, forwardSquare));
-                if (Square::getRow(square) == originalPawnRow) {
-                    const int forwardTwoSquares = Square::getInDirection(square, 0, pawnDirection * 2);
-                    if (board.isEmpty(forwardTwoSquares)) {
-                        results.push_back(Move(square, forwardTwoSquares));
-                    }
-                }
-            }
-            // TODO: Include promotions
-            break;
         }
-
-        case PieceType::Knight: {
-            const std::array<int, 8> knightSquares = {
-                Square::getInDirection(square, 1, 2),
-                Square::getInDirection(square, 1, -2),
-                Square::getInDirection(square, -1, 2),
-                Square::getInDirection(square, -1, -2),
-                Square::getInDirection(square, 2, 1),
-                Square::getInDirection(square, 2, -1),
-                Square::getInDirection(square, -2, 1),
-                Square::getInDirection(square, -2, -1)};
-            for (int knightSquare : knightSquares) {
-                if (knightSquare == -1 || board.getSideAt(knightSquare) == side) {
-                    continue;
-                }
-                results.push_back(Move(square, knightSquare));
+        // TODO: Include promotions
+    } else if (board.knights & squareMask) {
+        const std::array<int, 8> knightSquares = {
+            Square::getInDirection(square, 1, 2),
+            Square::getInDirection(square, 1, -2),
+            Square::getInDirection(square, -1, 2),
+            Square::getInDirection(square, -1, -2),
+            Square::getInDirection(square, 2, 1),
+            Square::getInDirection(square, 2, -1),
+            Square::getInDirection(square, -2, 1),
+            Square::getInDirection(square, -2, -1)};
+        for (int knightSquare : knightSquares) {
+            if (knightSquare == -1 || board.isSide(knightSquare, side)) {
+                continue;
             }
-            break;
+            results.push_back(Move(square, knightSquare));
         }
-
-        case PieceType::Bishop: {
-            std::vector<int> destinations;
-            std::vector<int> squaresToNorthwest = board.getUnobstructedInDirection(square, side, -1, 1);
-            std::vector<int> squaresToNortheast = board.getUnobstructedInDirection(square, side, 1, 1);
-            std::vector<int> squaresToSouthwest = board.getUnobstructedInDirection(square, side, -1, -1);
-            std::vector<int> squaresToSoutheast = board.getUnobstructedInDirection(square, side, 1, -1);
-            destinations.insert(destinations.end(), squaresToNorthwest.begin(), squaresToNorthwest.end());
-            destinations.insert(destinations.end(), squaresToNortheast.begin(), squaresToNortheast.end());
-            destinations.insert(destinations.end(), squaresToSouthwest.begin(), squaresToSouthwest.end());
-            destinations.insert(destinations.end(), squaresToSoutheast.begin(), squaresToSoutheast.end());
-            for (int destination : destinations) {
-                results.push_back(Move(square, destination));
-            }
-            break;
+    } else if (board.bishops & squareMask) {
+        std::vector<int> destinations;
+        std::vector<int> squaresToNorthwest = board.getUnobstructedInDirection(square, side, -1, 1);
+        std::vector<int> squaresToNortheast = board.getUnobstructedInDirection(square, side, 1, 1);
+        std::vector<int> squaresToSouthwest = board.getUnobstructedInDirection(square, side, -1, -1);
+        std::vector<int> squaresToSoutheast = board.getUnobstructedInDirection(square, side, 1, -1);
+        destinations.insert(destinations.end(), squaresToNorthwest.begin(), squaresToNorthwest.end());
+        destinations.insert(destinations.end(), squaresToNortheast.begin(), squaresToNortheast.end());
+        destinations.insert(destinations.end(), squaresToSouthwest.begin(), squaresToSouthwest.end());
+        destinations.insert(destinations.end(), squaresToSoutheast.begin(), squaresToSoutheast.end());
+        for (int destination : destinations) {
+            results.push_back(Move(square, destination));
         }
-
-        case PieceType::Rook: {
-            std::vector<int> destinations;
-            std::vector<int> squaresToNorth = board.getUnobstructedInDirection(square, side, 0, 1);
-            std::vector<int> squaresToEast = board.getUnobstructedInDirection(square, side, 1, 0);
-            std::vector<int> squaresToSouth = board.getUnobstructedInDirection(square, side, 0, -1);
-            std::vector<int> squaresToWest = board.getUnobstructedInDirection(square, side, -1, 0);
-            destinations.insert(destinations.end(), squaresToNorth.begin(), squaresToNorth.end());
-            destinations.insert(destinations.end(), squaresToEast.begin(), squaresToEast.end());
-            destinations.insert(destinations.end(), squaresToSouth.begin(), squaresToSouth.end());
-            destinations.insert(destinations.end(), squaresToWest.begin(), squaresToWest.end());
-            for (int destination : destinations) {
-                results.push_back(Move(square, destination));
-            }
-            break;
+    } else if (board.rooks & squareMask) {
+        std::vector<int> destinations;
+        std::vector<int> squaresToNorth = board.getUnobstructedInDirection(square, side, 0, 1);
+        std::vector<int> squaresToEast = board.getUnobstructedInDirection(square, side, 1, 0);
+        std::vector<int> squaresToSouth = board.getUnobstructedInDirection(square, side, 0, -1);
+        std::vector<int> squaresToWest = board.getUnobstructedInDirection(square, side, -1, 0);
+        destinations.insert(destinations.end(), squaresToNorth.begin(), squaresToNorth.end());
+        destinations.insert(destinations.end(), squaresToEast.begin(), squaresToEast.end());
+        destinations.insert(destinations.end(), squaresToSouth.begin(), squaresToSouth.end());
+        destinations.insert(destinations.end(), squaresToWest.begin(), squaresToWest.end());
+        for (int destination : destinations) {
+            results.push_back(Move(square, destination));
         }
-
-        case PieceType::Queen: {
-            std::vector<int> destinations;
-            std::vector<int> squaresToNorthwest = board.getUnobstructedInDirection(square, side, -1, 1);
-            std::vector<int> squaresToNortheast = board.getUnobstructedInDirection(square, side, 1, 1);
-            std::vector<int> squaresToSouthwest = board.getUnobstructedInDirection(square, side, -1, -1);
-            std::vector<int> squaresToSoutheast = board.getUnobstructedInDirection(square, side, 1, -1);
-            std::vector<int> squaresToNorth = board.getUnobstructedInDirection(square, side, 0, 1);
-            std::vector<int> squaresToEast = board.getUnobstructedInDirection(square, side, 1, 0);
-            std::vector<int> squaresToSouth = board.getUnobstructedInDirection(square, side, 0, -1);
-            std::vector<int> squaresToWest = board.getUnobstructedInDirection(square, side, -1, 0);
-            destinations.insert(destinations.end(), squaresToNorthwest.begin(), squaresToNorthwest.end());
-            destinations.insert(destinations.end(), squaresToNortheast.begin(), squaresToNortheast.end());
-            destinations.insert(destinations.end(), squaresToSouthwest.begin(), squaresToSouthwest.end());
-            destinations.insert(destinations.end(), squaresToSoutheast.begin(), squaresToSoutheast.end());
-            destinations.insert(destinations.end(), squaresToNorth.begin(), squaresToNorth.end());
-            destinations.insert(destinations.end(), squaresToEast.begin(), squaresToEast.end());
-            destinations.insert(destinations.end(), squaresToSouth.begin(), squaresToSouth.end());
-            destinations.insert(destinations.end(), squaresToWest.begin(), squaresToWest.end());
-            for (int destination : destinations) {
-                results.push_back(Move(square, destination));
-            }
-            break;
+    } else if (board.queens & squareMask) {
+        std::vector<int> destinations;
+        std::vector<int> squaresToNorthwest = board.getUnobstructedInDirection(square, side, -1, 1);
+        std::vector<int> squaresToNortheast = board.getUnobstructedInDirection(square, side, 1, 1);
+        std::vector<int> squaresToSouthwest = board.getUnobstructedInDirection(square, side, -1, -1);
+        std::vector<int> squaresToSoutheast = board.getUnobstructedInDirection(square, side, 1, -1);
+        std::vector<int> squaresToNorth = board.getUnobstructedInDirection(square, side, 0, 1);
+        std::vector<int> squaresToEast = board.getUnobstructedInDirection(square, side, 1, 0);
+        std::vector<int> squaresToSouth = board.getUnobstructedInDirection(square, side, 0, -1);
+        std::vector<int> squaresToWest = board.getUnobstructedInDirection(square, side, -1, 0);
+        destinations.insert(destinations.end(), squaresToNorthwest.begin(), squaresToNorthwest.end());
+        destinations.insert(destinations.end(), squaresToNortheast.begin(), squaresToNortheast.end());
+        destinations.insert(destinations.end(), squaresToSouthwest.begin(), squaresToSouthwest.end());
+        destinations.insert(destinations.end(), squaresToSoutheast.begin(), squaresToSoutheast.end());
+        destinations.insert(destinations.end(), squaresToNorth.begin(), squaresToNorth.end());
+        destinations.insert(destinations.end(), squaresToEast.begin(), squaresToEast.end());
+        destinations.insert(destinations.end(), squaresToSouth.begin(), squaresToSouth.end());
+        destinations.insert(destinations.end(), squaresToWest.begin(), squaresToWest.end());
+        for (int destination : destinations) {
+            results.push_back(Move(square, destination));
         }
-
-        case PieceType::King:
-            int origin = board.getKingLocation(side);
-            std::vector<int> candidateDestinations = {
-                Square::getInDirection(origin, 0, -1),
-                Square::getInDirection(origin, 0, 1),
-                Square::getInDirection(origin, 1, -1),
-                Square::getInDirection(origin, 1, 1),
-                Square::getInDirection(origin, -1, -1),
-                Square::getInDirection(origin, -1, 1),
-                Square::getInDirection(origin, -1, 0),
-                Square::getInDirection(origin, 1, 0),
-            };
-            for (int destination : candidateDestinations) {
-                if (destination == -1 || board.getSideAt(destination) == side || board.wouldBeUnderAttack(destination, origin, side)) {
-                    continue;
-                } else {
-                    results.push_back(Move(origin, destination));
-                }
+    } else if (board.kings & squareMask) {
+        int origin = board.getKingLocation(side);
+        std::vector<int> candidateDestinations = {
+            Square::getInDirection(origin, 0, -1),
+            Square::getInDirection(origin, 0, 1),
+            Square::getInDirection(origin, 1, -1),
+            Square::getInDirection(origin, 1, 1),
+            Square::getInDirection(origin, -1, -1),
+            Square::getInDirection(origin, -1, 1),
+            Square::getInDirection(origin, -1, 0),
+            Square::getInDirection(origin, 1, 0),
+        };
+        for (int destination : candidateDestinations) {
+            if (destination == -1 || board.isSide(destination, side) || board.wouldBeUnderAttack(destination, origin, side)) {
+                continue;
+            } else {
+                results.push_back(Move(origin, destination));
             }
-            // TODO: now check the castles
-            break;
+        }
+        // TODO: now check the castles
     }
     return results;
 }
@@ -533,7 +516,7 @@ bool GameState::canEnPassant(int square) const {
     }
     const Move lastMove = moveHistory.back();
     const int candidatePawnLocation = lastMove.destination;
-    if (board.getPieceAt(candidatePawnLocation) != PieceType::Pawn) {
+    if (!(board.pawns & board.getSquareMask(candidatePawnLocation))) {
         return false;
     }
     if (!lastMove.isTwoSquarePawnMove()) {

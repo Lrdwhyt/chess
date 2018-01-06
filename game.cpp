@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include <algorithm>
 #include <iostream>
 
 Game::Game(Agent *p1, Agent *p2) {

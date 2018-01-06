@@ -54,6 +54,8 @@ public:
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;
     std::vector<int> getUnobstructedInDirection(int square, Side side, int x, int y) const;
     std::uint64_t getSquareMask(int square) const;
+    bool isSide(int square, Side side) const;
+    bool isAttackedByKnight(int square, Side side) const;
 };
 
 #endif
