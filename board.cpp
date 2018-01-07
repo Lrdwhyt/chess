@@ -318,24 +318,12 @@ bool Board::isUnderAttack(int square, Side side) const {
 }
 
 bool Board::isAttackedByKnight(int square, Side side) const {
-    const std::array<int, 8> knightSquares = {
-        Square::getInDirection(square, 1, 2),
-        Square::getInDirection(square, 1, -2),
-        Square::getInDirection(square, -1, 2),
-        Square::getInDirection(square, -1, -2),
-        Square::getInDirection(square, 2, 1),
-        Square::getInDirection(square, 2, -1),
-        Square::getInDirection(square, -2, 1),
-        Square::getInDirection(square, -2, -1)};
-    for (int knightSquare : knightSquares) {
-        // Loop through all locations where a knight could be attacking
-        if (knightSquare != -1) { // Square is outside of board
-            if (knights & getSquareMask(knightSquare) && !isSide(knightSquare, side)) {
-                return true;
-            }
-        }
+    const Bitboard &oppSide = (side == Side::White) ? blacks : whites;
+    if (getKnightAttacks(square) & knights & oppSide) {
+        return true;
+    } else {
+        return false;
     }
-    return false;
 }
 
 bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
@@ -404,7 +392,6 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
                 directAttacker = true;
                 attackerSquare = knightSquare;
                 break;
-                // return true;
             }
         }
     }
@@ -707,4 +694,21 @@ bool Board::isObstructedBetween(int a, int b) const {
         current += y * 8 + x;
     }
     return false;
+}
+
+Bitboard Board::getKnightAttacks(int square) const {
+    const Bitboard squareMask = getSquareMask(square);
+    constexpr Bitboard notHColumn = 9187201950435737471ULL;
+    constexpr Bitboard notGHColumn = 4557430888798830399ULL;
+    constexpr Bitboard notAColumn = 18374403900871474942ULL;
+    constexpr Bitboard notABColumn = 18229723555195321596ULL;
+
+    return ((squareMask >> 6 & notABColumn) |
+            (squareMask >> 10 & notGHColumn) |
+            (squareMask >> 15 & notAColumn) |
+            (squareMask >> 17 & notHColumn) |
+            (squareMask << 6 & notGHColumn) |
+            (squareMask << 10 & notABColumn) |
+            (squareMask << 15 & notHColumn) |
+            (squareMask << 17 & notAColumn));
 }
