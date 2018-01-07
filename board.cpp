@@ -655,3 +655,28 @@ bool Board::isSide(int square, Side side) const {
         return blacks & getSquareMask(square);
     }
 }
+
+bool Board::isObstructedBetween(int a, int b) const {
+    int x, y;
+    std::tie(x, y) = Square::diff(a, b);
+    if (x > 1) {
+        x = 1;
+    }
+    if (x < -1) {
+        x = -1;
+    }
+    if (y > 1) {
+        y = 1;
+    }
+    if (y < -1) {
+        y = -1;
+    }
+    int current = a + (y * 8 + x);
+    while (current != b) {
+        if (!isEmpty(current)) {
+            return true;
+        }
+        current += y * 8 + x;
+    }
+    return false;
+}

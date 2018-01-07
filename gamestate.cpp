@@ -223,16 +223,7 @@ std::vector<Move> GameState::getPossibleMoves() const {
                                 // Don't need/shouldn't check for obstructions as knight
                                 results.push_back(move);
                             } else {
-                                bool isObstructed = false;
-                                const std::vector<int> betweenSquares = Square::between(square, destination);
-                                for (int squareInPath : betweenSquares) {
-                                    if (!board.isEmpty(squareInPath)) {
-                                        isObstructed = true;
-                                        break;
-                                    }
-                                }
-                                if (isObstructed) {
-                                    // Piece in the way, can't move to destination
+                                if (board.isObstructedBetween(square, destination)) {
                                     continue;
                                 }
                                 if (board.pawns & board.getSquareMask(square)) {
@@ -333,18 +324,25 @@ std::vector<Move> GameState::getPossibleMoves() const {
                                 if (isObstructed) {
                                     continue;
                                 }
-                                if (Square::inLine(kingLocation, square)) {
-                                    const int potentialAttackingPieceLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
-                                    if (potentialAttackingPieceLocation != -1) {
-                                        // Piece must be pinned
-                                        // Line to king is therefore unobstructed
-                                        getBoard().print();
-                                        std::cout << "This should be illegal - " << Square::toString(square) << " pinned by " << Square::toString(potentialAttackingPieceLocation) << std::endl;
-                                        //if (Square::isBetweenInclusive(checkingSquare, square, potentialAttackingPieceLocation)) {
-                                        if (Square::isBetweenInclusive(checkingSquare, kingLocation, potentialAttackingPieceLocation)) {
-                                            results.push_back(move);
-                                        }
-                                    } else {
+                            }
+                            results.push_back(move);
+                        }
+                    } else {
+                        // Bishop/rook/queen
+                        if (board.isLegalPieceMove(square, checkingSquare)) {
+                            if (board.isObstructedBetween(square, checkingSquare)) {
+                                continue;
+                            }
+                            if (Square::inLine(kingLocation, square)) {
+                                const int pinningLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
+                                if (pinningLocation != -1) {
+                                    // Piece might be pinned
+                                    // TODO: fix this
+                                    // Line to king is therefore unobstructed
+                                    getBoard().print();
+                                    std::cout << "This should be illegal - " << Square::toString(square) << " pinned by " << Square::toString(pinningLocation) << std::endl;
+                                    //if (Square::isBetweenInclusive(checkingSquare, square, pinningLocation)) {
+                                    if (Square::isBetweenInclusive(checkingSquare, kingLocation, pinningLocation)) {
                                         results.push_back(move);
                                     }
                                 } else {

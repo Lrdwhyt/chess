@@ -56,6 +56,7 @@ public:
     std::uint64_t getSquareMask(int square) const;
     bool isSide(int square, Side side) const;
     bool isAttackedByKnight(int square, Side side) const;
+    bool isObstructedBetween(int a, int b) const;
 };
 
 #endif
