@@ -142,11 +142,11 @@ std::vector<Move> GameState::getPossibleMoves() const {
                     // it could be pinned
                     const int pinningPieceLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
                     if (pinningPieceLocation != -1) {
-                        // Piece is pinned
+                        // Since we are not under check, it has to be a pin
+                        // and not a check. So piece is pinned,
                         // But we can still move along the line of the pin
-                        std::vector<int> validDestinations = Square::between(square, pinningPieceLocation);
-                        validDestinations.push_back(pinningPieceLocation);
-                        if (board.pawns & board.getSquareMask(square)) {
+                        std::vector<int> validDestinations = Square::fromAtoBInclusive(square, pinningPieceLocation);
+                        if (board.pawns & squareMask) {
                             for (int destination : validDestinations) {
                                 const Move move = Move(square, destination);
                                 if (!board.isEmpty(destination)) {
@@ -214,8 +214,8 @@ std::vector<Move> GameState::getPossibleMoves() const {
                         }
                     }
                     // Piece can only block the check or capture the checking piece
-                    std::vector<int> validDestinations = Square::between(kingLocation, checkingSquare);
-                    validDestinations.push_back(checkingSquare);
+                    // So squares between the king and the checking piece (including checking piece)
+                    std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, checkingSquare);
                     for (int destination : validDestinations) {
                         const Move move = Move(square, destination);
                         if (board.isLegalPieceMove(square, destination)) {

@@ -72,13 +72,18 @@ std::vector<int> Square::between(int a, int b) {
     std::vector<int> results;
     int x, y;
     std::tie(x, y) = Square::diff(a, b);
-
     if (x == 0 || y == 0 || abs(x) == abs(y)) { // alternatively, check columns
-        if (x != 0) {
-            x = x / abs(x);
+        if (x > 1) {
+            x = 1;
         }
-        if (y != 0) {
-            y = y / abs(y);
+        if (x < -1) {
+            x = -1;
+        }
+        if (y > 1) {
+            y = 1;
+        }
+        if (y < -1) {
+            y = -1;
         }
         int current = a + (y * 8 + x);
         while (current != b) {
@@ -88,6 +93,36 @@ std::vector<int> Square::between(int a, int b) {
         return results;
     } else {
         throw std::runtime_error("No straight line between squares " + Square::toString(a) + Square::toString(b));
+    }
+}
+
+std::vector<int> Square::fromAtoBInclusive(int a, int b) {
+    std::vector<int> results;
+    if (a == b) {
+        return results;
+    }
+    int x, y;
+    std::tie(x, y) = Square::diff(a, b);
+    if (x == 0 || y == 0 || abs(x) == abs(y)) { // alternatively, check columns
+        if (x > 1) {
+            x = 1;
+        } else if (x < -1) {
+            x = -1;
+        }
+        if (y > 1) {
+            y = 1;
+        } else if (y < -1) {
+            y = -1;
+        }
+        int current = a + (y * 8 + x);
+        while (current != b) {
+            results.push_back(current);
+            current += y * 8 + x;
+        }
+        results.push_back(b);
+        return results;
+    } else {
+        throw std::runtime_error("No straight line between squares (inclusive) " + Square::toString(a) + Square::toString(b));
     }
 }
 

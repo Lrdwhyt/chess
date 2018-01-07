@@ -16,9 +16,14 @@ public:
     static int get(int, int);
     static int fromString(std::string str);
     static std::tuple<int, int> diff(int, int);
+
+    /* Get row of square (0-63) */
     static int getRow(int);
+
+    /* Get column of square (0-63) */
     static int getColumn(int);
     static std::vector<int> between(int, int);
+    static std::vector<int> fromAtoBInclusive(int, int);
     static bool inLine(int, int);
 
     /* Returns -1 if square is out of range */
