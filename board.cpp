@@ -343,6 +343,21 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
     if (isAttackedByKnight(square, side)) {
         return true;
     }
+    const std::vector<int> kingLocations = {
+        Square::getInYDirection(square, -1),
+        Square::getInYDirection(square, 1),
+        Square::getInDirection(square, 1, -1),
+        Square::getInDirection(square, 1, 1),
+        Square::getInDirection(square, -1, -1),
+        Square::getInDirection(square, -1, 1),
+        Square::getInDirection(square, -1, 0),
+        Square::getInDirection(square, 1, 0),
+    };
+    for (int kingSquare : kingLocations) {
+        if (!isSide(kingSquare, side) && kings & getSquareMask(kingSquare)) {
+            return true;
+        }
+    }
     // Check the two possible squares that an enemy pawn could be checking from
     const int pawnDirection = (side == Side::White) ? 1 : -1;
     const int pawnLocationFirst = Square::getInDirection(square, -1, pawnDirection);
