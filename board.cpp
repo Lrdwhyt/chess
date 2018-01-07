@@ -358,7 +358,6 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
             continue;
         }
         if (!isSide(kingSquare, side) && kings & getSquareMask(kingSquare)) {
-            std::cout << Square::toString(kingSquare) << std::endl;
             return true;
         }
     }

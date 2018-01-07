@@ -34,7 +34,7 @@ GameState::GameState(std::string fenString) {
     std::string sideString = fenString.substr(0, index);
     side = (sideString == "w") ? Side::White : Side::Black;
     fenString.erase(0, index + 1);
-    index = fenString.find(" ", index + 1);
+    index = fenString.find(" ");
     std::string castleString = fenString.substr(0, index);
     canWhiteCastleKingside = false;
     canWhiteCastleQueenside = false;
@@ -60,7 +60,7 @@ GameState::GameState(std::string fenString) {
         if (Square::getRow(enPassantSquare) == 3) {
             moveHistory.push_back(Move(Square::getInYDirection(enPassantSquare, -1),
                                        Square::getInYDirection(enPassantSquare, 1)));
-        } else { // 5
+        } else { // 6
             moveHistory.push_back(Move(Square::getInYDirection(enPassantSquare, 1),
                                        Square::getInYDirection(enPassantSquare, -1)));
         }
