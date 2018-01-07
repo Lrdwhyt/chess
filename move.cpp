@@ -29,7 +29,11 @@ Move Move::fromString(std::string str) {
 }
 
 std::string Move::toString() const {
+    if (promotion != Piece::None) {
+        return Square::toString(origin) + Square::toString(destination) + Piece::getString(promotion);
+    } else {
     return Square::toString(origin) + Square::toString(destination);
+    }
 }
 
 bool Move::isRookMove() const {
