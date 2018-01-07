@@ -7,6 +7,7 @@
 #include "computeragent.h"
 #include "game.h"
 #include "humanagent.h"
+#include "perft.h"
 #include "ucicontroller.h"
 
 void startUciMode() {
@@ -20,23 +21,27 @@ void startDebugMode() {
     g.print();
 }
 
-int perft(GameState &g, int depth) {
-    std::vector<Move> moves = g.getPossibleMoves();
-
-    if (depth > 1) {
-        int total = 0;
-        for (Move m : moves) {
-            if (m.origin < 0 || m.destination < 0 || m.origin > 63 || m.destination > 63) {
-                //std::cout << Square::toString(m.origin) << Square::toString(m.destination) << std::endl;
-            }
-            GameState g2 = GameState(g);
-            g2.processMove(m);
-            total += perft(g2, depth - 1);
-        }
-        return total;
-    } else {
-        return moves.size();
+GameState getPosition(std::string position) {
+    GameState result;
+    if (position.length() >= 3 && position.substr(0, 3) == "fen") {
+        result = GameState(position.substr(4, position.find("moves")));
+    } else if (position.length() >= 8 && position.substr(0, 8) == "startpos") {
+        result = GameState();
     }
+    if (position.find("moves") != std::string::npos) {
+        bool hasNextMove = true;
+        position.erase(0, position.find("moves") + 6);
+        while (hasNextMove) {
+            int nextIndex = position.find(" ");
+            if (nextIndex == std::string::npos) {
+                hasNextMove = false;
+            }
+            Move nextMove = Move::fromString(position.substr(0, nextIndex));
+            result.processMove(nextMove);
+            position.erase(0, nextIndex + 1);
+        }
+    }
+    return result;
 }
 
 void waitForMode() {
@@ -49,12 +54,29 @@ void waitForMode() {
         } else if (input == "debug") {
             startDebugMode();
             break;
+        } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
+            state = getPosition(input.substr(9));
+        } else if (input.length() >= 12 && input.substr(0, 12) == "perft divide") {
+            Perft::resetLogs();
+            const int perftDepth = stoi(input.substr(13, std::string::npos));
+            const double start = std::time(0);
+            const std::vector<std::tuple<Move, int>> perftDivideResult = Perft::divide(state, perftDepth);
+            const double end = std::time(0);
+            int total = 0;
+            for (std::tuple<Move, int> move : perftDivideResult) {
+                total += std::get<1>(move);
+                std::cout << "perft(" << perftDepth << ")/" << std::get<0>(move).toString() << ": " << std::get<1>(move) << " moves" << std::endl;
+            }
+            std::cout << "perft(" << perftDepth << ") = " << total << " in " << (end - start) << "s" << std::endl;
+            std::cout << "Captures: " << Perft::getCaptureCount() << " / En passant: " << Perft::getEnPassantCount() << " / Checkmates: " << Perft::getCheckmateCount() << " / Other: " << Perft::getOtherCount() << std::endl;
         } else if (input.length() >= 5 && input.substr(0, 5) == "perft") {
+            Perft::resetLogs();
             const int perftDepth = stoi(input.substr(6, std::string::npos));
             const double start = std::time(0);
-            const int perftResult = perft(state, perftDepth);
+            const int perftResult = Perft::perft(state, perftDepth);
             const double end = std::time(0);
             std::cout << "perft(" << perftDepth << ") = " << perftResult << " in " << (end - start) << "s" << std::endl;
+            std::cout << "Captures: " << Perft::getCaptureCount() << " / En passant: " << Perft::getEnPassantCount() << " / Checkmates: " << Perft::getCheckmateCount() << " / Other: " << Perft::getOtherCount() << std::endl;
         }
     }
 }
