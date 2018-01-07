@@ -30,7 +30,7 @@ Board::Board(std::string fenString) {
     int y = 8;
     for (int i = 0; i < fenString.length(); ++i) {
         ++x;
-        const char c = fenString.at(i);
+        const char c = fenString[i];
         if (c == '/') {
             --y;
             x = 0;
@@ -239,20 +239,20 @@ void Board::deletePiece(int square) {
 
 void Board::movePiece(int origin, int destination) {
     // Assumes there exists a piece at origin
-    const int piece = getPieceAt(origin);
-    const std::uint64_t originMask = 1ULL << origin;
-    const std::uint64_t destinationMask = 1ULL << destination;
-    if (whites & getSquareMask(origin)) {
+    const std::uint64_t originMask = getSquareMask(origin);
+    const std::uint64_t destinationMask = getSquareMask(destination);
+    if (whites & originMask) {
         whites = (whites ^ originMask) ^ destinationMask;
-        if (piece == PieceType::King) {
+        if (kings & originMask) {
             whiteKingLocation = destination;
         }
     } else {
         blacks = (blacks ^ originMask) ^ destinationMask;
-        if (piece == PieceType::King) {
+        if (kings & originMask) {
             blackKingLocation = destination;
         }
     }
+    const int piece = getPieceAt(origin);
     switch (piece) {
         case PieceType::Pawn:
             pawns = (pawns ^ originMask) ^ destinationMask;
@@ -629,7 +629,7 @@ std::vector<int> Board::getUnobstructedInDirection(int square, Side side, int x,
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     std::vector<int> results;
     while (true) {
-        square = Square::getInDirection(square, x, y);
+        square = (x == 0) ? Square::getInYDirection(square, y) : Square::getInDirection(square, x, y);
         if (square == -1) {
             break;
         }

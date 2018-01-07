@@ -35,7 +35,6 @@ public:
     static Board startingPosition();
     void print() const;
     int at(int square) const;
-    Side getSideAt(int square) const;
     int getPieceAt(int square) const;
     bool isEmpty(int square) const;
     std::string toString() const;
