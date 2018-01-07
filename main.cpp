@@ -36,7 +36,11 @@ GameState getPosition(std::string position) {
             if (nextIndex == std::string::npos) {
                 hasNextMove = false;
             }
-            Move nextMove = Move::fromString(position.substr(0, nextIndex));
+            std::string moveString = position.substr(0, nextIndex);
+            if (moveString.length() < 4 || moveString.length() > 5) {
+                break;
+            }
+            Move nextMove = Move::fromString(moveString);
             result.processMove(nextMove);
             position.erase(0, nextIndex + 1);
         }
@@ -56,6 +60,7 @@ void waitForMode() {
             break;
         } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
             state = getPosition(input.substr(9));
+            state.getBoard().print();
         } else if (input.length() >= 12 && input.substr(0, 12) == "perft divide") {
             Perft::resetLogs();
             const int perftDepth = stoi(input.substr(13, std::string::npos));
