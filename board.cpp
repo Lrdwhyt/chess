@@ -108,7 +108,7 @@ void Board::print() const {
 }
 
 int Board::at(int square) const {
-    const std::uint64_t squareMask = 1ULL << square;
+    const std::uint64_t squareMask = getSquareMask(square);
     if (whites & squareMask) {
         if (pawns & squareMask) {
             return PieceType::Pawn;

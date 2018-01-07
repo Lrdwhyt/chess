@@ -162,19 +162,15 @@ bool Move::isPawnMove(Side side) const {
 }
 
 bool Move::isTwoSquarePawnMove() const {
-    int x, y;
-    std::tie(x, y) = Square::diff(origin, destination);
-    if (x != 0) {
-        return false;
-    }
-    if (y == 2) {
+    const int difference = destination - origin;
+    if (difference == 16) { // exactly 2 rows apart
         if (Square::getRow(origin) == 2) {
             // Pawns have to be in original position to be moved up twice
             return true; // White move forward two spaces
         } else {
             return false;
         }
-    } else if (y == -2) {
+    } else if (difference == -16) { // exactly 2 rows apart
         if (Square::getRow(origin) == 7) {
             return true; // Black move forward two spaces
         } else {
@@ -186,15 +182,11 @@ bool Move::isTwoSquarePawnMove() const {
 }
 
 bool Move::isTwoSquarePawnMove(Side side) const {
-    int x, y;
-    std::tie(x, y) = Square::diff(origin, destination);
-    if (x != 0) {
-        return false;
-    }
+    const int difference = destination - origin;
     if (side == Side::White) {
-        return (y == 2 && Square::getRow(origin) == 2);
+        return (difference == 16 && Square::getRow(origin) == 2);
     } else {
-        return (y == -2 && Square::getRow(origin) == 7);
+        return (difference == -16 && Square::getRow(origin) == 7);
     }
 }
 
