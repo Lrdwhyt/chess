@@ -21,14 +21,14 @@ typedef std::uint64_t Bitboard;
 
 class Board {
 public:
-    std::uint64_t whites;
-    std::uint64_t blacks;
-    std::uint64_t pawns;
-    std::uint64_t knights;
-    std::uint64_t bishops;
-    std::uint64_t rooks;
-    std::uint64_t queens;
-    std::uint64_t kings;
+    Bitboard whites;
+    Bitboard blacks;
+    Bitboard pawns;
+    Bitboard knights;
+    Bitboard bishops;
+    Bitboard rooks;
+    Bitboard queens;
+    Bitboard kings;
     int whiteKingLocation;
     int blackKingLocation;
     Board();
@@ -54,11 +54,12 @@ public:
     bool isLegalPieceMove(int origin, int destination) const;
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;
     std::vector<int> getUnobstructedInDirection(int square, Side side, int x, int y) const;
-    std::uint64_t getSquareMask(int square) const;
+    Bitboard getSquareMask(int square) const;
     bool isSide(int square, Side side) const;
     bool isAttackedByKnight(int square, Side side) const;
     bool isObstructedBetween(int a, int b) const;
     Bitboard getKnightAttacks(int square) const;
+    Bitboard getKingAttacks(int square) const;
 };
 
 #endif
