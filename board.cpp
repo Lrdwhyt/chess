@@ -26,6 +26,16 @@ Board::Board() {
 }
 
 Board::Board(std::string fenString) {
+    whites = 0;
+    blacks = 0;
+    pawns = 0;
+    knights = 0;
+    bishops = 0;
+    rooks = 0;
+    queens = 0;
+    kings = 0;
+    whiteKingLocation = -1;
+    blackKingLocation = -1;
     int x = 0;
     int y = 8;
     for (int i = 0; i < fenString.length(); ++i) {
