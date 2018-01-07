@@ -71,7 +71,48 @@ const Board &GameState::getBoard() const {
 }
 
 void GameState::processMove(Move move) {
-    const int piece = board.at(move.origin);
+    const std::uint64_t originMask = board.getSquareMask(move.origin);
+    // Update ability to castle
+    const int blackQueenRook = Square::get(Column::A, 8);
+    const int blackKingRook = Square::get(Column::H, 8);
+    const int whiteQueenRook = Square::get(Column::A, 1);
+    const int whiteKingRook = Square::get(Column::H, 1);
+    if (canWhiteCastleKingside && move.destination == whiteKingRook) {
+        canWhiteCastleKingside = false;
+    }
+    if (canWhiteCastleQueenside && move.destination == whiteQueenRook) {
+        canWhiteCastleQueenside = false;
+    }
+    if (canBlackCastleKingside && move.destination == blackKingRook) {
+        canBlackCastleKingside = false;
+    }
+    if (canBlackCastleQueenside && move.destination == blackQueenRook) {
+        canBlackCastleQueenside = false;
+    }
+    if (side == Side::White && (canWhiteCastleKingside || canWhiteCastleQueenside)) {
+        if (board.kings & originMask) {
+            canWhiteCastleKingside = false;
+            canWhiteCastleQueenside = false;
+        } else if (board.rooks & originMask) {
+            if (move.origin == Square::get(Column::A, 1)) {
+                canWhiteCastleQueenside = false;
+            } else if (move.origin == Square::get(Column::H, 1)) {
+                canWhiteCastleKingside = false;
+            }
+        }
+    } else if (side == Side::Black && (canBlackCastleKingside || canBlackCastleQueenside)) {
+        if (board.kings & originMask) {
+            canBlackCastleKingside = false;
+            canBlackCastleQueenside = false;
+        } else if (board.rooks & originMask) {
+            if (move.origin == Square::get(Column::A, 8)) {
+                canBlackCastleQueenside = false;
+            } else if (move.origin == Square::get(Column::H, 8)) {
+                canBlackCastleKingside = false;
+            }
+        }
+    }
+
     if (board.kings & board.getSquareMask(move.origin) && move.isCastleMove()) {
         // Move rook
         const int kingRow = (side == Side::White) ? 1 : 8;
@@ -83,35 +124,18 @@ void GameState::processMove(Move move) {
     } else if (board.pawns & board.getSquareMask(move.origin) && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
         // Remove pawn captured via en passant
         const int pawnDirection = side == Side::White ? 1 : -1;
-        board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) + pawnDirection));
+        board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) - pawnDirection));
+        Perft::logCapture();
     }
     if (!board.isEmpty(move.destination)) {
         board.deletePiece(move.destination);
+        Perft::logCapture();
     }
     board.movePiece(move.origin, move.destination);
-    // Update ability to castle
-    if (side == Side::White && (canWhiteCastleKingside || canBlackCastleQueenside)) {
-        if (Piece::getType(piece) == PieceType::King) {
-            canWhiteCastleKingside = false;
-            canWhiteCastleQueenside = false;
-        } else if (Piece::getType(piece) == PieceType::Rook) {
-            if (move.origin == Square::get(Column::A, 1)) {
-                canWhiteCastleQueenside = false;
-            } else if (move.origin == Square::get(Column::H, 1)) {
-                canWhiteCastleKingside = false;
-            }
-        }
-    } else if (side == Side::Black && (canBlackCastleKingside || canBlackCastleQueenside)) {
-        if (Piece::getType(piece) == PieceType::King) {
-            canBlackCastleKingside = false;
-            canBlackCastleQueenside = false;
-        } else if (Piece::getType(piece) == PieceType::Rook) {
-            if (move.origin == Square::get(Column::A, 8)) {
-                canBlackCastleQueenside = false;
-            } else if (move.origin == Square::get(Column::H, 8)) {
-                canBlackCastleKingside = false;
-            }
-        }
+    if (move.promotion != Piece::None) {
+        // Promotion
+        board.deletePiece(move.destination);
+        board.addPiece(move.destination, Piece::get(side, move.promotion));
     }
     moveHistory.push_back(move);
     if (side == Side::White) {
