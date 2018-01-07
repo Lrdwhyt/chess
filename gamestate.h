@@ -29,6 +29,7 @@ public:
     std::vector<Move> getPossibleMoves() const;
     std::vector<Move> getPossiblePieceMoves(int square) const;
     std::vector<Move> getPossibleKingMoves(Side side) const;
+    std::vector<Move> getPossiblePawnMoves(int square) const;
     bool canEnPassant(int square) const;
 };
 

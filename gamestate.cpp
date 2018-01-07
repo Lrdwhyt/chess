@@ -386,40 +386,46 @@ std::vector<Move> GameState::getPossibleKingMoves(Side side) const {
     return results;
 }
 
+std::vector<Move> GameState::getPossiblePawnMoves(int square) const {
+    std::vector<Move> results;
+    if (canEnPassant(square)) {
+        if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
+            // Can capture by en passant
+            const int pawnDirection = (side == Side::White) ? 1 : -1;
+            results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
+        }
+    }
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    const int originalPawnRow = (side == Side::White) ? 2 : 7;
+    const int pawnDirection = (side == Side::White) ? 1 : -1;
+    const int prePromotionRow = (side == Side::White) ? 7 : 2;
+    const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
+    const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
+    if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
+        results.push_back(Move(square, leftCaptureSquare));
+    }
+    if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
+        results.push_back(Move(square, rightCaptureSquare));
+    }
+    const int forwardSquare = Square::getInYDirection(square, pawnDirection);
+    if (board.isEmpty(forwardSquare)) {
+        results.push_back(Move(square, forwardSquare));
+        if (Square::getRow(square) == originalPawnRow) {
+            const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
+            if (board.isEmpty(forwardTwoSquares)) {
+                results.push_back(Move(square, forwardTwoSquares));
+            }
+        }
+    }
+    // TODO: Include promotions
+    return results;
+}
+
 std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
     std::vector<Move> results;
-    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     const std::uint64_t squareMask = board.getSquareMask(square);
     if (board.pawns & squareMask) {
-        if (canEnPassant(square)) {
-            if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
-                // Can capture by en passant
-                const int pawnDirection = (side == Side::White) ? 1 : -1;
-                results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
-            }
-        }
-        const int originalPawnRow = (side == Side::White) ? 2 : 7;
-        const int pawnDirection = (side == Side::White) ? 1 : -1;
-        const int prePromotionRow = (side == Side::White) ? 7 : 2;
-        const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
-        const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
-        if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
-            results.push_back(Move(square, leftCaptureSquare));
-        }
-        if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
-            results.push_back(Move(square, rightCaptureSquare));
-        }
-        const int forwardSquare = Square::getInYDirection(square, pawnDirection);
-        if (board.isEmpty(forwardSquare)) {
-            results.push_back(Move(square, forwardSquare));
-            if (Square::getRow(square) == originalPawnRow) {
-                const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
-                if (board.isEmpty(forwardTwoSquares)) {
-                    results.push_back(Move(square, forwardTwoSquares));
-                }
-            }
-        }
-        // TODO: Include promotions
+        return getPossiblePawnMoves(square);
     } else if (board.knights & squareMask) {
         const std::array<int, 8> knightSquares = {
             Square::getInDirection(square, 1, 2),
