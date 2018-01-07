@@ -354,7 +354,11 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
         Square::getInDirection(square, 1, 0),
     };
     for (int kingSquare : kingLocations) {
+        if (kingSquare == -1) {
+            continue;
+        }
         if (!isSide(kingSquare, side) && kings & getSquareMask(kingSquare)) {
+            std::cout << Square::toString(kingSquare) << std::endl;
             return true;
         }
     }
