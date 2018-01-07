@@ -209,7 +209,23 @@ std::vector<Move> GameState::getPossibleMoves() const {
                         if (pinningSquare != -1) {
                             // Piece is pinned and can't move
                             if (pinningSquare == checkingSquare) {
-                                // TODO: Proceed as normal
+                                // One valid move, which is to capture checkingSquare
+                                const Move move = Move(square, checkingSquare);
+                                if (board.pawns & squareMask) {
+                                    if (move.isPawnCapture(side)) {
+                                        std::vector<Move> pawnMoves = convertPawnMove(square, checkingSquare);
+                                        results.insert(results.end(), pawnMoves.begin(), pawnMoves.end());
+                                        continue;
+                                    }
+                                } else if (board.isLegalPieceMove(square, checkingSquare)) {
+                                    // We still need to check for obstructions
+                                    if (board.isObstructedBetween(square, checkingSquare)) {
+                                        continue;
+                                    }
+                                    results.push_back(Move(square, checkingSquare));
+                                    continue;
+                                    //TODO: reorganise this and the above to not use continues
+                                }
                             } else {
                                 // If pinningSquare, checkingSquare, and square
                                 // are on the same line, we can freely capture checkingSquare
@@ -228,22 +244,24 @@ std::vector<Move> GameState::getPossibleMoves() const {
                             if (board.knights & squareMask) {
                                 // Don't need/shouldn't check for obstructions as knight
                                 results.push_back(move);
-                            } else {
-                                if (board.isObstructedBetween(square, destination)) {
-                                    continue;
-                                }
-                                if (board.pawns & squareMask) {
-                                    if (board.isEmpty(destination)) {
-                                        if (move.isPawnMove(side)) {
-                                            results.push_back(move);
-                                        }
-                                    } else {
-                                        if (move.isPawnCapture(side)) {
-                                            results.push_back(move);
-                                        }
+                            }
+                        } else if (board.isLegalPieceMove(square, destination)) { // Pawn/bishop/rook/queen
+                            if (board.isObstructedBetween(square, destination)) {
+                                continue;
+                            }
+                            if (board.pawns & squareMask) {
+                                // Pawns need additional checks that either
+                                // destination is clear or move is a capture
+                                if (board.isEmpty(destination)) {
+                                    if (move.isPawnMove(side)) {
+                                        std::vector<Move> pawnMoves = convertPawnMove(square, destination);
+                                        results.insert(results.end(), pawnMoves.begin(), pawnMoves.end());
                                     }
                                 } else {
-                                    results.push_back(move);
+                                    if (move.isPawnCapture(side)) {
+                                        std::vector<Move> pawnMoves = convertPawnMove(square, destination);
+                                        results.insert(results.end(), pawnMoves.begin(), pawnMoves.end());
+                                    }
                                 }
                             }
                         }
@@ -379,25 +397,67 @@ std::vector<Move> GameState::getPossiblePawnMoves(int square) const {
     const int originalPawnRow = (side == Side::White) ? 2 : 7;
     const int pawnDirection = (side == Side::White) ? 1 : -1;
     const int prePromotionRow = (side == Side::White) ? 7 : 2;
+    bool canPromote = false;
+    if (Square::getRow(square) == prePromotionRow) {
+        canPromote = true;
+    }
     const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
     const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
     if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
-        results.push_back(Move(square, leftCaptureSquare));
+        if (canPromote) {
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Knight));
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Bishop));
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Rook));
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Queen));
+        } else {
+            results.push_back(Move(square, leftCaptureSquare));
+        }
     }
     if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
-        results.push_back(Move(square, rightCaptureSquare));
+        if (canPromote) {
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Knight));
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Bishop));
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Rook));
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Queen));
+        } else {
+            results.push_back(Move(square, rightCaptureSquare));
+        }
     }
     const int forwardSquare = Square::getInYDirection(square, pawnDirection);
     if (board.isEmpty(forwardSquare)) {
-        results.push_back(Move(square, forwardSquare));
-        if (Square::getRow(square) == originalPawnRow) {
-            const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
-            if (board.isEmpty(forwardTwoSquares)) {
-                results.push_back(Move(square, forwardTwoSquares));
+        if (canPromote) {
+            results.push_back(Move(square, forwardSquare, PieceType::Knight));
+            results.push_back(Move(square, forwardSquare, PieceType::Bishop));
+            results.push_back(Move(square, forwardSquare, PieceType::Rook));
+            results.push_back(Move(square, forwardSquare, PieceType::Queen));
+        } else {
+            results.push_back(Move(square, forwardSquare));
+            if (Square::getRow(square) == originalPawnRow) {
+                const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
+                if (board.isEmpty(forwardTwoSquares)) {
+                    results.push_back(Move(square, forwardTwoSquares));
+                }
             }
         }
     }
-    // TODO: Include promotions
+    return results;
+}
+
+std::vector<Move> GameState::convertPawnMove(int origin, int destination) const {
+    std::vector<Move> results;
+    if (side == Side::White && Square::getRow(origin) == 7) {
+        results.push_back(Move(origin, destination, PieceType::Knight));
+        results.push_back(Move(origin, destination, PieceType::Bishop));
+        results.push_back(Move(origin, destination, PieceType::Rook));
+        results.push_back(Move(origin, destination, PieceType::Queen));
+    } else if (side == Side::Black && Square::getRow(origin) == 2) {
+        results.push_back(Move(origin, destination, PieceType::Knight));
+        results.push_back(Move(origin, destination, PieceType::Bishop));
+        results.push_back(Move(origin, destination, PieceType::Rook));
+        results.push_back(Move(origin, destination, PieceType::Queen));
+    } else {
+        results.push_back(Move(origin, destination));
+    }
     return results;
 }
 

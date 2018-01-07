@@ -19,6 +19,7 @@ private:
     bool canBlackCastleQueenside, canBlackCastleKingside;
     int movesSinceCaptureOrPawnMove; // used in calculation of 50 move rule
     std::vector<Move> moveHistory;
+    std::vector<Move> convertPawnMove(int origin, int destination) const;
 
 public:
     GameState();
