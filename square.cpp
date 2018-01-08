@@ -195,3 +195,10 @@ std::string Square::toString(int square) {
     char col = Square::getColumn(square) + 'a' - 1;
     return std::string(1, col) + std::to_string(Square::getRow(square));
 }
+
+/*
+ * TODO: consider fallbacks
+ */
+int Square::getSetBit(std::uint64_t b) {
+    return __builtin_ctzll(b);
+}

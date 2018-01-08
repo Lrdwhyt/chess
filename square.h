@@ -34,6 +34,8 @@ public:
     static bool isBetweenInclusive(int square, int a, int b);
 
     static std::string toString(int square);
+
+    static int getSetBit(std::uint64_t b);
 };
 
 #endif
