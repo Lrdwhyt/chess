@@ -144,6 +144,36 @@ int Square::getInDirection(int square, int x, int y) {
     }
 }
 
+std::uint64_t Square::getInPositiveDirection(std::uint64_t square, int x, int y) {
+    constexpr std::uint64_t notAColumn = 9187201950435737471ULL;
+    constexpr std::uint64_t notHColumn = 18374403900871474942ULL;
+    switch (x) {
+        case -1:
+            return square << (8 * y + x) & notAColumn;
+
+        case 1:
+            return square << (8 * y + x) & notHColumn;
+
+        case 0:
+            return square << (8 * y + x);
+    }
+}
+
+std::uint64_t Square::getInNegativeDirection(std::uint64_t square, int x, int y) {
+    constexpr std::uint64_t notAColumn = 9187201950435737471ULL;
+    constexpr std::uint64_t notHColumn = 18374403900871474942ULL;
+    switch (x) {
+        case -1:
+            return square >> -(8 * y + x) & notAColumn;
+
+        case 1:
+            return square >> -(8 * y + x) & notHColumn;
+
+        case 0:
+            return square >> -(8 * y + x);
+    }
+}
+
 int Square::getInYDirection(int square, int y) {
     const int result = square + y * 8;
     if (result < 0 || result > 63) {
