@@ -9,10 +9,17 @@
 
 #include <string>
 
+#include "board.h"
 #include "piece.h"
 #include "square.h"
 
+typedef std::uint64_t Bitboard;
+
 class Move {
+private:
+    static constexpr Bitboard secondRow = 65280ULL;
+    static constexpr Bitboard seventhRow = 71776119061217280ULL;
+
 public:
     int origin;
     int destination;

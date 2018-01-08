@@ -2,6 +2,11 @@
 
 #include <stdexcept>
 
+#include "board.h"
+
+static constexpr Bitboard secondRow = 65280ULL;
+static constexpr Bitboard seventhRow = 71776119061217280ULL;
+
 Move::Move(int o, int d)
     : origin(o), destination(d), promotion(Piece::None) {}
 
@@ -114,18 +119,18 @@ bool Move::isPawnMove() const {
     if (x != 0) {
         return false;
     }
-
+    const Bitboard originMask = 1ULL << origin;
     if (abs(y) == 1) {
         return true; // Move forward/backwards one space
     } else if (y == 2) {
-        if (Square::getRow(origin) == 2) {
+        if (secondRow & originMask) {
             // Pawns have to be in original position to be moved up twice
             return true; // White move forward two spaces
         } else {
             return false;
         }
     } else if (y == -2) {
-        if (Square::getRow(origin) == 7) {
+        if (seventhRow & originMask) {
             return true; // Black move forward two spaces
         } else {
             return false;
@@ -138,13 +143,14 @@ bool Move::isPawnMove() const {
 bool Move::isPawnMove(Side side) const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
+    const Bitboard originMask = 1ULL << origin;
     if (x != 0) {
         return false;
     }
     if (side == Side::White) {
         if (y == 1) {
             return true;
-        } else if (y == 2 && Square::getRow(origin) == 2) {
+        } else if (y == 2 && secondRow & originMask) {
             return true;
         } else {
             return false;
@@ -152,7 +158,7 @@ bool Move::isPawnMove(Side side) const {
     } else if (side == Side::Black) {
         if (y == -1) {
             return true;
-        } else if (y == -2 && Square::getRow(origin) == 7) {
+        } else if (y == -2 && seventhRow & originMask) {
             return true;
         } else {
             return false;
@@ -163,15 +169,16 @@ bool Move::isPawnMove(Side side) const {
 
 bool Move::isTwoSquarePawnMove() const {
     const int difference = destination - origin;
+    const Bitboard originMask = 1ULL << origin;
     if (difference == 16) { // exactly 2 rows apart
-        if (Square::getRow(origin) == 2) {
+        if (secondRow & originMask) {
             // Pawns have to be in original position to be moved up twice
             return true; // White move forward two spaces
         } else {
             return false;
         }
     } else if (difference == -16) { // exactly 2 rows apart
-        if (Square::getRow(origin) == 7) {
+        if (seventhRow & originMask) {
             return true; // Black move forward two spaces
         } else {
             return false;
@@ -183,10 +190,11 @@ bool Move::isTwoSquarePawnMove() const {
 
 bool Move::isTwoSquarePawnMove(Side side) const {
     const int difference = destination - origin;
+    const Bitboard originMask = 1ULL << origin;
     if (side == Side::White) {
-        return (difference == 16 && Square::getRow(origin) == 2);
+        return (difference == 16 && secondRow & originMask);
     } else {
-        return (difference == -16 && Square::getRow(origin) == 7);
+        return (difference == -16 && seventhRow & originMask);
     }
 }
 
