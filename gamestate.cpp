@@ -525,10 +525,10 @@ std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
         }
     } else if (board.bishops & squareMask) {
         std::vector<int> destinations;
-        std::vector<int> squaresToNorthwest = board.getUnobstructedInDirection(square, side, -1, 1);
-        std::vector<int> squaresToNortheast = board.getUnobstructedInDirection(square, side, 1, 1);
-        std::vector<int> squaresToSouthwest = board.getUnobstructedInDirection(square, side, -1, -1);
-        std::vector<int> squaresToSoutheast = board.getUnobstructedInDirection(square, side, 1, -1);
+        std::vector<int> squaresToNorthwest = board.getUnobstructedInPositiveDirection(squareMask, side, -1, 1);
+        std::vector<int> squaresToNortheast = board.getUnobstructedInPositiveDirection(squareMask, side, 1, 1);
+        std::vector<int> squaresToSouthwest = board.getUnobstructedInNegativeDirection(squareMask, side, -1, -1);
+        std::vector<int> squaresToSoutheast = board.getUnobstructedInNegativeDirection(squareMask, side, 1, -1);
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToNorthwest.begin()), std::make_move_iterator(squaresToNorthwest.end()));
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToNortheast.begin()), std::make_move_iterator(squaresToNortheast.end()));
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToSouthwest.begin()), std::make_move_iterator(squaresToSouthwest.end()));
@@ -538,10 +538,10 @@ std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
         }
     } else if (board.rooks & squareMask) {
         std::vector<int> destinations;
-        std::vector<int> squaresToNorth = board.getUnobstructedInDirection(square, side, 0, 1);
-        std::vector<int> squaresToEast = board.getUnobstructedInDirection(square, side, 1, 0);
-        std::vector<int> squaresToSouth = board.getUnobstructedInDirection(square, side, 0, -1);
-        std::vector<int> squaresToWest = board.getUnobstructedInDirection(square, side, -1, 0);
+        std::vector<int> squaresToNorth = board.getUnobstructedInPositiveDirection(squareMask, side, 0, 1);
+        std::vector<int> squaresToEast = board.getUnobstructedInPositiveDirection(squareMask, side, 1, 0);
+        std::vector<int> squaresToSouth = board.getUnobstructedInNegativeDirection(squareMask, side, 0, -1);
+        std::vector<int> squaresToWest = board.getUnobstructedInNegativeDirection(squareMask, side, -1, 0);
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToNorth.begin()), std::make_move_iterator(squaresToNorth.end()));
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToEast.begin()), std::make_move_iterator(squaresToEast.end()));
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToSouth.begin()), std::make_move_iterator(squaresToSouth.end()));
@@ -551,14 +551,14 @@ std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
         }
     } else if (board.queens & squareMask) {
         std::vector<int> destinations;
-        std::vector<int> squaresToNorthwest = board.getUnobstructedInDirection(square, side, -1, 1);
-        std::vector<int> squaresToNortheast = board.getUnobstructedInDirection(square, side, 1, 1);
-        std::vector<int> squaresToSouthwest = board.getUnobstructedInDirection(square, side, -1, -1);
-        std::vector<int> squaresToSoutheast = board.getUnobstructedInDirection(square, side, 1, -1);
-        std::vector<int> squaresToNorth = board.getUnobstructedInDirection(square, side, 0, 1);
-        std::vector<int> squaresToEast = board.getUnobstructedInDirection(square, side, 1, 0);
-        std::vector<int> squaresToSouth = board.getUnobstructedInDirection(square, side, 0, -1);
-        std::vector<int> squaresToWest = board.getUnobstructedInDirection(square, side, -1, 0);
+        std::vector<int> squaresToNorthwest = board.getUnobstructedInPositiveDirection(squareMask, side, -1, 1);
+        std::vector<int> squaresToNortheast = board.getUnobstructedInPositiveDirection(squareMask, side, 1, 1);
+        std::vector<int> squaresToSouthwest = board.getUnobstructedInNegativeDirection(squareMask, side, -1, -1);
+        std::vector<int> squaresToSoutheast = board.getUnobstructedInNegativeDirection(squareMask, side, 1, -1);
+        std::vector<int> squaresToNorth = board.getUnobstructedInPositiveDirection(squareMask, side, 0, 1);
+        std::vector<int> squaresToEast = board.getUnobstructedInPositiveDirection(squareMask, side, 1, 0);
+        std::vector<int> squaresToSouth = board.getUnobstructedInNegativeDirection(squareMask, side, 0, -1);
+        std::vector<int> squaresToWest = board.getUnobstructedInNegativeDirection(squareMask, side, -1, 0);
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToNorthwest.begin()), std::make_move_iterator(squaresToNorthwest.end()));
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToNortheast.begin()), std::make_move_iterator(squaresToNortheast.end()));
         destinations.insert(destinations.end(), std::make_move_iterator(squaresToSouthwest.begin()), std::make_move_iterator(squaresToSouthwest.end()));

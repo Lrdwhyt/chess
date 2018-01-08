@@ -627,19 +627,40 @@ bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
     }
 }
 
-std::vector<int> Board::getUnobstructedInDirection(int square, Side side, int x, int y) const {
-    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+std::vector<int> Board::getUnobstructedInPositiveDirection(Bitboard sqMask, Side side, int x, int y) const {
+    const Bitboard ourSide = (side == Side::White) ? whites : blacks;
+    const Bitboard oppSide = (side == Side::White) ? blacks : whites;
     std::vector<int> results;
     while (true) {
-        square = (x == 0) ? Square::getInYDirection(square, y) : Square::getInDirection(square, x, y);
-        if (square == -1) {
+        sqMask = Square::getInPositiveDirection(sqMask, x, y);
+        if (!sqMask) {
             break;
         }
-        if (isSide(square, side)) {
+        if (ourSide & sqMask) {
             break;
         }
-        results.push_back(square);
-        if (isSide(square, enemySide)) {
+        results.push_back(Square::getSetBit(sqMask));
+        if (oppSide & sqMask) {
+            break;
+        }
+    }
+    return results;
+}
+
+std::vector<int> Board::getUnobstructedInNegativeDirection(Bitboard sqMask, Side side, int x, int y) const {
+    const Bitboard ourSide = (side == Side::White) ? whites : blacks;
+    const Bitboard oppSide = (side == Side::White) ? blacks : whites;
+    std::vector<int> results;
+    while (true) {
+        sqMask = Square::getInNegativeDirection(sqMask, x, y);
+        if (!sqMask) {
+            break;
+        }
+        if (ourSide & sqMask) {
+            break;
+        }
+        results.push_back(Square::getSetBit(sqMask));
+        if (oppSide & sqMask) {
             break;
         }
     }
