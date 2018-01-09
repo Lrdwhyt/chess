@@ -24,6 +24,9 @@ private:
     std::vector<Move> getPossiblePawnMoves(int square) const;
     std::vector<Move> convertPawnMove(int origin, int destination) const;
     bool canEnPassant(int square) const;
+    std::vector<Move> getMovesInDirectCheck(int checkingSquare) const;
+    std::vector<Move> getMovesInRayCheck(int checkingSquare) const;
+    std::vector<Move> getMovesOutsideCheck() const;
 
 public:
     GameState();
@@ -32,6 +35,8 @@ public:
     const Board &getBoard() const;
     void processMove(Move);
     std::vector<Move> getPossibleMoves() const;
+    int getMaterialEvaluation() const;
+    int getEvaluation() const;
 };
 
 #endif
