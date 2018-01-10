@@ -14,7 +14,7 @@ UciController::UciController() {
 
 void UciController::send(std::string msg) {
     std::ofstream outputFile(LOGFILE, std::ios::app);
-    //outputFile << "-> " << msg << std::endl;
+    outputFile << "-> " << msg << std::endl;
     std::cout << msg << std::endl;
     outputFile.close();
 }
