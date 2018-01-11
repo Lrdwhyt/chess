@@ -144,34 +144,19 @@ int Square::getInDirection(int square, int x, int y) {
     }
 }
 
-std::uint64_t Square::getInPositiveDirection(std::uint64_t square, int x, int y) {
+std::uint64_t Square::getInDirection(std::uint64_t square, Direction direction) {
     constexpr std::uint64_t notAColumn = 9187201950435737471ULL;
     constexpr std::uint64_t notHColumn = 18374403900871474942ULL;
-    switch (x) {
-        case -1:
-            return square << (8 * y + x) & notAColumn;
-
-        case 1:
-            return square << (8 * y + x) & notHColumn;
-
-        case 0:
-            return square << (8 * y + x);
+    if ((direction & 0b11) & 0b10) {
+    //if (direction == Direction::East || direction == Direction::Northeast || direction == Direction::Southeast) {
+    square &= notHColumn;
     }
-}
-
-std::uint64_t Square::getInNegativeDirection(std::uint64_t square, int x, int y) {
-    constexpr std::uint64_t notAColumn = 9187201950435737471ULL;
-    constexpr std::uint64_t notHColumn = 18374403900871474942ULL;
-    switch (x) {
-        case -1:
-            return square >> -(8 * y + x) & notAColumn;
-
-        case 1:
-            return square >> -(8 * y + x) & notHColumn;
-
-        case 0:
-            return square >> -(8 * y + x);
+    else if (direction & 1) {
+    //if (direction == Direction::West || direction == Direction::Northwest || direction == Direction::Southwest) {
+    square &= notAColumn;
+    
     }
+    return (direction < 0) ? square >> -direction : square << direction;
 }
 
 int Square::getInYDirection(int square, int y) {
@@ -231,4 +216,45 @@ std::string Square::toString(int square) {
  */
 int Square::getSetBit(std::uint64_t b) {
     return __builtin_ctzll(b);
+}
+
+int Square::getBitCount(std::uint64_t b) {
+    int counter = 0;
+    while (b) {
+        b = b & (b - 1);
+        ++counter;
+    }
+    return counter;
+}
+
+Bitboard Square::getMask(int square) {
+    return 1ULL << square;
+}
+
+Bitboard Square::getKnightAttacks(Bitboard square) {
+    constexpr Bitboard notAColumn = 9187201950435737471ULL;
+    constexpr Bitboard notABColumn = 4557430888798830399ULL;
+    constexpr Bitboard notHColumn = 18374403900871474942ULL;
+    constexpr Bitboard notGHColumn = 18229723555195321596ULL;
+    return ((square >> 6 & notGHColumn) |
+            (square >> 10 & notABColumn) |
+            (square >> 15 & notHColumn) |
+            (square >> 17 & notAColumn) |
+            (square << 6 & notABColumn) |
+            (square << 10 & notGHColumn) |
+            (square << 15 & notAColumn) |
+            (square << 17 & notHColumn));
+}
+
+Bitboard Square::getKingAttacks(Bitboard square) {
+    constexpr Bitboard notAColumn = 9187201950435737471ULL;
+    constexpr Bitboard notHColumn = 18374403900871474942ULL;
+    return ((square >> 9 & notAColumn) |
+            (square >> 8) |
+            (square >> 7 & notHColumn) |
+            (square >> 1 & notAColumn) |
+            (square << 1 & notHColumn) |
+            (square << 7 & notAColumn) |
+            (square << 8) |
+            (square << 9 & notHColumn));
 }

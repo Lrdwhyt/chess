@@ -20,6 +20,9 @@
 typedef std::uint64_t Bitboard;
 
 class Board {
+private:
+    int at(int square) const;
+
 public:
     Bitboard whites;
     Bitboard blacks;
@@ -29,15 +32,11 @@ public:
     Bitboard rooks;
     Bitboard queens;
     Bitboard kings;
-    int whiteKingLocation;
-    int blackKingLocation;
     Board();
     Board(std::string fenString);
     Board(Board const &);
     static Board startingPosition();
     void print() const;
-    int at(int square) const;
-    int getPieceAt(int square) const;
     bool isEmpty(int square) const;
     std::string toString() const;
     void addPiece(int square, int piece);
@@ -47,27 +46,23 @@ public:
     bool isUnderAttack(int square, Side side) const;
     bool wouldBeUnderAttack(int square, int origin, Side side) const;
 
-    int squareAttackingInDirection(int square, Side side, int x, int y) const;
+    int squareAttackingInDirection(Bitboard squareMask, Side side, Direction direction) const;
+
     bool isAttackedInDirection(int square, Side side, int x, int y) const;
     bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
     int getPinningOrAttackingSquare(int square, int movingPiece, Side side) const;
 
     std::tuple<CheckType, int> getInCheckStatus(Side side) const;
 
-    int getKingLocation(Side side) const;
-
     bool isLegalPieceMove(int origin, int destination) const;
 
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;
 
-    std::vector<int> getUnobstructedInPositiveDirection(Bitboard square, Side side, int x, int y) const;
-    std::vector<int> getUnobstructedInNegativeDirection(Bitboard square, Side side, int x, int y) const;
+    std::vector<int> getUnobstructedInDirection(Bitboard square, Side side, Direction direction) const;
     Bitboard getSquareMask(int square) const;
     bool isSide(int square, Side side) const;
     bool isAttackedByKnight(int square, Side side) const;
     bool isObstructedBetween(int a, int b) const;
-    Bitboard getKnightAttacks(int square) const;
-    Bitboard getKingAttacks(int square) const;
 };
 
 #endif

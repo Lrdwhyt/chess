@@ -10,35 +10,42 @@
 #include <vector>
 
 #include "column.h"
+#include "direction.h"
 
-class Square {
-public:
-    static int get(int, int);
-    static int fromString(std::string str);
-    static std::tuple<int, int> diff(int, int);
+namespace Square {
+    int get(int, int);
+    int fromString(std::string str);
+    std::tuple<int, int> diff(int, int);
 
     /* Get row of square (0-63) */
-    static int getRow(int);
+    int getRow(int);
 
     /* Get column of square (0-63) */
-    static int getColumn(int);
-    static std::vector<int> between(int, int);
-    static std::vector<int> fromAtoBInclusive(int, int);
-    static bool inLine(int, int);
+    int getColumn(int);
+    std::vector<int> between(int, int);
+    std::vector<int> fromAtoBInclusive(int, int);
+    bool inLine(int, int);
 
     /* Returns -1 if square is out of range */
-    static int getInDirection(int square, int x, int y);
+    int getInDirection(int square, int x, int y);
 
-    static std::uint64_t getInPositiveDirection(std::uint64_t square, int x, int y);
-    static std::uint64_t getInNegativeDirection(std::uint64_t square, int x, int y);
+    std::uint64_t getInDirection(std::uint64_t square, Direction direction);
 
-    static int getInYDirection(int square, int y);
+    int getInYDirection(int square, int y);
 
-    static bool isBetweenInclusive(int square, int a, int b);
+    bool isBetweenInclusive(int square, int a, int b);
 
-    static std::string toString(int square);
+    std::string toString(int square);
 
-    static int getSetBit(std::uint64_t b);
+    int getSetBit(std::uint64_t b);
+
+    int getBitCount(std::uint64_t b);
+
+    std::uint64_t getMask(int square);
+
+    std::uint64_t getKnightAttacks(std::uint64_t square);
+
+    std::uint64_t getKingAttacks(std::uint64_t square);
 };
 
 #endif
