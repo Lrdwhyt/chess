@@ -422,10 +422,10 @@ inline std::vector<Move> GameState::getPossibleKingMoves() const {
     std::vector<Move> results;
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int origin = Square::getSetBit(board.kings & currentSide);
-    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide);
+    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & ~currentSide;
     while (kingSquares) {
         const int kingDestination = Square::getSetBit(kingSquares);
-        if (!board.isSide(kingDestination, side) && !board.wouldBeUnderAttack(kingDestination, origin, side)) {
+        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
             results.push_back(Move(origin, kingDestination));
         }
         kingSquares &= kingSquares - 1;
@@ -436,23 +436,15 @@ inline std::vector<Move> GameState::getPossibleKingMoves() const {
 inline std::vector<Move> GameState::getPossibleKingCaptureMoves() const {
     std::vector<Move> results;
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
     const int origin = Square::getSetBit(board.kings & currentSide);
-    const std::vector<int> candidateDestinations = {
-        Square::getInYDirection(origin, -1),
-        Square::getInYDirection(origin, 1),
-        Square::getInDirection(origin, 1, -1),
-        Square::getInDirection(origin, 1, 1),
-        Square::getInDirection(origin, -1, -1),
-        Square::getInDirection(origin, -1, 1),
-        Square::getInDirection(origin, -1, 0),
-        Square::getInDirection(origin, 1, 0),
-    };
-    for (int destination : candidateDestinations) {
-        if (destination == -1 || board.isEmpty(destination) || board.isSide(destination, side) || board.wouldBeUnderAttack(destination, origin, side)) {
-            continue;
-        } else {
-            results.push_back(Move(origin, destination));
+    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & oppSide;
+    while (kingSquares) {
+        const int kingDestination = Square::getSetBit(kingSquares);
+        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
+            results.push_back(Move(origin, kingDestination));
         }
+        kingSquares &= kingSquares - 1;
     }
     return results;
 }
@@ -594,12 +586,11 @@ inline std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
     if (board.pawns & squareMask) {
         return getPossiblePawnMoves(square);
     } else if (board.knights & squareMask) {
-        Bitboard knightSquares = Square::getKnightAttacks(squareMask);
+        const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+        Bitboard knightSquares = Square::getKnightAttacks(squareMask) & ~currentSide;
         while (knightSquares) {
             const int destinationSquare = Square::getSetBit(knightSquares);
-            if (!board.isSide(destinationSquare, side)) {
-                results.push_back(Move(square, destinationSquare));
-            }
+            results.push_back(Move(square, destinationSquare));
             knightSquares &= knightSquares - 1;
         }
     } else if (board.bishops & squareMask) {
@@ -683,13 +674,11 @@ inline std::vector<Move> GameState::getPossiblePieceCaptureMoves(int square) con
     if (board.pawns & squareMask) {
         return getPossiblePawnCaptureMoves(square);
     } else if (board.knights & squareMask) {
-        Bitboard knightSquares = Square::getKnightAttacks(squareMask);
+        const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
+        Bitboard knightSquares = Square::getKnightAttacks(squareMask) & oppSide;
         while (knightSquares) {
             const int destinationSquare = Square::getSetBit(knightSquares);
-            const Side oppSide = (side == Side::White) ? Side::Black : Side::White;
-            if (board.isSide(destinationSquare, oppSide)) {
-                results.push_back(Move(square, destinationSquare));
-            }
+            results.push_back(Move(square, destinationSquare));
             knightSquares &= knightSquares - 1;
         }
     } else if (board.bishops & squareMask) {
