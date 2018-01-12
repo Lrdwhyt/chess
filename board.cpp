@@ -100,7 +100,7 @@ void Board::print() const {
 }
 
 int Board::at(int square) const {
-    const Bitboard squareMask = getSquareMask(square);
+    const Bitboard squareMask = Square::getMask(square);
     if (whites & squareMask) {
         if (pawns & squareMask) {
             return PieceType::Pawn;
@@ -135,11 +135,11 @@ int Board::at(int square) const {
 }
 
 bool Board::isEmpty(int square) const {
-    return !((whites | blacks) & getSquareMask(square));
+    return !((whites | blacks) & Square::getMask(square));
 }
 
 void Board::addPiece(int square, int piece) {
-    const Bitboard squareMask = getSquareMask(square);
+    const Bitboard squareMask = Square::getMask(square);
     if (Piece::getSide(piece) == Side::White) {
         whites = whites | squareMask;
     } else {
@@ -173,8 +173,8 @@ void Board::addPiece(int square, int piece) {
 }
 
 void Board::deletePiece(int square) {
-    const Bitboard squareMask = getSquareMask(square);
-    if (whites & getSquareMask(square)) {
+    const Bitboard squareMask = Square::getMask(square);
+    if (whites & Square::getMask(square)) {
         whites = whites ^ squareMask;
     } else {
         blacks = blacks ^ squareMask;
@@ -196,8 +196,8 @@ void Board::deletePiece(int square) {
 
 void Board::movePiece(int origin, int destination) {
     // Assumes there exists a piece at origin
-    const Bitboard originMask = getSquareMask(origin);
-    const Bitboard destinationMask = getSquareMask(destination);
+    const Bitboard originMask = Square::getMask(origin);
+    const Bitboard destinationMask = Square::getMask(destination);
     if (whites & originMask) {
         whites = (whites ^ originMask) ^ destinationMask;
     } else {
@@ -225,7 +225,7 @@ bool Board::isUnderAttack(int square, Side side) const {
         return true;
     }
     // Check the two possible squares that an enemy pawn could be checking from
-    const Bitboard squareMask = getSquareMask(square);
+    const Bitboard squareMask = Square::getMask(square);
     Bitboard pawnLocationFirst;
     Bitboard pawnLocationSecond;
     if (side == Side::White) {
@@ -254,7 +254,7 @@ bool Board::isUnderAttack(int square, Side side) const {
 
 bool Board::isAttackedByKnight(int square, Side side) const {
     const Bitboard oppSide = (side == Side::White) ? blacks : whites;
-    if (Square::getKnightAttacks(getSquareMask(square)) & knights & oppSide) {
+    if (Square::getKnightAttacks(Square::getMask(square)) & knights & oppSide) {
         return true;
     } else {
         return false;
@@ -267,11 +267,11 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
         return true;
     }
     const Bitboard oppSide = (side == Side::White) ? blacks : whites;
-    if (Square::getKingAttacks(getSquareMask(square)) & kings & oppSide) {
+    if (Square::getKingAttacks(Square::getMask(square)) & kings & oppSide) {
         return true;
     }
     // Check the two possible squares that an enemy pawn could be checking from
-    const Bitboard squareMask = getSquareMask(square);
+    const Bitboard squareMask = Square::getMask(square);
     Bitboard pawnLocationFirst;
     Bitboard pawnLocationSecond;
     if (side == Side::White) {
@@ -312,7 +312,7 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
         directAttacker = true;
     } else {
         // Check the two possible squares that an enemy pawn could be checking from
-        const Bitboard squareMask = getSquareMask(square);
+        const Bitboard squareMask = Square::getMask(square);
         Bitboard pawnLocationFirst;
         Bitboard pawnLocationSecond;
         if (side == Side::White) {
@@ -351,7 +351,7 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
         // Check number of ray attackers
         // The directions are paired in opposites because it is impossible
         // to be double checked from both sides in a line
-        const Bitboard squareMask = getSquareMask(square);
+        const Bitboard squareMask = Square::getMask(square);
         int attackerCount = 0;
         int attackerSquareTemp;
         attackerSquareTemp = squareAttackingInDirection(squareMask, side, Direction::North);
@@ -404,6 +404,13 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
     }
 }
 
+bool Board::isInCheck(Side side) const {
+    const Bitboard ourSide = (side == Side::White) ? whites : blacks;
+    const Bitboard squareMask = kings & ourSide;
+    const int square = Square::getSetBit(kings & ourSide);
+    return isUnderAttack(square, side);
+}
+
 // Returns -1 if there are no squares attacking, otherwise returns square (int) of attacking piece
 int Board::squareAttackingInDirection(Bitboard squareMask, Side side, Direction direction) const {
     const Bitboard sameSide = (side == Side::White) ? whites : blacks;
@@ -423,6 +430,22 @@ int Board::squareAttackingInDirection(Bitboard squareMask, Side side, Direction 
             } else {
                 return -1;
             }
+        }
+    }
+}
+
+int Board::captureInDirection(Bitboard squareMask, Side side, Direction direction) const {
+    const Bitboard sameSide = (side == Side::White) ? whites : blacks;
+    const Bitboard oppSide = (side == Side::White) ? blacks : whites;
+    while (true) {
+        squareMask = Square::getInDirection(squareMask, direction);
+        if (!squareMask) {
+            return -1;
+        }
+        if (sameSide & squareMask) {
+            return -1;
+        } else if (oppSide & squareMask) {
+            return Square::getSetBit(squareMask);
         }
     }
 }
@@ -455,7 +478,7 @@ int Board::getPinningOrAttackingSquare(int square, int movingPiece, Side side) c
         if (isSide(square, side)) {
             return -1;
         } else if (isSide(square, enemySide)) {
-            if (queens & getSquareMask(square) || enemyVariablePiece & getSquareMask(square)) {
+            if (queens & Square::getMask(square) || enemyVariablePiece & Square::getMask(square)) {
                 return square;
             } else {
                 return -1;
@@ -476,7 +499,7 @@ bool Board::isAttackedInDirection(int square, Side side, int x, int y) const {
         if (isSide(square, side)) {
             return false;
         } else if (isSide(square, enemySide)) {
-            if (enemyVariablePiece & getSquareMask(square)) {
+            if (enemyVariablePiece & Square::getMask(square)) {
                 return true;
             } else {
                 return false;
@@ -500,7 +523,7 @@ bool Board::wouldBeAttackedInDirection(int square, int origin, Side side, int x,
         if (isSide(square, side)) {
             return false;
         } else if (isSide(square, enemySide)) {
-            if (enemyVariablePiece & getSquareMask(square)) {
+            if (enemyVariablePiece & Square::getMask(square)) {
                 return true;
             } else {
                 return false;
@@ -511,7 +534,7 @@ bool Board::wouldBeAttackedInDirection(int square, int origin, Side side, int x,
 
 bool Board::isLegalPieceMove(int origin, int destination) const {
     const Move move = Move(origin, destination);
-    const Bitboard originMask = getSquareMask(origin);
+    const Bitboard originMask = Square::getMask(origin);
     if (pawns & originMask) {
         if (isEmpty(destination)) {
             return move.isPawnMove();
@@ -549,7 +572,7 @@ bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
         if (isSide(square, side)) {
             return false;
         } else if (isSide(square, enemySide)) {
-            if (queens & getSquareMask(square) || rooks & getSquareMask(square)) {
+            if (queens & Square::getMask(square) || rooks & Square::getMask(square)) {
                 return true;
             } else {
                 return false;
@@ -578,15 +601,11 @@ std::vector<int> Board::getUnobstructedInDirection(Bitboard squareMask, Side sid
     return results;
 }
 
-Bitboard Board::getSquareMask(int square) const {
-    return 1ULL << square;
-}
-
 bool Board::isSide(int square, Side side) const {
     if (side == Side::White) {
-        return whites & getSquareMask(square);
+        return whites & Square::getMask(square);
     } else {
-        return blacks & getSquareMask(square);
+        return blacks & Square::getMask(square);
     }
 }
 

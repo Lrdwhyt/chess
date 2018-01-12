@@ -22,6 +22,10 @@ typedef std::uint64_t Bitboard;
 class Board {
 private:
     int at(int square) const;
+    bool isAttackedByKnight(int square, Side side) const;
+    int squareAttackingInDirection(Bitboard squareMask, Side side, Direction direction) const;
+    bool isAttackedInDirection(int square, Side side, int x, int y) const;
+    bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
 
 public:
     Bitboard whites;
@@ -46,10 +50,6 @@ public:
     bool isUnderAttack(int square, Side side) const;
     bool wouldBeUnderAttack(int square, int origin, Side side) const;
 
-    int squareAttackingInDirection(Bitboard squareMask, Side side, Direction direction) const;
-
-    bool isAttackedInDirection(int square, Side side, int x, int y) const;
-    bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
     int getPinningOrAttackingSquare(int square, int movingPiece, Side side) const;
 
     std::tuple<CheckType, int> getInCheckStatus(Side side) const;
@@ -59,10 +59,14 @@ public:
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;
 
     std::vector<int> getUnobstructedInDirection(Bitboard square, Side side, Direction direction) const;
-    Bitboard getSquareMask(int square) const;
+
+    int captureInDirection(Bitboard squareMask, Side side, Direction direction) const;
+
     bool isSide(int square, Side side) const;
-    bool isAttackedByKnight(int square, Side side) const;
+    
     bool isObstructedBetween(int a, int b) const;
+
+    bool isInCheck(Side side) const;
 };
 
 #endif
