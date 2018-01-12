@@ -11,7 +11,7 @@ private:
     static int numOther;
 
 public:
-    static int perft(GameState state, int depth);
+    static int perft(GameState &state, int depth);
     static void logCapture();
     static void logCheckmate();
     static void logEnPassant();

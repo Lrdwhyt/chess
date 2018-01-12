@@ -7,31 +7,33 @@ int Perft::numCheckmate;
 int Perft::numEnPassant;
 int Perft::numOther;
 
-int Perft::perft(GameState g, int depth) {
-    std::vector<Move> moves = g.getPossibleMoves();
+int Perft::perft(GameState &gamestate, int depth) {
+    std::vector<Move> moves = gamestate.getLegalMoves();
     if (moves.size() == 0) {
-        ++numCheckmate;
+        logCheckmate();
     }
-    if (depth > 1) {
-        int total = 0;
-        for (Move m : moves) {
-            GameState g2 = GameState(g);
-            g2.processMove(m);
-            total += perft(g2, depth - 1);
-        }
-        return total;
-    } else {
+    if (depth == 1) {
         return moves.size();
     }
+    if (depth == 0) {
+        return 1;
+    }
+    int total = 0;
+    for (Move move : moves) {
+        GameState branch = GameState(gamestate);
+        branch.processMove(move);
+        total += perft(branch, depth - 1);
+    }
+    return total;
 }
 
-std::vector<std::tuple<Move, int>> Perft::divide(GameState state, int depth) {
+std::vector<std::tuple<Move, int>> Perft::divide(GameState gamestate, int depth) {
     std::vector<std::tuple<Move, int>> results;
-    std::vector<Move> moves = state.getPossibleMoves();
+    std::vector<Move> moves = gamestate.getLegalMoves();
     for (Move move : moves) {
-        GameState substate = GameState(state);
-        substate.processMove(move);
-        int total = perft(substate, depth - 1);
+        GameState branch = GameState(gamestate);
+        branch.processMove(move);
+        int total = perft(branch, depth - 1);
         results.push_back(std::make_tuple(move, total));
     }
     return results;
