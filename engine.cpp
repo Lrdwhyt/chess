@@ -14,7 +14,7 @@ void debug(std::string msg) {
  */
 Move Engine::alphaBetaPrune(GameState &gamestate, int depth) {
     std::vector<Move> moves = gamestate.getLegalMoves();
-    int alpha = -9999;
+    int alpha = -99999;
     Move bestMove;
     for (Move move : moves) {
         GameState branch = GameState(gamestate);
@@ -26,7 +26,6 @@ Move Engine::alphaBetaPrune(GameState &gamestate, int depth) {
             bestMove = move;
         }
     }
-    //debug(bestMove.toString() + " " + std::to_string(alpha));
     return bestMove;
 }
 
@@ -43,7 +42,7 @@ int Engine::alphaBetaMaximise(GameState &gamestate, int alpha, int beta, int dep
     }
     std::vector<Move> moves = gamestate.getLegalMoves();
     if (moves.size() == 0) {
-        return -100; // Checkmate
+        return -10000; // Checkmate
     }
     for (Move move : moves) {
         GameState branch = GameState(gamestate);
@@ -73,7 +72,7 @@ int Engine::alphaBetaMinimise(GameState &gamestate, int alpha, int beta, int dep
     std::vector<Move> moves = gamestate.getLegalMoves();
     if (moves.size() == 0) {
         // Checkmate
-        return 100;
+        return 10000;
     }
     for (Move move : moves) {
         GameState branch = GameState(gamestate);
@@ -87,25 +86,6 @@ int Engine::alphaBetaMinimise(GameState &gamestate, int alpha, int beta, int dep
     return beta;
 }
 
-/*Move Engine::quiescenceSearch(GameState &gamestate, int alpha, int beta, int depth) {
-    std::vector<Move> moves = gamestate.getLegalMoves();
-    int alpha = -9999;
-    Move bestMove;
-    for (Move move : moves) {
-        GameState branch = GameState(gamestate);
-        branch.processMove(move);
-        int eval = quiescenceMinimise(branch, alpha, -alpha, depth - 1);
-        if (eval > alpha) {
-            alpha = eval;
-            bestMove = move;
-        }
-    }
-    return bestMove;
-}*/
-
-/*
- * Same side to play
- */
 int Engine::quiescenceSearchMaximise(GameState &gamestate, int alpha, int beta, int depth) {
     if (depth == 0) {
         return gamestate.getEvaluation();
@@ -113,7 +93,7 @@ int Engine::quiescenceSearchMaximise(GameState &gamestate, int alpha, int beta, 
     std::vector<Move> moves = gamestate.getNonQuietMoves();
     if (moves.size() == 0) {
         if (gamestate.isInCheck()) {
-            return -100; // Checkmate
+            return -10000; // Checkmate
         } else {
             return gamestate.getEvaluation();
         }
@@ -142,7 +122,7 @@ int Engine::quiescenceSearchMinimise(GameState &gamestate, int alpha, int beta, 
     std::vector<Move> moves = gamestate.getNonQuietMoves();
     if (moves.size() == 0) {
         if (gamestate.isInCheck()) {
-            return 100; // Checkmate
+            return 10000; // Checkmate
         } else {
             return -gamestate.getEvaluation();
         }
