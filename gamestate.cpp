@@ -207,10 +207,10 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
                     }
                 }
             } else {
-                appendMovesByPiece(results, square);
+                appendQueenMoves(results, square);
             }
         } else {
-            appendMovesByPiece(results, square);
+            appendQueenMoves(results, square);
         }
         queenSquares &= queenSquares - 1;
     }
@@ -231,10 +231,10 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
                     }
                 }
             } else {
-                appendMovesByPiece(results, square);
+                appendRookMoves(results, square);
             }
         } else {
-            appendMovesByPiece(results, square);
+            appendRookMoves(results, square);
         }
         rookSquares &= rookSquares - 1;
     }
@@ -245,7 +245,7 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
             board.getPinningOrAttackingSquare(kingLocation, square, side) == -1) {
             // Check that we aren't pinned
             // Knights can't move at all when pinned
-            appendMovesByPiece(results, square);
+            appendKnightMoves(results, square);
         }
         knightSquares &= knightSquares - 1;
     }
@@ -266,10 +266,10 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
                     }
                 }
             } else {
-                appendMovesByPiece(results, square);
+                appendBishopMoves(results, square);
             }
         } else {
-            appendMovesByPiece(results, square);
+            appendBishopMoves(results, square);
         }
         bishopSquares &= bishopSquares - 1;
     }
@@ -291,14 +291,15 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
                     }
                 }
             } else {
-                appendMovesByPiece(results, square);
+                appendPawnMoves(results, square);
             }
         } else {
-            appendMovesByPiece(results, square);
+            appendPawnMoves(results, square);
         }
         pawnSquares &= pawnSquares - 1;
     }
     appendKingMoves(results);
+    appendCastleMoves(results);
     return results;
 }
 
@@ -431,86 +432,91 @@ std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
     return results;
 }
 
-void GameState::appendMovesByPiece(std::vector<Move> &results, int square) const {
+void GameState::appendKnightMoves(std::vector<Move> &results, int square) const {
+    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    Bitboard knightSquares = Square::getKnightAttacks(Square::getMask(square)) & ~currentSide;
+    while (knightSquares) {
+        const int destinationSquare = Square::getSetBit(knightSquares);
+        results.push_back(Move(square, destinationSquare));
+        knightSquares &= knightSquares - 1;
+    }
+}
+
+void GameState::appendBishopMoves(std::vector<Move> &results, int square) const {
     const Bitboard squareMask = Square::getMask(square);
-    if (board.pawns & squareMask) {
-        appendPawnMoves(results, square);
-    } else if (board.knights & squareMask) {
-        const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
-        Bitboard knightSquares = Square::getKnightAttacks(squareMask) & ~currentSide;
-        while (knightSquares) {
-            const int destinationSquare = Square::getSetBit(knightSquares);
-            results.push_back(Move(square, destinationSquare));
-            knightSquares &= knightSquares - 1;
-        }
-    } else if (board.bishops & squareMask) {
-        std::vector<int> destinations;
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southeast);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southwest);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northeast);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northwest);
-        for (int destination : destinations) {
-            results.push_back(Move(square, destination));
-        }
-    } else if (board.rooks & squareMask) {
-        std::vector<int> destinations;
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::North);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::East);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::South);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::West);
-        for (int destination : destinations) {
-            results.push_back(Move(square, destination));
-        }
-    } else if (board.queens & squareMask) {
-        std::vector<int> destinations;
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::North);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::East);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::South);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::West);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southeast);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southwest);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northeast);
-        board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northwest);
-        for (int destination : destinations) {
-            results.push_back(Move(square, destination));
-        }
-    } else if (board.kings & squareMask) {
-        appendKingMoves(results);
-        const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
-        const int kingLocation = Square::getSetBit(board.kings & currentSide);
-        if (side == Side::White) {
-            if (canWhiteCastleKingside) {
-                constexpr Bitboard castleMask = 96ULL;
-                if (!((board.whites | board.blacks) & castleMask) &&
-                    !board.isUnderAttack(Square::get(Column::F, 1), side) &&
-                    !board.isUnderAttack(Square::get(Column::G, 1), side)) {
-                    results.push_back(Move(kingLocation, Square::get(Column::G, 1)));
-                }
+    std::vector<int> destinations;
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southeast);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southwest);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northeast);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northwest);
+    for (int destination : destinations) {
+        results.push_back(Move(square, destination));
+    }
+}
+
+void GameState::appendRookMoves(std::vector<Move> &results, int square) const {
+    const Bitboard squareMask = Square::getMask(square);
+    std::vector<int> destinations;
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::North);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::East);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::South);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::West);
+    for (int destination : destinations) {
+        results.push_back(Move(square, destination));
+    }
+}
+
+void GameState::appendQueenMoves(std::vector<Move> &results, int square) const {
+    const Bitboard squareMask = Square::getMask(square);
+    std::vector<int> destinations;
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::North);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::East);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::South);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::West);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southeast);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southwest);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northeast);
+    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northwest);
+    for (int destination : destinations) {
+        results.push_back(Move(square, destination));
+    }
+}
+
+void GameState::appendCastleMoves(std::vector<Move> &results) const {
+    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    const int kingLocation = Square::getSetBit(board.kings & currentSide);
+    if (side == Side::White) {
+        if (canWhiteCastleKingside) {
+            constexpr Bitboard castleMask = 96ULL;
+            if (!((board.whites | board.blacks) & castleMask) &&
+                !board.isUnderAttack(Square::get(Column::F, 1), side) &&
+                !board.isUnderAttack(Square::get(Column::G, 1), side)) {
+                results.push_back(Move(kingLocation, Square::get(Column::G, 1)));
             }
-            if (canWhiteCastleQueenside) {
-                constexpr Bitboard castleMask = 14ULL;
-                if (!((board.whites | board.blacks) & castleMask) &&
-                    !board.isUnderAttack(Square::get(Column::D, 1), side) &&
-                    !board.isUnderAttack(Square::get(Column::C, 1), side)) {
-                    results.push_back(Move(kingLocation, Square::get(Column::C, 1)));
-                }
+        }
+        if (canWhiteCastleQueenside) {
+            constexpr Bitboard castleMask = 14ULL;
+            if (!((board.whites | board.blacks) & castleMask) &&
+                !board.isUnderAttack(Square::get(Column::D, 1), side) &&
+                !board.isUnderAttack(Square::get(Column::C, 1), side)) {
+                results.push_back(Move(kingLocation, Square::get(Column::C, 1)));
             }
-        } else {
-            if (canBlackCastleKingside) {
-                constexpr Bitboard castleMask = 6917529027641081856ULL;
-                if (!((board.whites | board.blacks) & castleMask) &&
-                    !board.isUnderAttack(Square::get(Column::F, 8), side) &&
-                    !board.isUnderAttack(Square::get(Column::G, 8), side)) {
-                    results.push_back(Move(kingLocation, Square::get(Column::G, 8)));
-                }
+        }
+    } else {
+        if (canBlackCastleKingside) {
+            constexpr Bitboard castleMask = 6917529027641081856ULL;
+            if (!((board.whites | board.blacks) & castleMask) &&
+                !board.isUnderAttack(Square::get(Column::F, 8), side) &&
+                !board.isUnderAttack(Square::get(Column::G, 8), side)) {
+                results.push_back(Move(kingLocation, Square::get(Column::G, 8)));
             }
-            if (canBlackCastleQueenside) {
-                constexpr Bitboard castleMask = 1008806316530991104ULL;
-                if (!((board.whites | board.blacks) & castleMask) &&
-                    !board.isUnderAttack(Square::get(Column::D, 8), side) &&
-                    !board.isUnderAttack(Square::get(Column::C, 8), side)) {
-                    results.push_back(Move(kingLocation, Square::get(Column::C, 8)));
-                }
+        }
+        if (canBlackCastleQueenside) {
+            constexpr Bitboard castleMask = 1008806316530991104ULL;
+            if (!((board.whites | board.blacks) & castleMask) &&
+                !board.isUnderAttack(Square::get(Column::D, 8), side) &&
+                !board.isUnderAttack(Square::get(Column::C, 8), side)) {
+                results.push_back(Move(kingLocation, Square::get(Column::C, 8)));
             }
         }
     }

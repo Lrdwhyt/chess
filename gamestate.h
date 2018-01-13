@@ -19,10 +19,16 @@ private:
     bool canBlackCastleQueenside, canBlackCastleKingside;
     int movesSinceCaptureOrPawnMove; // used in calculation of 50 move rule
     std::vector<Move> moveHistory;
-    void appendMovesByPiece(std::vector<Move> &results, int square) const;
+
     std::vector<Move> getKingMoves() const;
+    
     void appendKingMoves(std::vector<Move> &results) const;
     void appendPawnMoves(std::vector<Move> &results, int square) const;
+    void appendKnightMoves(std::vector<Move> &results, int square) const;
+    void appendBishopMoves(std::vector<Move> &results, int square) const;
+    void appendRookMoves(std::vector<Move> &results, int square) const;
+    void appendQueenMoves(std::vector<Move> &results, int square) const;
+    void appendCastleMoves(std::vector<Move> &results) const;
 
     void appendNonQuietLegalPieceMoves(std::vector<Move> &results, int square) const;
     std::vector<Move> getNonQuietKingMoves() const;
