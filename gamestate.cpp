@@ -190,106 +190,115 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
     std::vector<Move> results;
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
-    for (int square = 0; square < 64; ++square) {
-        const Bitboard squareMask = Square::getMask(square);
-        if (!(currentSide & squareMask)) {
-            continue;
-        }
-        if (square != kingLocation && Square::inLine(square, kingLocation)) {
-            // Need to check for potential pins
+    Bitboard queenSquares = board.queens & currentSide;
+    while (queenSquares) {
+        const int square = Square::getSetBit(queenSquares);
+        if (Square::inLine(square, kingLocation)) {
             const int pinningLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
             if (pinningLocation != -1) {
-                // Since we are not under check, this has to be a pin.
-                // <---pinningLocation-----square-----kingLocation--->
-                // But we can still move along the line of this pin
                 const std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, pinningLocation);
-                // Point to beware: This includes the current square as well
-                if (board.pawns & squareMask) {
-                    for (int destination : validDestinations) {
-                        const Move move = Move(square, destination);
-                        if (!board.isEmpty(destination)) {
-                            if (move.isPawnCapture(side)) {
-                                results.push_back(move);
-                            }
-                        } else if (move.isPawnMove(side)) {
-                            results.push_back(move);
-                        }
+                for (int destination : validDestinations) {
+                    if (destination == square) {
+                        continue;
                     }
-                } else {
-                    // Since our piece is pinned, we know we are the only piece
-                    // between the king and the pinner. Therefore our move
-                    // between them cannot be obstructed.
-                    for (int destination : validDestinations) {
-                        if (destination == square) {
-                            continue;
-                        }
-                        if (board.isLegalPieceMove(square, destination)) {
-                            results.push_back(Move(square, destination));
-                        }
+                    const Move move = Move(square, destination);
+                    if (move.isQueenMove()) {
+                        results.push_back(move);
                     }
                 }
             } else {
-                // Piece is not pinned and can be moved freely
                 appendMovesByPiece(results, square);
             }
         } else {
             appendMovesByPiece(results, square);
         }
+        queenSquares &= queenSquares - 1;
     }
-    return results;
-}
-
-std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
-    std::vector<Move> results;
-    // Can only evade check by capturing attacking piece or by moving king
-    for (int square = 0; square < 64; ++square) {
-        const Bitboard squareMask = Square::getMask(square);
-        if (!(((side == Side::White) ? board.whites : board.blacks) & squareMask)) {
-            continue;
-        }
-
-        if (board.kings & squareMask) {
-            appendKingMoves(results);
-        } else {
-            // Only valid moves are to capture on checkingSquare
-            // The destination does not have to be checkingSquare
-            // (can capture via en passant)
-            const Move move = Move(square, checkingSquare);
-            const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
-            const int kingLocation = Square::getSetBit(board.kings & currentSide);
-            if (Square::inLine(kingLocation, square)) {
-                if (board.getPinningOrAttackingSquare(kingLocation, square, side) != -1) {
-                    // We are pinned and cannot legally capture on checkingSquare
-                    continue;
-                }
-            }
-            if (board.pawns & squareMask) {
-                if (canEnPassant(square)) {
-                    // It is the en passant pawn that is checking us
-                    // Our pawn is in one of two positions relative to our king
-                    // On top/bottom or one knight jump away
-                    const int pawnDirection = (side == Side::White) ? 1 : -1;
-                    const Move enPassant = Move(square, Square::getInYDirection(checkingSquare, pawnDirection));
-                    Perft::logEnPassant();
-                    results.push_back(enPassant);
-                } else if (move.isPawnCapture(side)) {
-                    results.push_back(move);
-                }
-            } else if (board.knights & squareMask) {
-                if (move.isKnightMove()) {
-                    results.push_back(move);
-                }
-            } else {
-                // Bishop/rook/queen
-                if (board.isLegalPieceMove(square, checkingSquare)) {
-                    if (board.isObstructedBetween(square, checkingSquare)) {
+    Bitboard rookSquares = board.rooks & currentSide;
+    while (rookSquares) {
+        const int square = Square::getSetBit(rookSquares);
+        if (Square::inLine(square, kingLocation)) {
+            const int pinningLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
+            if (pinningLocation != -1) {
+                const std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, pinningLocation);
+                for (int destination : validDestinations) {
+                    if (destination == square) {
                         continue;
                     }
-                    results.push_back(move);
+                    const Move move = Move(square, destination);
+                    if (move.isRookMove()) {
+                        results.push_back(move);
+                    }
                 }
+            } else {
+                appendMovesByPiece(results, square);
             }
+        } else {
+            appendMovesByPiece(results, square);
         }
+        rookSquares &= rookSquares - 1;
     }
+    Bitboard knightSquares = board.knights & currentSide;
+    while (knightSquares) {
+        const int square = Square::getSetBit(knightSquares);
+        if (!Square::inLine(square, kingLocation) ||
+            board.getPinningOrAttackingSquare(kingLocation, square, side) == -1) {
+            // Check that we aren't pinned
+            // Knights can't move at all when pinned
+            appendMovesByPiece(results, square);
+        }
+        knightSquares &= knightSquares - 1;
+    }
+    Bitboard bishopSquares = board.bishops & currentSide;
+    while (bishopSquares) {
+        const int square = Square::getSetBit(bishopSquares);
+        if (Square::inLine(square, kingLocation)) {
+            const int pinningLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
+            if (pinningLocation != -1) {
+                const std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, pinningLocation);
+                for (int destination : validDestinations) {
+                    if (destination == square) {
+                        continue;
+                    }
+                    const Move move = Move(square, destination);
+                    if (move.isBishopMove()) {
+                        results.push_back(move);
+                    }
+                }
+            } else {
+                appendMovesByPiece(results, square);
+            }
+        } else {
+            appendMovesByPiece(results, square);
+        }
+        bishopSquares &= bishopSquares - 1;
+    }
+    Bitboard pawnSquares = board.pawns & currentSide;
+    while (pawnSquares) {
+        const int square = Square::getSetBit(pawnSquares);
+        if (Square::inLine(square, kingLocation)) {
+            const int pinningLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
+            if (pinningLocation != -1) {
+                const std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, pinningLocation);
+                for (int destination : validDestinations) {
+                    const Move move = Move(square, destination);
+                    if (!board.isEmpty(destination)) {
+                        if (move.isPawnCapture(side)) {
+                            results.push_back(move);
+                        }
+                    } else if (move.isPawnMove(side)) {
+                        results.push_back(move);
+                    }
+                }
+            } else {
+                appendMovesByPiece(results, square);
+            }
+        } else {
+            appendMovesByPiece(results, square);
+        }
+        pawnSquares &= pawnSquares - 1;
+    }
+    appendKingMoves(results);
     return results;
 }
 
@@ -366,6 +375,59 @@ std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
             }
         }
     }
+    return results;
+}
+
+std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
+    std::vector<Move> results;
+    // Can only evade check by capturing attacking piece or by moving king
+    for (int square = 0; square < 64; ++square) {
+        const Bitboard squareMask = Square::getMask(square);
+        if (!(((side == Side::White) ? board.whites : board.blacks) & squareMask)) {
+            continue;
+        }
+        if (board.kings & squareMask) {
+            continue;
+        }
+        // Only valid moves are to capture on checkingSquare
+        // The destination does not have to be checkingSquare
+        // (can capture via en passant)
+        const Move move = Move(square, checkingSquare);
+        const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+        const int kingLocation = Square::getSetBit(board.kings & currentSide);
+        if (Square::inLine(kingLocation, square)) {
+            if (board.getPinningOrAttackingSquare(kingLocation, square, side) != -1) {
+                // We are pinned and cannot legally capture on checkingSquare
+                continue;
+            }
+        }
+        if (board.pawns & squareMask) {
+            if (canEnPassant(square)) {
+                // It is the en passant pawn that is checking us
+                // Our pawn is in one of two positions relative to our king
+                // On top/bottom or one knight jump away
+                const int pawnDirection = (side == Side::White) ? 1 : -1;
+                const Move enPassant = Move(square, Square::getInYDirection(checkingSquare, pawnDirection));
+                Perft::logEnPassant();
+                results.push_back(enPassant);
+            } else if (move.isPawnCapture(side)) {
+                results.push_back(move);
+            }
+        } else if (board.knights & squareMask) {
+            if (move.isKnightMove()) {
+                results.push_back(move);
+            }
+        } else {
+            // Bishop/rook/queen
+            if (board.isLegalPieceMove(square, checkingSquare)) {
+                if (board.isObstructedBetween(square, checkingSquare)) {
+                    continue;
+                }
+                results.push_back(move);
+            }
+        }
+    }
+    appendKingMoves(results);
     return results;
 }
 

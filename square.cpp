@@ -78,6 +78,7 @@ std::tuple<int, int> Square::diff(int a, int b) {
     return std::tuple<int, int>(x2 - x1, y2 - y1);
 }
 
+// TODO: Place B first
 std::vector<int> Square::fromAtoBInclusive(int a, int b) {
     std::vector<int> results;
     if (a == b) {
