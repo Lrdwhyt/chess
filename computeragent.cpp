@@ -6,7 +6,7 @@
 ComputerAgent::ComputerAgent() {}
 
 Move ComputerAgent::requestMove(GameState &gameState) {
-    std::vector<Move> moves = gameState.getPossibleMoves();
+    std::vector<Move> moves = gameState.getLegalMoves();
     std::srand(std::time(0));
     int index = std::rand() % moves.size();
     return moves[index];

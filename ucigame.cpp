@@ -9,7 +9,7 @@ void UciGame::updateState(Move move) {
 }
 
 void UciGame::fromStart() {
-    state = GameState();
+    state = GameState(0);
 }
 
 void UciGame::fromFen(std::string fenString) {
