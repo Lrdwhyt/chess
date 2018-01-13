@@ -188,6 +188,7 @@ std::vector<Move> GameState::getLegalMoves() const {
 
 std::vector<Move> GameState::getMovesOutsideCheck() const {
     std::vector<Move> results;
+    results.reserve(40);
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
     appendCastleMoves(results);
