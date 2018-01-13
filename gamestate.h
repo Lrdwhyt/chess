@@ -21,7 +21,7 @@ private:
     std::vector<Move> moveHistory;
 
     std::vector<Move> getKingMoves() const;
-    
+
     void appendKingMoves(std::vector<Move> &results) const;
     void appendPawnMoves(std::vector<Move> &results, int square) const;
     void appendKnightMoves(std::vector<Move> &results, int square) const;
@@ -31,9 +31,8 @@ private:
     void appendCastleMoves(std::vector<Move> &results) const;
 
     void appendNonQuietLegalPieceMoves(std::vector<Move> &results, int square) const;
-    std::vector<Move> getNonQuietKingMoves() const;
     void appendNonQuietKingMoves(std::vector<Move> &results) const;
-    void getNonQuietPawnMoves(std::vector<Move> &results, int square) const;
+    void appendNonQuietPawnMoves(std::vector<Move> &results, int square) const;
 
     /**
      * Check if a pawn move will result in a promotion

@@ -657,7 +657,7 @@ std::vector<Move> GameState::getNonQuietMovesOutsideCheck() const {
 void GameState::appendNonQuietLegalPieceMoves(std::vector<Move> &results, int square) const {
     const Bitboard squareMask = Square::getMask(square);
     if (board.pawns & squareMask) {
-        getNonQuietPawnMoves(results, square);
+        appendNonQuietPawnMoves(results, square);
     } else if (board.knights & squareMask) {
         const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
         Bitboard knightSquares = Square::getKnightAttacks(squareMask) & oppSide;
@@ -712,7 +712,7 @@ void GameState::appendNonQuietLegalPieceMoves(std::vector<Move> &results, int sq
 }
 
 // Includes promotions
-void GameState::getNonQuietPawnMoves(std::vector<Move> &results, int square) const {
+void GameState::appendNonQuietPawnMoves(std::vector<Move> &results, int square) const {
     if (canEnPassant(square)) {
         if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
             // Can capture by en passant
@@ -776,41 +776,25 @@ void GameState::appendNonQuietKingMoves(std::vector<Move> &results) const {
     }
 }
 
-std::vector<Move> GameState::getNonQuietKingMoves() const {
-    std::vector<Move> results;
-    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
-    const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
-    const int origin = Square::getSetBit(board.kings & currentSide);
-    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & oppSide;
-    while (kingSquares) {
-        const int kingDestination = Square::getSetBit(kingSquares);
-        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
-            results.push_back(Move(origin, kingDestination));
-        }
-        kingSquares &= kingSquares - 1;
-    }
-    return results;
-}
-
-/*
+/**
  * Checks if en passant is possible
  * Does not check if en passant will put us into check
  * Conditions for en passant:
  * - Previous move was a 2 pawn move
  * - Our pawn is now 1 square horizontally adjacent to said pawn
- * ASSUME: square contains pawn
+ * Precondition: square contains pawn
  */
 bool GameState::canEnPassant(int square) const {
     if (moveHistory.size() == 0) {
         return false; // No previous moves
     }
     const Move lastMove = moveHistory.back();
+    if (!lastMove.isTwoSquarePawnMove()) {
+        return false; // Pawn didn't move two squares
+    }
     const int lastMovedPiece = lastMove.destination;
     if (!(board.pawns & Square::getMask(lastMovedPiece))) {
         return false; // Previous moved piece wasn't a pawn
-    }
-    if (!lastMove.isTwoSquarePawnMove()) {
-        return false; // Pawn didn't move two squares
     }
     if (Square::getRow(square) != Square::getRow(lastMovedPiece)) {
         return false; // We are not in the same row as the pawn
