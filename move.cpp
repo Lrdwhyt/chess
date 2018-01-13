@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include "board.h"
-
 static constexpr Bitboard secondRow = 65280ULL;
 static constexpr Bitboard seventhRow = 71776119061217280ULL;
 

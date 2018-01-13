@@ -9,7 +9,6 @@
 
 #include <string>
 
-#include "board.h"
 #include "piece.h"
 #include "square.h"
 

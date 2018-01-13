@@ -190,6 +190,7 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
     std::vector<Move> results;
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
+    appendCastleMoves(results);
     Bitboard queenSquares = board.queens & currentSide;
     while (queenSquares) {
         const int square = Square::getSetBit(queenSquares);
@@ -299,7 +300,6 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
         pawnSquares &= pawnSquares - 1;
     }
     appendKingMoves(results);
-    appendCastleMoves(results);
     return results;
 }
 
@@ -341,7 +341,7 @@ std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
                         results.push_back(Move(square, checkingSquare));
                     }
                     continue;
-                    //TODO: get rid of this continue without breaking logic
+                    // TODO: get rid of this continue without breaking logic
                 }
             }
             // Piece can only block the check or capture the checking piece
@@ -444,42 +444,30 @@ void GameState::appendKnightMoves(std::vector<Move> &results, int square) const 
 
 void GameState::appendBishopMoves(std::vector<Move> &results, int square) const {
     const Bitboard squareMask = Square::getMask(square);
-    std::vector<int> destinations;
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southeast);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southwest);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northeast);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northwest);
-    for (int destination : destinations) {
-        results.push_back(Move(square, destination));
-    }
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Southeast);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Southwest);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Northeast);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Northwest);
 }
 
 void GameState::appendRookMoves(std::vector<Move> &results, int square) const {
     const Bitboard squareMask = Square::getMask(square);
-    std::vector<int> destinations;
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::North);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::East);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::South);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::West);
-    for (int destination : destinations) {
-        results.push_back(Move(square, destination));
-    }
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::North);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::East);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::South);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::West);
 }
 
 void GameState::appendQueenMoves(std::vector<Move> &results, int square) const {
     const Bitboard squareMask = Square::getMask(square);
-    std::vector<int> destinations;
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::North);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::East);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::South);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::West);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southeast);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Southwest);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northeast);
-    board.appendUnobstructedSquaresInDirection(destinations, squareMask, side, Direction::Northwest);
-    for (int destination : destinations) {
-        results.push_back(Move(square, destination));
-    }
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::North);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::East);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::South);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::West);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Southeast);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Southwest);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Northeast);
+    board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Northwest);
 }
 
 void GameState::appendCastleMoves(std::vector<Move> &results) const {

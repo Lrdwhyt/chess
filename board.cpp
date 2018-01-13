@@ -252,11 +252,7 @@ bool Board::isUnderAttack(int square, Side side) const {
 
 bool Board::isAttackedByKnight(int square, Side side) const {
     const Bitboard oppSide = (side == Side::White) ? blacks : whites;
-    if (Square::getKnightAttacks(Board::getMask(square)) & knights & oppSide) {
-        return true;
-    } else {
-        return false;
-    }
+    return (knights & oppSide & Square::getKnightAttacks(Board::getMask(square)));
 }
 
 bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
@@ -343,8 +339,6 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
         }
     } else {
         // Check number of ray attackers
-        // The directions are paired in opposites because it is impossible
-        // to be double checked from both sides in a line
         const Bitboard squareMask = Board::getMask(square);
         int attackerCount = 0;
         int attackerSquareTemp;
@@ -459,7 +453,7 @@ int Board::getPinningOrAttackingSquare(int square, int movingPiece, Side side) c
     } else if (y > 0) {
         y = 1;
     }
-    const Bitboard enemyVariablePiece = (x == 0 || y == 0) ? rooks : bishops;
+    const Bitboard attackingPieces = queens | ((x == 0 || y == 0) ? rooks : bishops);
     while (true) {
         square = Square::getInDirection(square, x, y);
         if (square == -1) {
@@ -471,7 +465,7 @@ int Board::getPinningOrAttackingSquare(int square, int movingPiece, Side side) c
         if (isSide(square, side)) {
             return -1;
         } else if (isSide(square, oppSide)) {
-            if (queens & Board::getMask(square) || enemyVariablePiece & Board::getMask(square)) {
+            if (attackingPieces & Board::getMask(square)) {
                 return square;
             } else {
                 return -1;
@@ -574,7 +568,7 @@ bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
     }
 }
 
-void Board::appendUnobstructedSquaresInDirection(std::vector<int> &results, Bitboard squareMask, Side side, Direction direction) const {
+void Board::appendUnobstructedMovesInDirection(std::vector<Move> &results, int square, Bitboard squareMask, Side side, Direction direction) const {
     const Bitboard sameSide = (side == Side::White) ? whites : blacks;
     const Bitboard oppSide = (side == Side::White) ? blacks : whites;
     while (true) {
@@ -585,7 +579,7 @@ void Board::appendUnobstructedSquaresInDirection(std::vector<int> &results, Bitb
         if (sameSide & squareMask) {
             break;
         }
-        results.push_back(Square::getSetBit(squareMask));
+        results.push_back(Move(square, Square::getSetBit(squareMask)));
         if (oppSide & squareMask) {
             break;
         }
@@ -605,14 +599,12 @@ bool Board::isObstructedBetween(int a, int b) const {
     std::tie(x, y) = Square::diff(a, b);
     if (x > 1) {
         x = 1;
-    }
-    if (x < -1) {
+    } else if (x < -1) {
         x = -1;
     }
     if (y > 1) {
         y = 1;
-    }
-    if (y < -1) {
+    } else if (y < -1) {
         y = -1;
     }
     int current = a + (y * 8 + x);

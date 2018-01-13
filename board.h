@@ -58,7 +58,7 @@ public:
 
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;
 
-    void appendUnobstructedSquaresInDirection(std::vector<int> &results, Bitboard square, Side side, Direction direction) const;
+    void appendUnobstructedMovesInDirection(std::vector<Move> &results, int square, Bitboard squareMask, Side side, Direction direction) const;
 
     int captureInDirection(Bitboard squareMask, Side side, Direction direction) const;
 
