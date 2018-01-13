@@ -97,9 +97,9 @@ void GameState::processMove(Move move) {
             canWhiteCastleKingside = false;
             canWhiteCastleQueenside = false;
         } else if (board.rooks & originMask) {
-            if (move.origin == Square::get(Column::A, 1)) {
+            if (move.origin == whiteQueenRook) {
                 canWhiteCastleQueenside = false;
-            } else if (move.origin == Square::get(Column::H, 1)) {
+            } else if (move.origin == whiteKingRook) {
                 canWhiteCastleKingside = false;
             }
         }
@@ -108,15 +108,15 @@ void GameState::processMove(Move move) {
             canBlackCastleKingside = false;
             canBlackCastleQueenside = false;
         } else if (board.rooks & originMask) {
-            if (move.origin == Square::get(Column::A, 8)) {
+            if (move.origin == blackQueenRook) {
                 canBlackCastleQueenside = false;
-            } else if (move.origin == Square::get(Column::H, 8)) {
+            } else if (move.origin == blackKingRook) {
                 canBlackCastleKingside = false;
             }
         }
     }
 
-    if (board.kings & Square::getMask(move.origin) && move.isCastleMove()) {
+    if (board.kings & originMask && move.isCastleMove()) {
         // Move rook
         const int kingRow = (side == Side::White) ? 1 : 8;
         if (Square::getColumn(move.destination) == Column::G) {
@@ -124,7 +124,7 @@ void GameState::processMove(Move move) {
         } else if (Square::getColumn(move.destination) == Column::C) {
             board.movePiece(Square::get(Column::A, kingRow), Square::get(Column::D, kingRow));
         }
-    } else if (board.pawns & Square::getMask(move.origin) && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
+    } else if (board.pawns & originMask && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
         // Remove pawn captured via en passant
         const int pawnDirection = side == Side::White ? 1 : -1;
         board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) - pawnDirection));
@@ -156,14 +156,14 @@ std::vector<Move> GameState::getNonQuietMoves() const {
         case CheckType::None:
             return getCaptureMovesOutsideCheck();
 
-        case CheckType::Double:
-            return getPossibleKingMoves();
-
         case CheckType::Ray:
             return getMovesInRayCheck(checkingSquare);
 
         case CheckType::Direct:
             return getMovesInDirectCheck(checkingSquare);
+
+        case CheckType::Double:
+            return getKingMoves();
     }
 }
 
@@ -175,24 +175,24 @@ std::vector<Move> GameState::getLegalMoves() const {
         case CheckType::None:
             return getMovesOutsideCheck();
 
-        case CheckType::Double:
-            return getPossibleKingMoves();
-
         case CheckType::Ray:
             return getMovesInRayCheck(checkingSquare);
 
         case CheckType::Direct:
             return getMovesInDirectCheck(checkingSquare);
+
+        case CheckType::Double:
+            return getKingMoves();
     }
 }
 
-inline std::vector<Move> GameState::getCaptureMovesOutsideCheck() const {
+std::vector<Move> GameState::getMovesOutsideCheck() const {
     std::vector<Move> results;
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
     for (int square = 0; square < 64; ++square) {
-        const std::uint64_t squareMask = Square::getMask(square);
-        if (!(((side == Side::White) ? board.whites : board.blacks) & squareMask)) {
+        const Bitboard squareMask = Square::getMask(square);
+        if (!(currentSide & squareMask)) {
             continue;
         }
         if (square != kingLocation && Square::inLine(square, kingLocation)) {
@@ -202,49 +202,7 @@ inline std::vector<Move> GameState::getCaptureMovesOutsideCheck() const {
                 // Since we are not under check, this has to be a pin.
                 // <---pinningLocation-----square-----kingLocation--->
                 // But we can still move along the line of this pin
-                if (board.pawns & squareMask) {
-                    const Move move = Move(square, pinningLocation);
-                    if (move.isPawnCapture(side)) {
-                        results.push_back(move);
-                    }
-                } else {
-                    // Since our piece is pinned, we know we are the only piece
-                    // between the king and the pinner. Therefore our move
-                    // between them cannot be obstructed.
-                    if (board.isLegalPieceMove(square, pinningLocation)) {
-                        results.push_back(Move(square, pinningLocation));
-                    }
-                }
-            } else {
-                // Piece is not pinned and can be moved freely
-                std::vector<Move> pieceMoves = getPossiblePieceCaptureMoves(square);
-                results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
-            }
-        } else {
-            std::vector<Move> pieceMoves = getPossiblePieceCaptureMoves(square);
-            results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
-        }
-    }
-    return results;
-}
-
-inline std::vector<Move> GameState::getMovesOutsideCheck() const {
-    std::vector<Move> results;
-    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
-    const int kingLocation = Square::getSetBit(board.kings & currentSide);
-    for (int square = 0; square < 64; ++square) {
-        const std::uint64_t squareMask = Square::getMask(square);
-        if (!(((side == Side::White) ? board.whites : board.blacks) & squareMask)) {
-            continue;
-        }
-        if (square != kingLocation && Square::inLine(square, kingLocation)) {
-            // Need to check for potential pins
-            const int pinningLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
-            if (pinningLocation != -1) {
-                // Since we are not under check, this has to be a pin.
-                // <---pinningLocation-----square-----kingLocation--->
-                // But we can still move along the line of this pin
-                std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, pinningLocation);
+                const std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, pinningLocation);
                 // Point to beware: This includes the current square as well
                 if (board.pawns & squareMask) {
                     for (int destination : validDestinations) {
@@ -272,29 +230,26 @@ inline std::vector<Move> GameState::getMovesOutsideCheck() const {
                 }
             } else {
                 // Piece is not pinned and can be moved freely
-                std::vector<Move> pieceMoves = getPossiblePieceMoves(square);
-                results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
+                appendMovesByPiece(results, square);
             }
         } else {
-            std::vector<Move> pieceMoves = getPossiblePieceMoves(square);
-            results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
+            appendMovesByPiece(results, square);
         }
     }
     return results;
 }
 
-inline std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
+std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
     std::vector<Move> results;
     // Can only evade check by capturing attacking piece or by moving king
     for (int square = 0; square < 64; ++square) {
-        const std::uint64_t squareMask = Square::getMask(square);
+        const Bitboard squareMask = Square::getMask(square);
         if (!(((side == Side::White) ? board.whites : board.blacks) & squareMask)) {
             continue;
         }
 
         if (board.kings & squareMask) {
-            std::vector<Move> kingMoves = getPossibleKingMoves();
-            results.insert(results.end(), kingMoves.begin(), kingMoves.end());
+            appendKingMoves(results);
         } else {
             // Only valid moves are to capture on checkingSquare
             // The destination does not have to be checkingSquare
@@ -338,18 +293,17 @@ inline std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) co
     return results;
 }
 
-inline std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
+std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
     std::vector<Move> results;
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
     for (int square = 0; square < 64; ++square) {
-        const std::uint64_t squareMask = Square::getMask(square);
+        const Bitboard squareMask = Square::getMask(square);
         if (!(((side == Side::White) ? board.whites : board.blacks) & squareMask)) {
             continue;
         }
         if (square == kingLocation) { // Piece is king
-            std::vector<Move> kingMoves = getPossibleKingMoves();
-            results.insert(results.end(), kingMoves.begin(), kingMoves.end());
+            appendKingMoves(results);
         } else {
             if (Square::inLine(kingLocation, square)) {
                 const int pinningSquare = board.getPinningOrAttackingSquare(kingLocation, square, side);
@@ -367,7 +321,7 @@ inline std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const
                     const Move move = Move(square, checkingSquare);
                     if (board.pawns & squareMask) {
                         if (move.isPawnCapture(side)) {
-                            const std::vector<Move> pawnMoves = convertPawnMove(square, checkingSquare);
+                            const std::vector<Move> pawnMoves = getPawnPromotionMoves(square, checkingSquare);
                             results.insert(results.end(), pawnMoves.begin(), pawnMoves.end());
                         }
                     } else if (board.isLegalPieceMove(square, checkingSquare)) {
@@ -399,12 +353,12 @@ inline std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const
                         // destination is clear or move is a capture
                         if (board.isEmpty(destination)) {
                             if (move.isPawnMove(side)) {
-                                std::vector<Move> pawnMoves = convertPawnMove(square, destination);
+                                std::vector<Move> pawnMoves = getPawnPromotionMoves(square, destination);
                                 results.insert(results.end(), pawnMoves.begin(), pawnMoves.end());
                             }
                         } else {
                             if (move.isPawnCapture(side)) {
-                                std::vector<Move> pawnMoves = convertPawnMove(square, destination);
+                                std::vector<Move> pawnMoves = getPawnPromotionMoves(square, destination);
                                 results.insert(results.end(), pawnMoves.begin(), pawnMoves.end());
                             }
                         }
@@ -418,173 +372,10 @@ inline std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const
     return results;
 }
 
-inline std::vector<Move> GameState::getPossibleKingMoves() const {
-    std::vector<Move> results;
-    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
-    const int origin = Square::getSetBit(board.kings & currentSide);
-    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & ~currentSide;
-    while (kingSquares) {
-        const int kingDestination = Square::getSetBit(kingSquares);
-        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
-            results.push_back(Move(origin, kingDestination));
-        }
-        kingSquares &= kingSquares - 1;
-    }
-    return results;
-}
-
-inline std::vector<Move> GameState::getPossibleKingCaptureMoves() const {
-    std::vector<Move> results;
-    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
-    const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
-    const int origin = Square::getSetBit(board.kings & currentSide);
-    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & oppSide;
-    while (kingSquares) {
-        const int kingDestination = Square::getSetBit(kingSquares);
-        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
-            results.push_back(Move(origin, kingDestination));
-        }
-        kingSquares &= kingSquares - 1;
-    }
-    return results;
-}
-
-inline std::vector<Move> GameState::getPossiblePawnMoves(int square) const {
-    std::vector<Move> results;
-    if (canEnPassant(square)) {
-        if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
-            // Can capture by en passant
-            Perft::logEnPassant();
-            const int pawnDirection = (side == Side::White) ? 1 : -1;
-            results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
-        }
-    }
-    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
-    const int originalPawnRow = (side == Side::White) ? 2 : 7;
-    const int pawnDirection = (side == Side::White) ? 1 : -1;
-    const int prePromotionRow = (side == Side::White) ? 7 : 2;
-    bool canPromote = false;
-    if (Square::getRow(square) == prePromotionRow) {
-        canPromote = true;
-    }
-    const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
-    const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
-    if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
-        if (canPromote) {
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Queen));
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Rook));
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Bishop));
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Knight));
-        } else {
-            results.push_back(Move(square, leftCaptureSquare));
-        }
-    }
-    if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
-        if (canPromote) {
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Queen));
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Rook));
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Bishop));
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Knight));
-        } else {
-            results.push_back(Move(square, rightCaptureSquare));
-        }
-    }
-    const int forwardSquare = Square::getInYDirection(square, pawnDirection);
-    if (board.isEmpty(forwardSquare)) {
-        if (canPromote) {
-            results.push_back(Move(square, forwardSquare, PieceType::Queen));
-            results.push_back(Move(square, forwardSquare, PieceType::Rook));
-            results.push_back(Move(square, forwardSquare, PieceType::Bishop));
-            results.push_back(Move(square, forwardSquare, PieceType::Knight));
-        } else {
-            results.push_back(Move(square, forwardSquare));
-            if (Square::getRow(square) == originalPawnRow) {
-                const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
-                if (board.isEmpty(forwardTwoSquares)) {
-                    results.push_back(Move(square, forwardTwoSquares));
-                }
-            }
-        }
-    }
-    return results;
-}
-
-// Includes promotions
-inline std::vector<Move> GameState::getPossiblePawnCaptureMoves(int square) const {
-    std::vector<Move> results;
-    if (canEnPassant(square)) {
-        if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
-            // Can capture by en passant
-            Perft::logEnPassant();
-            const int pawnDirection = (side == Side::White) ? 1 : -1;
-            results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
-        }
-    }
-    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
-    const int originalPawnRow = (side == Side::White) ? 2 : 7;
-    const int pawnDirection = (side == Side::White) ? 1 : -1;
-    const int prePromotionRow = (side == Side::White) ? 7 : 2;
-    bool canPromote = false;
-    if (Square::getRow(square) == prePromotionRow) {
-        canPromote = true;
-    }
-    const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
-    const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
-    if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
-        if (canPromote) {
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Queen));
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Rook));
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Bishop));
-            results.push_back(Move(square, leftCaptureSquare, PieceType::Knight));
-        } else {
-            results.push_back(Move(square, leftCaptureSquare));
-        }
-    }
-    if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
-        if (canPromote) {
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Queen));
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Rook));
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Bishop));
-            results.push_back(Move(square, rightCaptureSquare, PieceType::Knight));
-        } else {
-            results.push_back(Move(square, rightCaptureSquare));
-        }
-    }
-    const int forwardSquare = Square::getInYDirection(square, pawnDirection);
-    if (board.isEmpty(forwardSquare)) {
-        if (canPromote) {
-            results.push_back(Move(square, forwardSquare, PieceType::Queen));
-            results.push_back(Move(square, forwardSquare, PieceType::Rook));
-            results.push_back(Move(square, forwardSquare, PieceType::Bishop));
-            results.push_back(Move(square, forwardSquare, PieceType::Knight));
-        }
-    }
-    return results;
-}
-
-inline std::vector<Move> GameState::convertPawnMove(int origin, int destination) const {
-    std::vector<Move> results;
-    if (side == Side::White && Square::getRow(origin) == 7) {
-        results.push_back(Move(origin, destination, PieceType::Queen));
-        results.push_back(Move(origin, destination, PieceType::Rook));
-        results.push_back(Move(origin, destination, PieceType::Bishop));
-        results.push_back(Move(origin, destination, PieceType::Knight));
-    } else if (side == Side::Black && Square::getRow(origin) == 2) {
-        results.push_back(Move(origin, destination, PieceType::Queen));
-        results.push_back(Move(origin, destination, PieceType::Rook));
-        results.push_back(Move(origin, destination, PieceType::Bishop));
-        results.push_back(Move(origin, destination, PieceType::Knight));
-    } else {
-        results.push_back(Move(origin, destination));
-    }
-    return results;
-}
-
-inline std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
-    std::vector<Move> results;
-    const std::uint64_t squareMask = Square::getMask(square);
+void GameState::appendMovesByPiece(std::vector<Move> &results, int square) const {
+    const Bitboard squareMask = Square::getMask(square);
     if (board.pawns & squareMask) {
-        return getPossiblePawnMoves(square);
+        appendPawnMoves(results, square);
     } else if (board.knights & squareMask) {
         const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
         Bitboard knightSquares = Square::getKnightAttacks(squareMask) & ~currentSide;
@@ -625,13 +416,12 @@ inline std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
             results.push_back(Move(square, destination));
         }
     } else if (board.kings & squareMask) {
-        std::vector<Move> kingMoves = getPossibleKingMoves();
-        results.insert(results.end(), kingMoves.begin(), kingMoves.end());
+        appendKingMoves(results);
         const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
         const int kingLocation = Square::getSetBit(board.kings & currentSide);
         if (side == Side::White) {
             if (canWhiteCastleKingside) {
-                constexpr std::uint64_t castleMask = 96ULL;
+                constexpr Bitboard castleMask = 96ULL;
                 if (!((board.whites | board.blacks) & castleMask) &&
                     !board.isUnderAttack(Square::get(Column::F, 1), side) &&
                     !board.isUnderAttack(Square::get(Column::G, 1), side)) {
@@ -639,7 +429,7 @@ inline std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
                 }
             }
             if (canWhiteCastleQueenside) {
-                constexpr std::uint64_t castleMask = 14ULL;
+                constexpr Bitboard castleMask = 14ULL;
                 if (!((board.whites | board.blacks) & castleMask) &&
                     !board.isUnderAttack(Square::get(Column::D, 1), side) &&
                     !board.isUnderAttack(Square::get(Column::C, 1), side)) {
@@ -648,7 +438,7 @@ inline std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
             }
         } else {
             if (canBlackCastleKingside) {
-                constexpr std::uint64_t castleMask = 6917529027641081856ULL;
+                constexpr Bitboard castleMask = 6917529027641081856ULL;
                 if (!((board.whites | board.blacks) & castleMask) &&
                     !board.isUnderAttack(Square::get(Column::F, 8), side) &&
                     !board.isUnderAttack(Square::get(Column::G, 8), side)) {
@@ -656,7 +446,7 @@ inline std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
                 }
             }
             if (canBlackCastleQueenside) {
-                constexpr std::uint64_t castleMask = 1008806316530991104ULL;
+                constexpr Bitboard castleMask = 1008806316530991104ULL;
                 if (!((board.whites | board.blacks) & castleMask) &&
                     !board.isUnderAttack(Square::get(Column::D, 8), side) &&
                     !board.isUnderAttack(Square::get(Column::C, 8), side)) {
@@ -665,14 +455,158 @@ inline std::vector<Move> GameState::getPossiblePieceMoves(int square) const {
             }
         }
     }
+}
+
+void GameState::appendKingMoves(std::vector<Move> &results) const {
+    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    const int origin = Square::getSetBit(board.kings & currentSide);
+    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & ~currentSide;
+    while (kingSquares) {
+        const int kingDestination = Square::getSetBit(kingSquares);
+        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
+            results.push_back(Move(origin, kingDestination));
+        }
+        kingSquares &= kingSquares - 1;
+    }
+}
+
+std::vector<Move> GameState::getKingMoves() const {
+    std::vector<Move> results;
+    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    const int origin = Square::getSetBit(board.kings & currentSide);
+    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & ~currentSide;
+    while (kingSquares) {
+        const int kingDestination = Square::getSetBit(kingSquares);
+        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
+            results.push_back(Move(origin, kingDestination));
+        }
+        kingSquares &= kingSquares - 1;
+    }
     return results;
 }
 
-inline std::vector<Move> GameState::getPossiblePieceCaptureMoves(int square) const {
+void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
+    const Bitboard squareMask = Square::getMask(square);
+    if (canEnPassant(square)) {
+        if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
+            // Can capture by en passant
+            Perft::logEnPassant();
+            const int pawnDirection = (side == Side::White) ? 1 : -1;
+            results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
+        }
+    }
+    const Side oppSide = (side == Side::White) ? Side::Black : Side::White;
+    const int originalPawnRow = (side == Side::White) ? 2 : 7;
+    const int pawnDirection = (side == Side::White) ? 1 : -1;
+    const int prePromotionRow = (side == Side::White) ? 7 : 2;
+    const bool canPromote = (Square::getRow(square) == prePromotionRow) ? true : false;
+    const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
+    const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
+    if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, oppSide)) {
+        if (canPromote) {
+            std::array<Move, 4> res = {
+                Move(square, leftCaptureSquare, PieceType::Queen),
+                Move(square, leftCaptureSquare, PieceType::Rook),
+                Move(square, leftCaptureSquare, PieceType::Bishop),
+                Move(square, leftCaptureSquare, PieceType::Knight)};
+            results.insert(results.end(), res.begin(), res.end());
+        } else {
+            results.push_back(Move(square, leftCaptureSquare));
+        }
+    }
+    if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, oppSide)) {
+        if (canPromote) {
+            std::array<Move, 4> res = {
+                Move(square, rightCaptureSquare, PieceType::Queen),
+                Move(square, rightCaptureSquare, PieceType::Rook),
+                Move(square, rightCaptureSquare, PieceType::Bishop),
+                Move(square, rightCaptureSquare, PieceType::Knight)};
+            results.insert(results.end(), res.begin(), res.end());
+        } else {
+            results.push_back(Move(square, rightCaptureSquare));
+        }
+    }
+    const int forwardSquare = Square::getInYDirection(square, pawnDirection);
+    if (board.isEmpty(forwardSquare)) {
+        if (canPromote) {
+            std::array<Move, 4> res = {
+                Move(square, forwardSquare, PieceType::Queen),
+                Move(square, forwardSquare, PieceType::Rook),
+                Move(square, forwardSquare, PieceType::Bishop),
+                Move(square, forwardSquare, PieceType::Knight)};
+            results.insert(results.end(), res.begin(), res.end());
+        } else {
+            results.push_back(Move(square, forwardSquare));
+            if (Square::getRow(square) == originalPawnRow) {
+                const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
+                if (board.isEmpty(forwardTwoSquares)) {
+                    results.push_back(Move(square, forwardTwoSquares));
+                }
+            }
+        }
+    }
+}
+
+std::vector<Move> GameState::getPawnPromotionMoves(int origin, int destination) const {
+    if ((side == Side::White && Square::getRow(origin) == 7) ||
+        (side == Side::Black && Square::getRow(origin) == 2)) {
+        return {
+            Move(origin, destination, PieceType::Queen),
+            Move(origin, destination, PieceType::Rook),
+            Move(origin, destination, PieceType::Bishop),
+            Move(origin, destination, PieceType::Knight)};
+    } else {
+        return {Move(origin, destination)};
+    }
+}
+
+std::vector<Move> GameState::getCaptureMovesOutsideCheck() const {
     std::vector<Move> results;
-    const std::uint64_t squareMask = Square::getMask(square);
+    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    const int kingLocation = Square::getSetBit(board.kings & currentSide);
+    for (int square = 0; square < 64; ++square) {
+        const Bitboard squareMask = Square::getMask(square);
+        if (!(currentSide & squareMask)) {
+            continue;
+        }
+        if (square != kingLocation && Square::inLine(square, kingLocation)) {
+            // Need to check for potential pins
+            const int pinningLocation = board.getPinningOrAttackingSquare(kingLocation, square, side);
+            if (pinningLocation != -1) {
+                // Since we are not under check, this has to be a pin.
+                // <---pinningLocation-----square-----kingLocation--->
+                // But we can still move along the line of this pin
+                if (board.pawns & squareMask) {
+                    const Move move = Move(square, pinningLocation);
+                    if (move.isPawnCapture(side)) {
+                        results.push_back(move);
+                    }
+                } else {
+                    // Since our piece is pinned, we know we are the only piece
+                    // between the king and the pinner. Therefore our move
+                    // between them cannot be obstructed.
+                    if (board.isLegalPieceMove(square, pinningLocation)) {
+                        results.push_back(Move(square, pinningLocation));
+                    }
+                }
+            } else {
+                // Piece is not pinned and can be moved freely
+                std::vector<Move> pieceMoves = getNonQuietLegalPieceMoves(square);
+                results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
+            }
+        } else {
+            std::vector<Move> pieceMoves = getNonQuietLegalPieceMoves(square);
+            results.insert(results.end(), pieceMoves.begin(), pieceMoves.end());
+        }
+    }
+    return results;
+}
+
+std::vector<Move> GameState::getNonQuietLegalPieceMoves(int square) const {
+    std::vector<Move> results;
+    const Bitboard squareMask = Square::getMask(square);
     if (board.pawns & squareMask) {
-        return getPossiblePawnCaptureMoves(square);
+        return getNonQuietPawnMoves(square);
     } else if (board.knights & squareMask) {
         const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
         Bitboard knightSquares = Square::getKnightAttacks(squareMask) & oppSide;
@@ -722,7 +656,76 @@ inline std::vector<Move> GameState::getPossiblePieceCaptureMoves(int square) con
             results.push_back(Move(square, destination));
         }
     } else if (board.kings & squareMask) {
-        return getPossibleKingCaptureMoves();
+        return getNonQuietKingMoves();
+    }
+    return results;
+}
+
+// Includes promotions
+std::vector<Move> GameState::getNonQuietPawnMoves(int square) const {
+    std::vector<Move> results;
+    if (canEnPassant(square)) {
+        if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
+            // Can capture by en passant
+            Perft::logEnPassant();
+            const int pawnDirection = (side == Side::White) ? 1 : -1;
+            results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
+        }
+    }
+    const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
+    const int originalPawnRow = (side == Side::White) ? 2 : 7;
+    const int pawnDirection = (side == Side::White) ? 1 : -1;
+    const int prePromotionRow = (side == Side::White) ? 7 : 2;
+    bool canPromote = false;
+    if (Square::getRow(square) == prePromotionRow) {
+        canPromote = true;
+    }
+    const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
+    const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
+    if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
+        if (canPromote) {
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Queen));
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Rook));
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Bishop));
+            results.push_back(Move(square, leftCaptureSquare, PieceType::Knight));
+        } else {
+            results.push_back(Move(square, leftCaptureSquare));
+        }
+    }
+    if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
+        if (canPromote) {
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Queen));
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Rook));
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Bishop));
+            results.push_back(Move(square, rightCaptureSquare, PieceType::Knight));
+        } else {
+            results.push_back(Move(square, rightCaptureSquare));
+        }
+    }
+    const int forwardSquare = Square::getInYDirection(square, pawnDirection);
+    if (board.isEmpty(forwardSquare)) {
+        if (canPromote) {
+            results.push_back(Move(square, forwardSquare, PieceType::Queen));
+            results.push_back(Move(square, forwardSquare, PieceType::Rook));
+            results.push_back(Move(square, forwardSquare, PieceType::Bishop));
+            results.push_back(Move(square, forwardSquare, PieceType::Knight));
+        }
+    }
+    return results;
+}
+
+std::vector<Move> GameState::getNonQuietKingMoves() const {
+    std::vector<Move> results;
+    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
+    const int origin = Square::getSetBit(board.kings & currentSide);
+    Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & oppSide;
+    while (kingSquares) {
+        const int kingDestination = Square::getSetBit(kingSquares);
+        if (!board.wouldBeUnderAttack(kingDestination, origin, side)) {
+            results.push_back(Move(origin, kingDestination));
+        }
+        kingSquares &= kingSquares - 1;
     }
     return results;
 }
@@ -759,7 +762,7 @@ bool GameState::canEnPassant(int square) const {
 }
 
 // Evaluates position by number of pieces close to center
-inline int GameState::getPositionEvaluation() const {
+int GameState::getPositionEvaluation() const {
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
     constexpr Bitboard center6by6 = 35604928818740736ULL;
@@ -770,7 +773,7 @@ inline int GameState::getPositionEvaluation() const {
            -2 * Square::getBitCount(oppSide & center6by6);
 }
 
-inline int GameState::getMaterialEvaluation() const {
+int GameState::getMaterialEvaluation() const {
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
     int score = Square::getBitCount(currentSide & board.pawns) +

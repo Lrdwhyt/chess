@@ -19,13 +19,16 @@ private:
     bool canBlackCastleQueenside, canBlackCastleKingside;
     int movesSinceCaptureOrPawnMove; // used in calculation of 50 move rule
     std::vector<Move> moveHistory;
-    std::vector<Move> getPossiblePieceMoves(int square) const;
-    std::vector<Move> getPossiblePieceCaptureMoves(int square) const;
-    std::vector<Move> getPossibleKingMoves(Side side) const;
-    std::vector<Move> getPossibleKingCaptureMoves(Side side) const;
-    std::vector<Move> getPossiblePawnMoves(int square) const;
-    std::vector<Move> getPossiblePawnCaptureMoves(int square) const;
-    std::vector<Move> convertPawnMove(int origin, int destination) const;
+    void appendMovesByPiece(std::vector<Move> &results, int square) const;
+    std::vector<Move> getKingMoves() const;
+    void appendKingMoves(std::vector<Move> &results) const;
+    void appendPawnMoves(std::vector<Move> &results, int square) const;
+
+    std::vector<Move> getNonQuietLegalPieceMoves(int square) const;
+    std::vector<Move> getNonQuietKingMoves() const;
+    std::vector<Move> getNonQuietPawnMoves(int square) const;
+
+    std::vector<Move> getPawnPromotionMoves(int origin, int destination) const;
     bool canEnPassant(int square) const;
 
     // Generate moves when placed in check by a knight or pawn
@@ -37,15 +40,18 @@ private:
     std::vector<Move> getMovesOutsideCheck() const;
     std::vector<Move> getCaptureMovesOutsideCheck() const;
 
+    int getPositionEvaluation() const;
+    int getMaterialEvaluation() const;
+
 public:
     GameState();
+    GameState(int);
     GameState(GameState const &);
     GameState(std::string fenString);
     const Board &getBoard() const;
     void processMove(Move);
     std::vector<Move> getLegalMoves() const;
     std::vector<Move> getNonQuietMoves() const;
-    int getMaterialEvaluation() const;
     int getEvaluation() const;
     bool isLastMovedPieceUnderAttack() const;
     bool isInCheck() const;

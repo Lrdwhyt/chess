@@ -58,17 +58,19 @@ public:
 
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;
 
-    void appendUnobstructedSquaresInDirection(std::vector<int> &destinations, Bitboard square, Side side, Direction direction) const;
+    void appendUnobstructedSquaresInDirection(std::vector<int> &results, Bitboard square, Side side, Direction direction) const;
 
     int captureInDirection(Bitboard squareMask, Side side, Direction direction) const;
 
     bool isSide(int square, Side side) const;
     
+    /* Determine if a piece can travel from A to B without being obstructed */
     bool isObstructedBetween(int a, int b) const;
 
+    /* Determines if side is in check */
     bool isInCheck(Side side) const;
 
-    inline Bitboard getMask(int square) const;
+    Bitboard getMask(int square) const;
 };
 
 #endif
