@@ -1,3 +1,4 @@
+#include <bitset>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -26,7 +27,7 @@ GameState getPosition(std::string position) {
     if (position.length() >= 3 && position.substr(0, 3) == "fen") {
         result = GameState(position.substr(4, position.find("moves")));
     } else if (position.length() >= 8 && position.substr(0, 8) == "startpos") {
-        result = GameState();
+        result = GameState(0);
     }
     if (position.find("moves") != std::string::npos) {
         bool hasNextMove = true;
@@ -49,7 +50,7 @@ GameState getPosition(std::string position) {
 }
 
 void waitForMode() {
-    GameState state;
+    GameState state = GameState(0);
     std::string input;
     while (std::getline(std::cin, input)) {
         if (input == "uci") {

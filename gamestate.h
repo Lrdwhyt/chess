@@ -24,11 +24,22 @@ private:
     void appendKingMoves(std::vector<Move> &results) const;
     void appendPawnMoves(std::vector<Move> &results, int square) const;
 
-    std::vector<Move> getNonQuietLegalPieceMoves(int square) const;
+    void appendNonQuietLegalPieceMoves(std::vector<Move> &results, int square) const;
     std::vector<Move> getNonQuietKingMoves() const;
-    std::vector<Move> getNonQuietPawnMoves(int square) const;
+    void appendNonQuietKingMoves(std::vector<Move> &results) const;
+    void getNonQuietPawnMoves(std::vector<Move> &results, int square) const;
 
-    std::vector<Move> getPawnPromotionMoves(int origin, int destination) const;
+    /**
+     * Check if a pawn move will result in a promotion
+     * If so, append the 4 different promotion moves to &results
+     * Otherwise, append the move normally.
+     */
+    void appendConvertedPawnMoves(std::vector<Move> &results, int origin, int destination) const;
+
+    /**
+     * Determine if a given square is capable of capturing en passant
+     * Precondition: Square is occupied by pawn
+     */
     bool canEnPassant(int square) const;
 
     // Generate moves when placed in check by a knight or pawn
@@ -38,7 +49,7 @@ private:
     std::vector<Move> getMovesInRayCheck(int checkingSquare) const;
 
     std::vector<Move> getMovesOutsideCheck() const;
-    std::vector<Move> getCaptureMovesOutsideCheck() const;
+    std::vector<Move> getNonQuietMovesOutsideCheck() const;
 
     int getPositionEvaluation() const;
     int getMaterialEvaluation() const;

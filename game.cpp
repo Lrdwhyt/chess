@@ -7,13 +7,14 @@ Game::Game(Agent *p1, Agent *p2) {
     white = p1;
     black = p2;
     side = Side::White;
+    state = GameState(0);
     print();
-    // std::vector<Move> validMoves = state.getPossibleMoves();
+    // std::vector<Move> validMoves = state.getLegalMoves();
     handleTurn(white->requestMove(state));
 }
 
 void Game::handleTurn(Move move) {
-    /*std::vector<Move> validMoves = state.getPossibleMoves();
+    /*std::vector<Move> validMoves = state.getLegalMoves();
     if (std::find(validMoves.begin(), validMoves.end(), move) == validMoves.end()) {
         print();
         handleTurn(getCurrentAgent()->requestMove(state));
@@ -28,7 +29,7 @@ void Game::handleTurn(Move move) {
     }
     print();
     /* Start debug */
-    std::vector<Move> moves = state.getPossibleMoves();
+    std::vector<Move> moves = state.getLegalMoves();
     std::cout << moves.size();
     for (Move move : moves) {
         std::cout << " " << Square::toString(move.origin) << Square::toString(move.destination);
