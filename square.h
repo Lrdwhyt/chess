@@ -22,7 +22,7 @@ namespace Square {
 
     /* Get column of square (0-63) */
     int getColumn(int);
-    std::vector<int> between(int, int);
+
     std::vector<int> fromAtoBInclusive(int, int);
     bool inLine(int, int);
 

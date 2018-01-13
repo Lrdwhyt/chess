@@ -2,8 +2,18 @@
 
 #include <stdexcept>
 
+typedef std::uint64_t Bitboard;
+
 int Square::get(int x, int y) {
     return (y - 1) * 8 + x - 1;
+}
+
+int Square::getRow(int square) {
+    return static_cast<unsigned int>(square) / 8 + 1;
+}
+
+int Square::getColumn(int square) {
+    return static_cast<unsigned int>(square) % 8 + 1;
 }
 
 int Square::fromString(std::string str) {
@@ -68,34 +78,6 @@ std::tuple<int, int> Square::diff(int a, int b) {
     return std::tuple<int, int>(x2 - x1, y2 - y1);
 }
 
-std::vector<int> Square::between(int a, int b) {
-    std::vector<int> results;
-    int x, y;
-    std::tie(x, y) = Square::diff(a, b);
-    if (x == 0 || y == 0 || abs(x) == abs(y)) { // alternatively, check columns
-        if (x > 1) {
-            x = 1;
-        }
-        if (x < -1) {
-            x = -1;
-        }
-        if (y > 1) {
-            y = 1;
-        }
-        if (y < -1) {
-            y = -1;
-        }
-        int current = a + (y * 8 + x);
-        while (current != b) {
-            results.push_back(current);
-            current += y * 8 + x;
-        }
-        return results;
-    } else {
-        throw std::runtime_error("No straight line between squares " + Square::toString(a) + Square::toString(b));
-    }
-}
-
 std::vector<int> Square::fromAtoBInclusive(int a, int b) {
     std::vector<int> results;
     if (a == b) {
@@ -126,14 +108,6 @@ std::vector<int> Square::fromAtoBInclusive(int a, int b) {
     }
 }
 
-int Square::getRow(int square) {
-    return static_cast<unsigned int>(square) / 8 + 1;
-}
-
-int Square::getColumn(int square) {
-    return static_cast<unsigned int>(square) % 8 + 1;
-}
-
 int Square::getInDirection(int square, int x, int y) {
     const int newX = Square::getColumn(square) + x;
     const int newY = Square::getRow(square) + y;
@@ -147,6 +121,7 @@ int Square::getInDirection(int square, int x, int y) {
 std::uint64_t Square::getInDirection(std::uint64_t square, Direction direction) {
     constexpr std::uint64_t notAColumn = 9187201950435737471ULL;
     constexpr std::uint64_t notHColumn = 18374403900871474942ULL;
+    // Assumes two's complement representation of negative numbers
     if ((direction & 0b11) & 0b10) {
     //if (direction == Direction::East || direction == Direction::Northeast || direction == Direction::Southeast) {
     square &= notHColumn;
