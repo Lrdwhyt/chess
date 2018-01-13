@@ -7,6 +7,8 @@
 static constexpr Bitboard secondRow = 65280ULL;
 static constexpr Bitboard seventhRow = 71776119061217280ULL;
 
+Move::Move() {}
+
 Move::Move(int o, int d)
     : origin(o), destination(d), promotion(Piece::None) {}
 
@@ -37,7 +39,7 @@ std::string Move::toString() const {
     if (promotion != Piece::None) {
         return Square::toString(origin) + Square::toString(destination) + Piece::getString(promotion);
     } else {
-    return Square::toString(origin) + Square::toString(destination);
+        return Square::toString(origin) + Square::toString(destination);
     }
 }
 
@@ -76,23 +78,12 @@ bool Move::isQueenMove() const {
 }
 
 bool Move::isKnightMove() const {
-    int x, y;
-    std::tie(x, y) = Square::diff(origin, destination);
-    if ((abs(x) == 2 && abs(y) == 1) || (abs(x) == 1 && abs(y) == 2)) {
-        return true;
-    } else {
-        return false;
-    }
+    return (1ULL << destination & Square::getKnightAttacks(1ULL << origin));
 }
 
+// Unused
 bool Move::isKingMove() const {
-    int x, y;
-    std::tie(x, y) = Square::diff(origin, destination);
-    if (abs(x) <= 1 && abs(y) <= 1) {
-        return true;
-    } else {
-        return false;
-    }
+    return (1ULL << destination & Square::getKingAttacks(1ULL << origin));
 }
 
 bool Move::isCastleMove() const {
@@ -169,20 +160,12 @@ bool Move::isPawnMove(Side side) const {
 
 bool Move::isTwoSquarePawnMove() const {
     const int difference = destination - origin;
-    const Bitboard originMask = 1ULL << origin;
+    const Bitboard originMask = Square::getMask(origin);
     if (difference == 16) { // exactly 2 rows apart
-        if (secondRow & originMask) {
-            // Pawns have to be in original position to be moved up twice
-            return true; // White move forward two spaces
-        } else {
-            return false;
-        }
+        return (secondRow & originMask);
+        // Pawns have to be in original position to be moved up twice
     } else if (difference == -16) { // exactly 2 rows apart
-        if (seventhRow & originMask) {
-            return true; // Black move forward two spaces
-        } else {
-            return false;
-        }
+        return (seventhRow & originMask);
     } else {
         return false;
     }
