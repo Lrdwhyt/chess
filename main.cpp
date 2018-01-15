@@ -4,22 +4,11 @@
 #include <iostream>
 #include <string>
 
-#include "agent.h"
-#include "computeragent.h"
-#include "game.h"
-#include "humanagent.h"
 #include "perft.h"
 #include "ucicontroller.h"
 
 void startUciMode() {
     UciController uc;
-}
-
-void startDebugMode() {
-    Agent *p1 = new HumanAgent("White");
-    Agent *p2 = new HumanAgent("Black");
-    Game g(p1, p2);
-    g.print();
 }
 
 GameState getPosition(std::string position) {
@@ -55,9 +44,6 @@ void waitForMode() {
     while (std::getline(std::cin, input)) {
         if (input == "uci") {
             startUciMode();
-            break;
-        } else if (input == "debug") {
-            startDebugMode();
             break;
         } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
             state = getPosition(input.substr(9));
