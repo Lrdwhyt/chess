@@ -49,7 +49,6 @@ void waitForMode() {
             state = getPosition(input.substr(9));
             state.getBoard().print();
         } else if (input.length() >= 12 && input.substr(0, 12) == "perft divide") {
-            Perft::resetLogs();
             const int perftDepth = stoi(input.substr(13, std::string::npos));
             const double start = std::time(0);
             const std::vector<std::tuple<Move, int>> perftDivideResult = Perft::divide(state, perftDepth);
@@ -60,15 +59,12 @@ void waitForMode() {
                 std::cout << "perft(" << perftDepth << ")/" << std::get<0>(move).toString() << ": " << std::get<1>(move) << " moves" << std::endl;
             }
             std::cout << "perft(" << perftDepth << ") = " << total << " in " << (end - start) << "s" << std::endl;
-            std::cout << "Captures: " << Perft::getCaptureCount() << " / En passant: " << Perft::getEnPassantCount() << " / Checkmates: " << Perft::getCheckmateCount() << " / Other: " << Perft::getOtherCount() << std::endl;
         } else if (input.length() >= 5 && input.substr(0, 5) == "perft") {
-            Perft::resetLogs();
             const int perftDepth = stoi(input.substr(6, std::string::npos));
             const double start = std::time(0);
             const int perftResult = Perft::perft(state, perftDepth);
             const double end = std::time(0);
             std::cout << "perft(" << perftDepth << ") = " << perftResult << " in " << (end - start) << "s" << std::endl;
-            std::cout << "Captures: " << Perft::getCaptureCount() << " / En passant: " << Perft::getEnPassantCount() << " / Checkmates: " << Perft::getCheckmateCount() << " / Other: " << Perft::getOtherCount() << std::endl;
         }
     }
 }

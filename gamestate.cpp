@@ -128,11 +128,9 @@ void GameState::processMove(Move move) {
         // Remove pawn captured via en passant
         const int pawnDirection = side == Side::White ? 1 : -1;
         board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) - pawnDirection));
-        Perft::logCapture();
     }
     if (!board.isEmpty(move.destination)) {
         board.deletePiece(move.destination);
-        Perft::logCapture();
     }
     board.movePiece(move.origin, move.destination);
     if (move.promotion != Piece::None) {
@@ -410,7 +408,6 @@ std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
                 // On top/bottom or one knight jump away
                 const int pawnDirection = (side == Side::White) ? 1 : -1;
                 const Move enPassant = Move(square, Square::getInYDirection(checkingSquare, pawnDirection));
-                Perft::logEnPassant();
                 results.push_back(enPassant);
             } else if (move.isPawnCapture(side)) {
                 results.push_back(move);
@@ -544,7 +541,6 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
     if (canEnPassant(square)) {
         if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
             // Can capture by en passant
-            Perft::logEnPassant();
             const int pawnDirection = (side == Side::White) ? 1 : -1;
             results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
         }
@@ -717,7 +713,6 @@ void GameState::appendNonQuietPawnMoves(std::vector<Move> &results, int square) 
     if (canEnPassant(square)) {
         if (!board.willEnPassantCheck(moveHistory.back().destination, square, side)) {
             // Can capture by en passant
-            Perft::logEnPassant();
             const int pawnDirection = (side == Side::White) ? 1 : -1;
             results.push_back(Move(square, Square::getInYDirection(moveHistory.back().destination, pawnDirection)));
         }
