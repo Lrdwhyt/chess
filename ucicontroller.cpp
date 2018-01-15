@@ -5,12 +5,7 @@
 
 const std::string LOGFILE = "debug.log";
 
-UciController::UciController() {
-    send("id name lrdwhyt/chess");
-    send("id author Lrdwhyt");
-    send("uciok");
-    initReadLoop();
-}
+UciController::UciController() {}
 
 void UciController::send(std::string msg) {
     std::ofstream outputFile(LOGFILE, std::ios::app);
@@ -19,23 +14,32 @@ void UciController::send(std::string msg) {
     outputFile.close();
 }
 
+void UciController::init() {
+    send("id name lrdwhyt/chess");
+    send("id author Lrdwhyt");
+    send("uciok");
+    initReadLoop();
+}
+
 void UciController::initReadLoop() {
     std::string input;
     while (std::getline(std::cin, input)) {
         std::ofstream outputFile(LOGFILE, std::ios::app);
         outputFile << input << std::endl;
         outputFile.close();
-        handleIn(input);
+        if (!handleIn(input)) {
+            break;
+        }
     }
 }
 
-void UciController::handleIn(std::string input) {
+bool UciController::handleIn(std::string input) {
     if (input == "ucinewgame") {
         initialisedGame = false;
     } else if (input == "isready") {
         send("readyok");
     } else if (input == "quit") {
-        quit();
+        return false;
     } else if (input == "stop") {
         // do nothing
     } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
@@ -43,6 +47,7 @@ void UciController::handleIn(std::string input) {
     } else if (input.length() >= 2 && input.substr(0, 2) == "go") {
         send("bestmove " + game.getBestMove().toString());
     }
+    return true;
 }
 
 void UciController::updatePosition(std::string position) {
@@ -65,8 +70,4 @@ void UciController::updatePosition(std::string position) {
             position.erase(0, nextIndex + 1);
         }
     }
-}
-
-void UciController::quit() {
-    // go back to main()
 }

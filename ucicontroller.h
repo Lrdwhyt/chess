@@ -13,11 +13,11 @@ private:
 
 public:
     UciController();
+    void init();
     void initReadLoop();
-    void handleIn(std::string);
+    bool handleIn(std::string);
     void send(std::string message);
     void updatePosition(std::string);
-    void quit();
 };
 
 #endif

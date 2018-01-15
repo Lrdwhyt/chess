@@ -9,6 +9,7 @@
 
 void startUciMode() {
     UciController uc;
+    uc.init();
 }
 
 GameState getPosition(std::string position) {
@@ -44,7 +45,6 @@ void waitForMode() {
     while (std::getline(std::cin, input)) {
         if (input == "uci") {
             startUciMode();
-            break;
         } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
             state = getPosition(input.substr(9));
             state.getBoard().print();
