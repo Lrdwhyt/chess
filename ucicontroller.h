@@ -3,20 +3,21 @@
 
 #include <string>
 
-#include "ucigame.h"
+#include "gamestate.h"
 
 class UciController {
 private:
-    UciGame game;
+    GameState gamestate;
     bool initialisedGame;
     std::string lastMovesString;
+    Move getBestMove() const;
+    void initReadLoop();
+    bool handleIn(std::string);
+    void send(std::string message);
 
 public:
     UciController();
     void init();
-    void initReadLoop();
-    bool handleIn(std::string);
-    void send(std::string message);
     void updatePosition(std::string);
 };
 

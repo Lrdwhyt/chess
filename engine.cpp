@@ -12,7 +12,7 @@ void debug(std::string msg) {
  * alpha = lowest possible score we can ensure
  * beta = highest possible score the opponent can achieve, given optimal play by us
  */
-Move Engine::alphaBetaPrune(GameState &gamestate, int depth) {
+Move Engine::alphaBetaPrune(GameState const &gamestate, int depth) {
     std::vector<Move> moves = gamestate.getLegalMoves();
     int alpha = -99999;
     Move bestMove;

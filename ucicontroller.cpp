@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "engine.h"
+
 const std::string LOGFILE = "debug.log";
 
 UciController::UciController() {}
@@ -45,16 +47,16 @@ bool UciController::handleIn(std::string input) {
     } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
         updatePosition(input.substr(9));
     } else if (input.length() >= 2 && input.substr(0, 2) == "go") {
-        send("bestmove " + game.getBestMove().toString());
+        send("bestmove " + getBestMove().toString());
     }
     return true;
 }
 
 void UciController::updatePosition(std::string position) {
     if (position.length() >= 3 && position.substr(0, 3) == "fen") {
-        game.fromFen(position.substr(4, position.find("moves")));
+        gamestate = GameState(position.substr(4, position.find("moves")));
     } else if (position.length() >= 8 && position.substr(0, 8) == "startpos") {
-        game.fromStart();
+        gamestate = GameState();
     }
     //}
     if (position.find("moves") != std::string::npos) {
@@ -66,8 +68,12 @@ void UciController::updatePosition(std::string position) {
                 hasNextMove = false;
             }
             Move nextMove = Move::fromString(position.substr(0, nextIndex));
-            game.updateState(nextMove);
+            gamestate.processMove(nextMove);
             position.erase(0, nextIndex + 1);
         }
     }
+}
+
+Move UciController::getBestMove() const {
+    return Engine::alphaBetaPrune(gamestate, 4);
 }
