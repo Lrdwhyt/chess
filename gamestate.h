@@ -61,7 +61,6 @@ private:
 
 public:
     GameState();
-    GameState(int);
     GameState(GameState const &);
     GameState(std::string fenString);
     const Board &getBoard() const;

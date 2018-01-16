@@ -65,17 +65,15 @@ Board::Board(Board const &old) {
     kings = old.kings;
 }
 
-Board Board::startingPosition() {
-    Board b;
-    b.whites = 65535ULL;
-    b.blacks = 18446462598732840960ULL;
-    b.pawns = 71776119061282560ULL;
-    b.knights = 4755801206503243842ULL;
-    b.bishops = 2594073385365405732ULL;
-    b.rooks = 9295429630892703873ULL;
-    b.queens = 576460752303423496ULL;
-    b.kings = 1152921504606846992ULL;
-    return b;
+void Board::setToStartPosition() {
+    whites = 65535ULL;
+    blacks = 18446462598732840960ULL;
+    pawns = 71776119061282560ULL;
+    knights = 4755801206503243842ULL;
+    bishops = 2594073385365405732ULL;
+    rooks = 9295429630892703873ULL;
+    queens = 576460752303423496ULL;
+    kings = 1152921504606846992ULL;
 }
 
 std::string Board::toString() const {

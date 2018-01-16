@@ -17,7 +17,7 @@ GameState getPosition(std::string position) {
     if (position.length() >= 3 && position.substr(0, 3) == "fen") {
         result = GameState(position.substr(4, position.find("moves")));
     } else if (position.length() >= 8 && position.substr(0, 8) == "startpos") {
-        result = GameState(0);
+        result = GameState();
     }
     if (position.find("moves") != std::string::npos) {
         bool hasNextMove = true;
@@ -40,18 +40,18 @@ GameState getPosition(std::string position) {
 }
 
 void waitForMode() {
-    GameState state = GameState(0);
+    GameState gamestate;
     std::string input;
     while (std::getline(std::cin, input)) {
         if (input == "uci") {
             startUciMode();
         } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
-            state = getPosition(input.substr(9));
-            state.getBoard().print();
+            gamestate = getPosition(input.substr(9));
+            gamestate.getBoard().print();
         } else if (input.length() >= 12 && input.substr(0, 12) == "perft divide") {
             const int perftDepth = stoi(input.substr(13, std::string::npos));
             const double start = std::time(0);
-            const std::vector<std::tuple<Move, int>> perftDivideResult = Perft::divide(state, perftDepth);
+            const std::vector<std::tuple<Move, int>> perftDivideResult = Perft::divide(gamestate, perftDepth);
             const double end = std::time(0);
             int total = 0;
             for (std::tuple<Move, int> move : perftDivideResult) {
@@ -62,7 +62,7 @@ void waitForMode() {
         } else if (input.length() >= 5 && input.substr(0, 5) == "perft") {
             const int perftDepth = stoi(input.substr(6, std::string::npos));
             const double start = std::time(0);
-            const int perftResult = Perft::perft(state, perftDepth);
+            const int perftResult = Perft::perft(gamestate, perftDepth);
             const double end = std::time(0);
             std::cout << "perft(" << perftDepth << ") = " << perftResult << " in " << (end - start) << "s" << std::endl;
         }

@@ -2,14 +2,11 @@
 
 #include <iostream>
 
-#include "perft.h"
 #include "piecetype.h"
 
-/* Initialise game state in the starting position */
-GameState::GameState() {}
-
-GameState::GameState(int id) {
-    board = Board::startingPosition();
+/* Initialise game state to the starting position */
+GameState::GameState() {
+    board.setToStartPosition();
     side = Side::White;
     canWhiteCastleKingside = true;
     canWhiteCastleQueenside = true;

@@ -39,7 +39,7 @@ public:
     Board();
     Board(std::string fenString);
     Board(Board const &);
-    static Board startingPosition();
+    void setToStartPosition();
     void print() const;
     bool isEmpty(int square) const;
     std::string toString() const;
