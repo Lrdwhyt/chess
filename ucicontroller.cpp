@@ -53,25 +53,7 @@ bool UciController::handleIn(std::string input) {
 }
 
 void UciController::updatePosition(std::string position) {
-    if (position.length() >= 3 && position.substr(0, 3) == "fen") {
-        gamestate = GameState(position.substr(4, position.find("moves")));
-    } else if (position.length() >= 8 && position.substr(0, 8) == "startpos") {
-        gamestate = GameState();
-    }
-    //}
-    if (position.find("moves") != std::string::npos) {
-        bool hasNextMove = true;
-        position.erase(0, position.find("moves") + 6);
-        while (hasNextMove) {
-            int nextIndex = position.find(" ");
-            if (nextIndex == std::string::npos) {
-                hasNextMove = false;
-            }
-            Move nextMove = Move::fromString(position.substr(0, nextIndex));
-            gamestate.processMove(nextMove);
-            position.erase(0, nextIndex + 1);
-        }
-    }
+    gamestate = GameState::loadFromUciString(position);
 }
 
 Move UciController::getBestMove() const {

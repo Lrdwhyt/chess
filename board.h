@@ -54,6 +54,11 @@ public:
 
     std::tuple<CheckType, int> getInCheckStatus(Side side) const;
 
+    /**
+     * Given an origin and a destination, take the piece located at origin and
+     * see if it is capable of moving to destination
+     * Ignores obstructions/checks/etc
+     */
     bool isLegalPieceMove(int origin, int destination) const;
 
     bool willEnPassantCheck(int capturer, int capturee, Side side) const;

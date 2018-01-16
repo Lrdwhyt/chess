@@ -63,6 +63,7 @@ public:
     GameState();
     GameState(GameState const &);
     GameState(std::string fenString);
+    static GameState loadFromUciString(std::string uciString);
     const Board &getBoard() const;
     void processMove(Move);
     std::vector<Move> getLegalMoves() const;

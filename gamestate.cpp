@@ -66,6 +66,30 @@ GameState::GameState(std::string fenString) {
     }
 }
 
+GameState GameState::loadFromUciString(std::string uciString) {
+    GameState gamestate;
+    if (uciString.length() >= 3 && uciString.substr(0, 3) == "fen") {
+        gamestate = GameState(uciString.substr(4, uciString.find("moves")));
+    } else if (uciString.length() >= 8 && uciString.substr(0, 8) == "startpos") {
+        gamestate = GameState();
+    }
+    //}
+    if (uciString.find("moves") != std::string::npos) {
+        bool hasNextMove = true;
+        uciString.erase(0, uciString.find("moves") + 6);
+        while (hasNextMove) {
+            int nextIndex = uciString.find(" ");
+            if (nextIndex == std::string::npos) {
+                hasNextMove = false;
+            }
+            Move nextMove = Move::fromString(uciString.substr(0, nextIndex));
+            gamestate.processMove(nextMove);
+            uciString.erase(0, nextIndex + 1);
+        }
+    }
+    return gamestate;
+}
+
 const Board &GameState::getBoard() const {
     return board;
 }
