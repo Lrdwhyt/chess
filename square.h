@@ -13,39 +13,39 @@
 #include "direction.h"
 
 namespace Square {
-    int get(int, int);
-    int fromString(std::string str);
-    std::tuple<int, int> diff(int, int);
 
-    /* Get row of square (0-63) */
-    int getRow(int);
+int get(int, int);
+int fromString(std::string str);
+std::tuple<int, int> diff(int a, int b);
 
-    /* Get column of square (0-63) */
-    int getColumn(int);
+/* Get row of square (0-63) */
+int getRow(int squareIndex);
 
-    std::vector<int> fromAtoBInclusive(int, int);
-    bool inLine(int, int);
+/* Get column of square (0-63) */
+int getColumn(int squareIndex);
 
-    /* Returns -1 if square is out of range */
-    int getInDirection(int square, int x, int y);
+std::vector<int> fromAtoBInclusive(int a, int b);
+bool inLine(int a, int );
 
-    std::uint64_t getInDirection(std::uint64_t square, Direction direction);
+/* Returns -1 if square is out of range */
+int getInDirection(int square, int x, int y);
 
-    int getInYDirection(int square, int y);
+std::uint64_t getInDirection(std::uint64_t square, Direction direction);
 
-    bool isBetweenInclusive(int square, int a, int b);
+int getInYDirection(int square, int y);
 
-    std::string toString(int square);
+std::string toString(int square);
 
-    int getSetBit(std::uint64_t b);
+int getSetBit(std::uint64_t b);
 
-    int getBitCount(std::uint64_t b);
+int getBitCount(std::uint64_t b);
 
-    std::uint64_t getMask(int square);
+std::uint64_t getMask(int square);
 
-    std::uint64_t getKnightAttacks(std::uint64_t square);
+std::uint64_t getKnightAttacks(std::uint64_t square);
 
-    std::uint64_t getKingAttacks(std::uint64_t square);
-};
+std::uint64_t getKingAttacks(std::uint64_t square);
+
+} // namespace Square
 
 #endif

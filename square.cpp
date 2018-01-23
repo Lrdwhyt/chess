@@ -147,34 +147,6 @@ bool Square::inLine(int a, int b) {
     return (x == 0 || y == 0 || std::abs(x) == std::abs(y));
 }
 
-bool Square::isBetweenInclusive(int square, int a, int b) {
-    int x, y;
-    std::tie(x, y) = Square::diff(a, b);
-    if (x > 1) {
-        x = 1;
-    } else if (x < -1) {
-        x = -1;
-    }
-    if (y > 1) {
-        y = 1;
-    } else if (y < -1) {
-        y = -1;
-    }
-    int sq = a;
-    while (true) {
-        sq = Square::getInDirection(sq, x, y);
-        if (sq == -1) {
-            return false;
-        }
-        if (sq == square) {
-            return true;
-        }
-        if (sq == b) {
-            return false;
-        }
-    }
-}
-
 std::string Square::toString(int square) {
     char col = Square::getColumn(square) + 'a' - 1;
     return std::string(1, col) + std::to_string(Square::getRow(square));
