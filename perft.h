@@ -3,10 +3,12 @@
 
 #include "gamestate.h"
 
-class Perft {
-public:
-    static int perft(GameState &state, int depth);
-    static std::vector<std::tuple<Move, int>> divide(GameState state, int depth);
-};
+namespace Perft {
+
+int perft(GameState &state, int depth);
+std::vector<std::tuple<Move, int>> divide(GameState state, int depth);
+void test();
+
+} // namespace Perft
 
 #endif

@@ -32,6 +32,9 @@ void waitForInput() {
                 std::cout << "perft(" << perftDepth << ")/" << std::get<0>(move).toString() << ": " << std::get<1>(move) << " moves" << std::endl;
             }
             std::cout << "perft(" << perftDepth << ") = " << total << " in " << (end - start) << "s" << std::endl;
+        } else if (input.length() >= 10 && input.substr(0, 10) == "perft test") {
+            Perft::test();
+            std::cout << "5/5 tests passed" << std::endl;
         } else if (input.length() >= 5 && input.substr(0, 5) == "perft") {
             const int perftDepth = stoi(input.substr(6, std::string::npos));
             const double start = std::time(0);
