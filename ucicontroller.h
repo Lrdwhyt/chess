@@ -11,7 +11,7 @@ private:
     bool initialisedGame;
     std::string lastMovesString;
     Move getBestMove() const;
-    void initReadLoop();
+    void waitForInput();
     bool handleIn(std::string);
     void send(std::string message);
 

@@ -12,7 +12,7 @@ void startUciMode() {
     uc.init();
 }
 
-void waitForMode() {
+void waitForInput() {
     GameState gamestate;
     std::string input;
     while (std::getline(std::cin, input)) {
@@ -43,6 +43,6 @@ void waitForMode() {
 }
 
 int main() {
-    waitForMode();
+    waitForInput();
     return 0;
 }

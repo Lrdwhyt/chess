@@ -3,7 +3,7 @@
 #include "move.h"
 
 int Perft::perft(GameState &gamestate, int depth) {
-    std::vector<Move> moves = gamestate.getLegalMoves();
+    std::vector<Move> moves = gamestate.generateLegalMoves();
     if (depth == 1) {
         return moves.size();
     }
@@ -21,7 +21,7 @@ int Perft::perft(GameState &gamestate, int depth) {
 
 std::vector<std::tuple<Move, int>> Perft::divide(GameState gamestate, int depth) {
     std::vector<std::tuple<Move, int>> results;
-    std::vector<Move> moves = gamestate.getLegalMoves();
+    std::vector<Move> moves = gamestate.generateLegalMoves();
     for (Move move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);

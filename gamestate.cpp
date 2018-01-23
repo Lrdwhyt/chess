@@ -14,24 +14,26 @@ GameState::GameState() {
     canBlackCastleQueenside = true;
 }
 
-GameState::GameState(GameState const &state) {
-    board = state.board;
-    side = state.side;
-    canWhiteCastleKingside = state.canWhiteCastleKingside;
-    canWhiteCastleQueenside = state.canWhiteCastleQueenside;
-    canBlackCastleKingside = state.canBlackCastleKingside;
-    canBlackCastleQueenside = state.canBlackCastleQueenside;
-    moveHistory = state.moveHistory;
+GameState::GameState(GameState const &original) {
+    board = original.board;
+    side = original.side;
+    canWhiteCastleKingside = original.canWhiteCastleKingside;
+    canWhiteCastleQueenside = original.canWhiteCastleQueenside;
+    canBlackCastleKingside = original.canBlackCastleKingside;
+    canBlackCastleQueenside = original.canBlackCastleQueenside;
+    moveHistory = original.moveHistory;
 }
 
 GameState::GameState(std::string fenString) {
     int index = fenString.find(" ");
     std::string pieceString = fenString.substr(0, index);
     board = Board(pieceString);
+
     fenString.erase(0, index + 1);
     index = fenString.find(" ");
     std::string sideString = fenString.substr(0, index);
     side = (sideString == "w") ? Side::White : Side::Black;
+
     fenString.erase(0, index + 1);
     index = fenString.find(" ");
     std::string castleString = fenString.substr(0, index);
@@ -51,6 +53,7 @@ GameState::GameState(std::string fenString) {
     if (castleString.find("q") != std::string::npos) {
         canBlackCastleQueenside = true;
     }
+    
     fenString.erase(0, index + 1);
     index = fenString.find(" ");
     std::string enPassantString = fenString.substr(0, index);
@@ -186,7 +189,7 @@ std::vector<Move> GameState::getNonQuietMoves() const {
     }
 }
 
-std::vector<Move> GameState::getLegalMoves() const {
+std::vector<Move> GameState::generateLegalMoves() const {
     CheckType checkStatus;
     int checkingSquare;
     std::tie(checkStatus, checkingSquare) = board.getInCheckStatus(side);
@@ -207,7 +210,7 @@ std::vector<Move> GameState::getLegalMoves() const {
 
 std::vector<Move> GameState::getMovesOutsideCheck() const {
     std::vector<Move> results;
-    results.reserve(40);
+    results.reserve(40); // Expected number of moves, somewhat arbitrary
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
     appendCastleMoves(results);
@@ -325,6 +328,7 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
 
 std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
     std::vector<Move> results;
+    results.reserve(10);
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
     for (int square = 0; square < 64; ++square) {
@@ -401,6 +405,7 @@ std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
 
 std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
     std::vector<Move> results;
+    results.reserve(10);
     // Can only evade check by capturing attacking piece or by moving king
     for (int square = 0; square < 64; ++square) {
         const Bitboard squareMask = Square::getMask(square);
@@ -544,6 +549,7 @@ void GameState::appendKingMoves(std::vector<Move> &results) const {
 
 std::vector<Move> GameState::getKingMoves() const {
     std::vector<Move> results;
+    results.reserve(8);
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int origin = Square::getSetBit(board.kings & currentSide);
     Bitboard kingSquares = Square::getKingAttacks(board.kings & currentSide) & ~currentSide;

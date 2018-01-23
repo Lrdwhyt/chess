@@ -13,7 +13,7 @@ void debug(std::string msg) {
  * beta = highest possible score the opponent can achieve, given optimal play by us
  */
 Move Engine::alphaBetaPrune(GameState const &gamestate, int depth) {
-    std::vector<Move> moves = gamestate.getLegalMoves();
+    std::vector<Move> moves = gamestate.generateLegalMoves();
     int alpha = -99999;
     Move bestMove;
     for (Move move : moves) {
@@ -40,7 +40,7 @@ int Engine::alphaBetaMaximise(GameState &gamestate, int alpha, int beta, int dep
             return gamestate.getEvaluation();
         }
     }
-    std::vector<Move> moves = gamestate.getLegalMoves();
+    std::vector<Move> moves = gamestate.generateLegalMoves();
     if (moves.size() == 0) {
         return -10000; // Checkmate
     }
@@ -69,7 +69,7 @@ int Engine::alphaBetaMinimise(GameState &gamestate, int alpha, int beta, int dep
             return -gamestate.getEvaluation();
         }
     }
-    std::vector<Move> moves = gamestate.getLegalMoves();
+    std::vector<Move> moves = gamestate.generateLegalMoves();
     if (moves.size() == 0) {
         // Checkmate
         return 10000;

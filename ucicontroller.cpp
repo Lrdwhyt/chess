@@ -20,10 +20,10 @@ void UciController::init() {
     send("id name lrdwhyt/chess");
     send("id author Lrdwhyt");
     send("uciok");
-    initReadLoop();
+    waitForInput();
 }
 
-void UciController::initReadLoop() {
+void UciController::waitForInput() {
     std::string input;
     while (std::getline(std::cin, input)) {
         std::ofstream outputFile(LOGFILE, std::ios::app);
@@ -43,7 +43,7 @@ bool UciController::handleIn(std::string input) {
     } else if (input == "quit") {
         return false;
     } else if (input == "stop") {
-        // do nothing
+        // TODO: do something
     } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
         updatePosition(input.substr(9));
     } else if (input.length() >= 2 && input.substr(0, 2) == "go") {
