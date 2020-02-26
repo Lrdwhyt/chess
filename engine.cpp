@@ -4,7 +4,7 @@
 
 namespace {
 
-void debug(std::string msg) {
+void debug(std::string const &msg) {
     std::ofstream outputFile("debug.log", std::ios::app);
     outputFile << "---| " << msg << std::endl;
     outputFile.close();
@@ -20,7 +20,7 @@ Move Engine::alphaBetaPrune(GameState const &gamestate, int depth) {
     std::vector<Move> moves = gamestate.generateLegalMoves();
     int alpha = -99999;
     Move bestMove;
-    for (Move move : moves) {
+    for (Move const &move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);
         int eval = alphaBetaMinimise(branch, alpha, -alpha, depth - 1);
@@ -49,13 +49,12 @@ int Engine::alphaBetaMaximise(GameState const &gamestate, int alpha, int beta, i
     if (moves.size() == 0) {
         return -10000; // Checkmate
     }
-    for (Move move : moves) {
+    for (Move const &move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);
         int eval = alphaBetaMinimise(branch, alpha, beta, depth - 1);
         alpha = std::max(alpha, eval);
-        // When eval exceeds or equals beta value,
-        // we can do no better.
+        // When eval exceeds or equals beta value, we can do no better.
         if (beta <= alpha) {
             break;
         }
@@ -80,7 +79,7 @@ int Engine::alphaBetaMinimise(GameState const &gamestate, int alpha, int beta, i
         // Checkmate
         return 10000;
     }
-    for (Move move : moves) {
+    for (Move const &move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);
         int eval = alphaBetaMaximise(branch, alpha, beta, depth - 1);
@@ -105,13 +104,12 @@ int Engine::quiescenceSearchMaximise(GameState const &gamestate, int alpha, int 
             return gamestate.getEvaluation();
         }
     }
-    for (Move move : moves) {
+    for (Move const &move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);
         int eval = quiescenceSearchMinimise(branch, alpha, beta, depth - 1);
         alpha = std::max(alpha, eval);
-        // When eval exceeds or equals beta value,
-        // we can do no better.
+        // When eval exceeds or equals beta value, we can do no better.
         if (beta <= alpha) {
             break;
         }
@@ -135,7 +133,7 @@ int Engine::quiescenceSearchMinimise(GameState const &gamestate, int alpha, int 
             return -gamestate.getEvaluation();
         }
     }
-    for (Move move : moves) {
+    for (Move const &move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);
         int eval = quiescenceSearchMaximise(branch, alpha, beta, depth - 1);

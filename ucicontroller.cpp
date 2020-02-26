@@ -43,7 +43,7 @@ bool UciController::handleIn(std::string input) {
     } else if (input == "quit") {
         return false;
     } else if (input == "stop") {
-        // TODO: do something
+        // TODO: interrupt calculation and return best move
     } else if (input.length() >= 8 && input.substr(0, 8) == "position") {
         updatePosition(input.substr(9));
     } else if (input.length() >= 2 && input.substr(0, 2) == "go") {
