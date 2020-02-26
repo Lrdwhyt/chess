@@ -2,8 +2,12 @@
 
 #include <stdexcept>
 
+namespace {
+
 static constexpr Bitboard secondRow = 65280ULL;
 static constexpr Bitboard seventhRow = 71776119061217280ULL;
+
+}
 
 Move::Move() {}
 
@@ -153,6 +157,7 @@ bool Move::isPawnMove(Side side) const {
             return false;
         }
     }
+    
     return false;
 }
 

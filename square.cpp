@@ -4,6 +4,15 @@
 
 typedef std::uint64_t Bitboard;
 
+namespace {
+
+constexpr Bitboard notAColumn = 9187201950435737471ULL;
+constexpr Bitboard notABColumn = 4557430888798830399ULL;
+constexpr Bitboard notHColumn = 18374403900871474942ULL;
+constexpr Bitboard notGHColumn = 18229723555195321596ULL;
+
+}
+
 int Square::get(int x, int y) {
     return (y - 1) * 8 + x - 1;
 }
@@ -16,7 +25,7 @@ int Square::getColumn(int square) {
     return static_cast<unsigned int>(square) % 8 + 1;
 }
 
-int Square::fromString(std::string str) {
+int Square::fromString(std::string const &str) {
     char squareRowChar = str.at(1);
     char squareColChar = toupper(str.at(0));
     int squareRow = squareRowChar - '0';
@@ -115,8 +124,6 @@ int Square::getInDirection(int square, int x, int y) {
 }
 
 std::uint64_t Square::getInDirection(std::uint64_t square, Direction direction) {
-    constexpr std::uint64_t notAColumn = 9187201950435737471ULL;
-    constexpr std::uint64_t notHColumn = 18374403900871474942ULL;
     // Assumes two's complement representation of negative numbers
     if (direction & 0b10) {
         //if (direction == Direction::East || direction == Direction::Northeast || direction == Direction::Southeast) {
@@ -165,6 +172,7 @@ int Square::getBitCount(std::uint64_t b) {
         b = b & (b - 1);
         ++counter;
     }
+
     return counter;
 }
 
@@ -173,10 +181,6 @@ Bitboard Square::getMask(int square) {
 }
 
 Bitboard Square::getKnightAttacks(Bitboard square) {
-    constexpr Bitboard notAColumn = 9187201950435737471ULL;
-    constexpr Bitboard notABColumn = 4557430888798830399ULL;
-    constexpr Bitboard notHColumn = 18374403900871474942ULL;
-    constexpr Bitboard notGHColumn = 18229723555195321596ULL;
     return ((square >> 6 & notGHColumn) |
             (square >> 10 & notABColumn) |
             (square >> 15 & notHColumn) |
@@ -188,8 +192,6 @@ Bitboard Square::getKnightAttacks(Bitboard square) {
 }
 
 Bitboard Square::getKingAttacks(Bitboard square) {
-    constexpr Bitboard notAColumn = 9187201950435737471ULL;
-    constexpr Bitboard notHColumn = 18374403900871474942ULL;
     return ((square >> 9 & notAColumn) |
             (square >> 8) |
             (square >> 7 & notHColumn) |

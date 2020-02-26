@@ -15,7 +15,7 @@
 namespace Square {
 
 int get(int, int);
-int fromString(std::string str);
+int fromString(std::string const &str);
 std::tuple<int, int> diff(int a, int b);
 
 /* Get row of square (0-63) */

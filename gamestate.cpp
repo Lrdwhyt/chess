@@ -827,6 +827,7 @@ bool GameState::canEnPassant(int square) const {
         // We already know that they're on the same row, so this is safe
         return false; // Pawns are not on adjacent columns
     }
+    
     return true;
 }
 
@@ -836,6 +837,7 @@ int GameState::getPositionEvaluation() const {
     const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
     constexpr Bitboard center6by6 = 35604928818740736ULL;
     constexpr Bitboard center4by4 = 66229406269440ULL;
+
     return 2 * Square::getBitCount(currentSide & center6by6) +
            1 * Square::getBitCount(currentSide & center4by4) +
            -1 * Square::getBitCount(oppSide & center4by4) +
@@ -853,6 +855,7 @@ int GameState::getMaterialEvaluation() const {
                 -300 * Square::getBitCount(oppSide & (board.bishops | board.knights)) +
                 -500 * Square::getBitCount(oppSide & board.rooks) +
                 -1050 * Square::getBitCount(oppSide & board.queens);
+
     return score;
 }
 

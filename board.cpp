@@ -200,6 +200,7 @@ void Board::movePiece(int origin, int destination) {
     } else {
         blacks = (blacks ^ originMask) ^ destinationMask;
     }
+
     if (pawns & originMask) {
         pawns = (pawns ^ originMask) ^ destinationMask;
     } else if (knights & originMask) {
@@ -236,6 +237,7 @@ bool Board::isUnderAttack(int square, Side side) const {
         (pawnLocationSecond && pawns & pawnLocationSecond && oppSide & pawnLocationSecond)) {
         return true;
     }
+
     // If any ray attacker exists in any corresponding direction, we are in check.
     return (isAttackedInDirection(square, side, 0, 1) ||
             isAttackedInDirection(square, side, 0, -1) ||
@@ -249,6 +251,7 @@ bool Board::isUnderAttack(int square, Side side) const {
 
 bool Board::isAttackedByKnight(int square, Side side) const {
     const Bitboard oppSide = (side == Side::White) ? blacks : whites;
+
     return (knights & oppSide & Square::getKnightAttacks(Board::getMask(square)));
 }
 
@@ -276,6 +279,7 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
         (pawnLocationSecond && pawns & pawnLocationSecond && oppSide & pawnLocationSecond)) {
         return true;
     }
+
     // If any ray attacker exists in any corresponding direction, we are in check.
     return (wouldBeAttackedInDirection(square, origin, side, 0, 1) ||
             wouldBeAttackedInDirection(square, origin, side, 0, -1) ||
@@ -392,6 +396,7 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
 bool Board::isInCheck(Side side) const {
     const Bitboard curSide = (side == Side::White) ? whites : blacks;
     const int square = Square::getSetBit(kings & curSide);
+
     return isUnderAttack(square, side);
 }
 
@@ -611,6 +616,7 @@ bool Board::isObstructedBetween(int a, int b) const {
         }
         current += y * 8 + x;
     }
+    
     return false;
 }
 
