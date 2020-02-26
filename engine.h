@@ -6,8 +6,8 @@
 namespace Engine {
 
 Move alphaBetaPrune(GameState const &gamestate, int depth);
-int alphaBetaMaximise(GameState &gamestate, int alpha, int beta, int depth);
-int alphaBetaMinimise(GameState &gamestate, int alpha, int beta, int depth);
+int alphaBetaMaximise(GameState const &gamestate, int alpha, int beta, int depth);
+int alphaBetaMinimise(GameState const &gamestate, int alpha, int beta, int depth);
 
 /**
  * The quiescence search is launched when the last move puts a piece in a
@@ -18,9 +18,9 @@ int alphaBetaMinimise(GameState &gamestate, int alpha, int beta, int depth);
  * We then apply alpha-beta pruning using the same cutoffs up to this point
  * in the search.
  */
-int quiescenceSearch(GameState &gamestate, int alpha, int beta, int depth);
-int quiescenceSearchMaximise(GameState &gamestate, int alpha, int beta, int depth);
-int quiescenceSearchMinimise(GameState &gamestate, int alpha, int beta, int depth);
+int quiescenceSearch(GameState const &gamestate, int alpha, int beta, int depth);
+int quiescenceSearchMaximise(GameState const &gamestate, int alpha, int beta, int depth);
+int quiescenceSearchMinimise(GameState const &gamestate, int alpha, int beta, int depth);
 
 } // namespace Engine
 

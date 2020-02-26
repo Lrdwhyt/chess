@@ -2,10 +2,14 @@
 
 #include <fstream>
 
+namespace {
+
 void debug(std::string msg) {
     std::ofstream outputFile("debug.log", std::ios::app);
     outputFile << "---| " << msg << std::endl;
     outputFile.close();
+}
+
 }
 
 /*
@@ -26,13 +30,14 @@ Move Engine::alphaBetaPrune(GameState const &gamestate, int depth) {
             bestMove = move;
         }
     }
+
     return bestMove;
 }
 
 /*
  * Same side to play
  */
-int Engine::alphaBetaMaximise(GameState &gamestate, int alpha, int beta, int depth) {
+int Engine::alphaBetaMaximise(GameState const &gamestate, int alpha, int beta, int depth) {
     if (depth == 0) {
         if (gamestate.isLastMovedPieceUnderAttack()) {
             return quiescenceSearchMaximise(gamestate, alpha, beta, 8);
@@ -55,10 +60,11 @@ int Engine::alphaBetaMaximise(GameState &gamestate, int alpha, int beta, int dep
             break;
         }
     }
+
     return alpha;
 }
 
-int Engine::alphaBetaMinimise(GameState &gamestate, int alpha, int beta, int depth) {
+int Engine::alphaBetaMinimise(GameState const &gamestate, int alpha, int beta, int depth) {
     if (depth == 0) {
         if (gamestate.isLastMovedPieceUnderAttack()) {
             return quiescenceSearchMinimise(gamestate, alpha, beta, 8);
@@ -83,10 +89,11 @@ int Engine::alphaBetaMinimise(GameState &gamestate, int alpha, int beta, int dep
             break;
         }
     }
+
     return beta;
 }
 
-int Engine::quiescenceSearchMaximise(GameState &gamestate, int alpha, int beta, int depth) {
+int Engine::quiescenceSearchMaximise(GameState const &gamestate, int alpha, int beta, int depth) {
     if (depth == 0) {
         return gamestate.getEvaluation();
     }
@@ -109,10 +116,11 @@ int Engine::quiescenceSearchMaximise(GameState &gamestate, int alpha, int beta, 
             break;
         }
     }
+
     return alpha;
 }
 
-int Engine::quiescenceSearchMinimise(GameState &gamestate, int alpha, int beta, int depth) {
+int Engine::quiescenceSearchMinimise(GameState const &gamestate, int alpha, int beta, int depth) {
     if (depth == 0) {
         // Evaluations are based on the side to play
         // In the simulated game state, it is supposed to be the opposite side to play.
@@ -136,5 +144,6 @@ int Engine::quiescenceSearchMinimise(GameState &gamestate, int alpha, int beta, 
             break;
         }
     }
+
     return beta;
 }
