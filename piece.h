@@ -3,9 +3,9 @@
 #ifndef PIECE_H
 #define PIECE_H
 
-#include <string>
-
 #include "side.h"
+
+#include <string>
 
 struct Piece {
 public:

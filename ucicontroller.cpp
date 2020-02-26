@@ -1,9 +1,9 @@
 #include "ucicontroller.h"
 
+#include "engine.h"
+
 #include <fstream>
 #include <iostream>
-
-#include "engine.h"
 
 const std::string LOGFILE = "debug.log";
 

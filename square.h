@@ -5,12 +5,12 @@
 #ifndef SQUARE_H
 #define SQUARE_H
 
+#include "column.h"
+#include "direction.h"
+
 #include <string>
 #include <tuple>
 #include <vector>
-
-#include "column.h"
-#include "direction.h"
 
 namespace Square {
 

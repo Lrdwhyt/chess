@@ -1,9 +1,9 @@
 #ifndef UCICONTROLLER_H
 #define UCICONTROLLER_H
 
-#include <string>
-
 #include "gamestate.h"
+
+#include <string>
 
 class UciController {
 private:

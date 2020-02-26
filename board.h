@@ -7,15 +7,15 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <array>
-#include <cstdint>
-#include <string>
-#include <vector>
-
 #include "checktype.h"
 #include "move.h"
 #include "piece.h"
 #include "square.h"
+
+#include <array>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 typedef std::uint64_t Bitboard;
 

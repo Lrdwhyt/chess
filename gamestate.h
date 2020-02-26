@@ -6,10 +6,10 @@
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
-#include <vector>
-
 #include "board.h"
 #include "move.h"
+
+#include <vector>
 
 class GameState {
 private:

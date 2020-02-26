@@ -1,11 +1,11 @@
+#include "perft.h"
+#include "ucicontroller.h"
+
 #include <bitset>
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <string>
-
-#include "perft.h"
-#include "ucicontroller.h"
 
 void startUciMode() {
     UciController uc;

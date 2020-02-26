@@ -7,10 +7,10 @@
 #ifndef MOVE_H
 #define MOVE_H
 
-#include <string>
-
 #include "piece.h"
 #include "square.h"
+
+#include <string>
 
 typedef std::uint64_t Bitboard;
 

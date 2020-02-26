@@ -1,16 +1,15 @@
 #include "board.h"
 
-#include <algorithm>
-#include <iostream>
-#include <string>
-#include <utility>
-
 #include "column.h"
 #include "piece.h"
 #include "piecetype.h"
 #include "square.h"
 
+#include <algorithm>
 #include <bitset>
+#include <iostream>
+#include <string>
+#include <utility>
 
 Board::Board() {
     whites = 0;

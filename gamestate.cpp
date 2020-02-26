@@ -1,8 +1,8 @@
 #include "gamestate.h"
 
-#include <iostream>
-
 #include "piecetype.h"
+
+#include <iostream>
 
 /* Initialise game state to the starting position */
 GameState::GameState() {

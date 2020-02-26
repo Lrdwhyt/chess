@@ -1,8 +1,8 @@
 #include "perft.h"
 
-#include <assert.h>
-
 #include "move.h"
+
+#include <assert.h>
 
 int Perft::perft(GameState &gamestate, int depth) {
     std::vector<Move> moves = gamestate.generateLegalMoves();
