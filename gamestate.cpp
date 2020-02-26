@@ -845,11 +845,11 @@ int GameState::getPositionEvaluation() const {
 int GameState::getMaterialEvaluation() const {
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
-    int score = Square::getBitCount(currentSide & board.pawns) +
+    int score = 100 * Square::getBitCount(currentSide & board.pawns) +
                 300 * Square::getBitCount(currentSide & (board.bishops | board.knights)) +
                 500 * Square::getBitCount(currentSide & board.rooks) +
                 1050 * Square::getBitCount(currentSide & board.queens) +
-                -Square::getBitCount(oppSide & board.pawns) +
+                -100 * Square::getBitCount(oppSide & board.pawns) +
                 -300 * Square::getBitCount(oppSide & (board.bishops | board.knights)) +
                 -500 * Square::getBitCount(oppSide & board.rooks) +
                 -1050 * Square::getBitCount(oppSide & board.queens);
