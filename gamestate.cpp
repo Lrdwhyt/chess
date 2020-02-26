@@ -748,10 +748,7 @@ void GameState::appendNonQuietPawnMoves(std::vector<Move> &results, int square) 
     const int originalPawnRow = (side == Side::White) ? 2 : 7;
     const int pawnDirection = (side == Side::White) ? 1 : -1;
     const int prePromotionRow = (side == Side::White) ? 7 : 2;
-    bool canPromote = false;
-    if (Square::getRow(square) == prePromotionRow) {
-        canPromote = true;
-    }
+    const bool canPromote = (Square::getRow(square) == prePromotionRow);
     const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
     const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
     if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {

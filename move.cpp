@@ -48,25 +48,19 @@ std::string Move::toString() const {
 bool Move::isRookMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
-    if (x == 0 || y == 0) {
-        // This includes cases where both x and y are 0, i.e. origin == destination
-        // That is checked elsewhere to reduce redundancy
-        return true;
-    } else {
-        return false;
-    }
+
+    // This includes cases where both x and y are 0, i.e. origin == destination
+    // That is checked elsewhere to reduce redundancy
+    return (x == 0 || y == 0);
 }
 
 bool Move::isBishopMove() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
-    if (abs(x) == abs(y)) {
-        // This includes cases where both x and y are 0, i.e. origin == destination
-        // That is checked elsewhere to reduce redundancy
-        return true;
-    } else {
-        return false;
-    }
+
+    // This includes cases where both x and y are 0, i.e. origin == destination
+    // That is checked elsewhere to reduce redundancy
+    return (abs(x) == abs(y));
 }
 
 bool Move::isQueenMove() const {
@@ -116,18 +110,10 @@ bool Move::isPawnMove() const {
     if (abs(y) == 1) {
         return true; // Move forward/backwards one space
     } else if (y == 2) {
-        if (secondRow & originMask) {
-            // Pawns have to be in original position to be moved up twice
-            return true; // White move forward two spaces
-        } else {
-            return false;
-        }
+        // Pawns have to be in original position to be moved up twice
+        return (secondRow & originMask); // White move forward two spaces
     } else if (y == -2) {
-        if (seventhRow & originMask) {
-            return true; // Black move forward two spaces
-        } else {
-            return false;
-        }
+        return (seventhRow & originMask); // Black move forward two spaces
     } else {
         return false;
     }
@@ -165,8 +151,8 @@ bool Move::isTwoSquarePawnMove() const {
     const int difference = destination - origin;
     const Bitboard originMask = Square::getMask(origin);
     if (difference == 16) { // exactly 2 rows apart
-        return (secondRow & originMask);
         // Pawns have to be in original position to be moved up twice
+        return (secondRow & originMask);
     } else if (difference == -16) { // exactly 2 rows apart
         return (seventhRow & originMask);
     } else {
@@ -187,11 +173,7 @@ bool Move::isTwoSquarePawnMove(Side side) const {
 bool Move::isPawnCapture() const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
-    if (abs(x) == 1 && abs(y) == 1) {
-        return true; // Pawn capture
-    } else {
-        return false;
-    }
+    return (abs(x) == 1 && abs(y) == 1); // Pawn capture
 }
 
 bool Move::isPawnCapture(Side side) const {
@@ -199,11 +181,7 @@ bool Move::isPawnCapture(Side side) const {
     int x, y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (abs(x) == 1 && abs(y) == 1) {
-        if (y == pawnDirection) {
-            return true;
-        } else {
-            return false;
-        }
+        return (y == pawnDirection);
     } else {
         return false;
     }

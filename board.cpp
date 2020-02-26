@@ -138,33 +138,33 @@ bool Board::isEmpty(int square) const {
 void Board::addPiece(int square, int piece) {
     const Bitboard squareMask = Board::getMask(square);
     if (Piece::getSide(piece) == Side::White) {
-        whites = whites | squareMask;
+        whites |= squareMask;
     } else {
-        blacks = blacks | squareMask;
+        blacks |= squareMask;
     }
     switch (Piece::getType(piece)) {
         case PieceType::Pawn:
-            pawns = pawns | squareMask;
+            pawns |= squareMask;
             break;
 
         case PieceType::Knight:
-            knights = knights | squareMask;
+            knights |= squareMask;
             break;
 
         case PieceType::Bishop:
-            bishops = bishops | squareMask;
+            bishops |= squareMask;
             break;
 
         case PieceType::Rook:
-            rooks = rooks | squareMask;
+            rooks |= squareMask;
             break;
 
         case PieceType::Queen:
-            queens = queens | squareMask;
+            queens |= squareMask;
             break;
 
         case PieceType::King:
-            kings = kings | squareMask;
+            kings |= squareMask;
             break;
     }
 }
@@ -172,22 +172,22 @@ void Board::addPiece(int square, int piece) {
 void Board::deletePiece(int square) {
     const Bitboard squareMask = Board::getMask(square);
     if (whites & Board::getMask(square)) {
-        whites = whites ^ squareMask;
+        whites ^= squareMask;
     } else {
-        blacks = blacks ^ squareMask;
+        blacks ^= squareMask;
     }
     if (pawns & squareMask) {
-        pawns = pawns ^ squareMask;
+        pawns ^= squareMask;
     } else if (knights & squareMask) {
-        knights = knights ^ squareMask;
+        knights ^= squareMask;
     } else if (bishops & squareMask) {
-        bishops = bishops ^ squareMask;
+        bishops ^= squareMask;
     } else if (rooks & squareMask) {
-        rooks = rooks ^ squareMask;
+        rooks ^= squareMask;
     } else if (queens & squareMask) {
-        queens = queens ^ squareMask;
+        queens ^= squareMask;
     } else if (kings & squareMask) {
-        kings = kings ^ squareMask;
+        kings ^= squareMask;
     }
 }
 
@@ -195,24 +195,25 @@ void Board::movePiece(int origin, int destination) {
     // Assumes there exists a piece at origin
     const Bitboard originMask = Board::getMask(origin);
     const Bitboard destinationMask = Board::getMask(destination);
+    const Bitboard movementMask = originMask ^ destinationMask;
     if (whites & originMask) {
-        whites = (whites ^ originMask) ^ destinationMask;
+        whites ^= movementMask;
     } else {
-        blacks = (blacks ^ originMask) ^ destinationMask;
+        blacks ^= movementMask;
     }
 
     if (pawns & originMask) {
-        pawns = (pawns ^ originMask) ^ destinationMask;
+        pawns ^= movementMask;
     } else if (knights & originMask) {
-        knights = (knights ^ originMask) ^ destinationMask;
+        knights ^= movementMask;
     } else if (bishops & originMask) {
-        bishops = (bishops ^ originMask) ^ destinationMask;
+        bishops ^= movementMask;
     } else if (rooks & originMask) {
-        rooks = (rooks ^ originMask) ^ destinationMask;
+        rooks ^= movementMask;
     } else if (queens & originMask) {
-        queens = (queens ^ originMask) ^ destinationMask;
+        queens ^= movementMask;
     } else if (kings & originMask) {
-        kings = (kings ^ originMask) ^ destinationMask;
+        kings ^= movementMask;
     }
 }
 
@@ -488,11 +489,7 @@ bool Board::isAttackedInDirection(int square, Side side, int x, int y) const {
         if (isSide(square, side)) {
             return false;
         } else if (isSide(square, oppSide)) {
-            if (enemyVariablePiece & Board::getMask(square)) {
-                return true;
-            } else {
-                return false;
-            }
+            return (enemyVariablePiece & Board::getMask(square));
         }
     }
 }
@@ -512,11 +509,7 @@ bool Board::wouldBeAttackedInDirection(int square, int origin, Side side, int x,
         if (isSide(square, side)) {
             return false;
         } else if (isSide(square, oppSide)) {
-            if (enemyVariablePiece & Board::getMask(square)) {
-                return true;
-            } else {
-                return false;
-            }
+            return (enemyVariablePiece & Board::getMask(square));
         }
     }
 }
