@@ -5,8 +5,8 @@
 
 namespace Perft {
 
-int perft(GameState &state, int depth);
-std::vector<std::tuple<Move, int>> divide(GameState state, int depth);
+int perft(GameState const &state, int depth);
+std::vector<std::tuple<Move, int>> divide(GameState const &state, int depth);
 void test();
 
 } // namespace Perft
