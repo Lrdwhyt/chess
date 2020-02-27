@@ -14,14 +14,17 @@ constexpr Bitboard notGHColumn = 18229723555195321596ULL;
 }
 
 int Square::get(int x, int y) {
-    return (y - 1) * 8 + x - 1;
+    //return (y - 1) * 8 + x - 1;
+    return (static_cast<unsigned int>(y) << 3) + x - 9;
 }
 
 int Square::getRow(int square) {
+    // allow compiler to optimise by casting to unsigned int
     return static_cast<unsigned int>(square) / 8 + 1;
 }
 
 int Square::getColumn(int square) {
+    // allow compiler to optimise by casting to unsigned int
     return static_cast<unsigned int>(square) % 8 + 1;
 }
 
@@ -123,7 +126,7 @@ int Square::getInDirection(int square, int x, int y) {
     }
 }
 
-std::uint64_t Square::getInDirection(std::uint64_t square, Direction direction) {
+Bitboard Square::getInDirection(Bitboard square, Direction direction) {
     // Assumes two's complement representation of negative numbers
     if (direction & 0b10) {
         //if (direction == Direction::East || direction == Direction::Northeast || direction == Direction::Southeast) {
@@ -162,11 +165,11 @@ std::string Square::toString(int square) {
 /*
  * TODO: consider fallbacks
  */
-int Square::getSetBit(std::uint64_t b) {
+int Square::getSetBit(Bitboard b) {
     return __builtin_ctzll(b);
 }
 
-int Square::getBitCount(std::uint64_t b) {
+int Square::getBitCount(Bitboard b) {
     int counter = 0;
     while (b) {
         b = b & (b - 1);

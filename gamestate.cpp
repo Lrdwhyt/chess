@@ -97,13 +97,19 @@ const Board &GameState::getBoard() const {
     return board;
 }
 
+namespace {
+
+const int blackQueenRook = Square::get(Column::A, 8);
+const int blackKingRook = Square::get(Column::H, 8);
+const int whiteQueenRook = Square::get(Column::A, 1);
+const int whiteKingRook = Square::get(Column::H, 1);
+
+}
+
 void GameState::processMove(Move move) {
     const Bitboard originMask = Square::getMask(move.origin);
     // Update ability to castle
-    const int blackQueenRook = Square::get(Column::A, 8);
-    const int blackKingRook = Square::get(Column::H, 8);
-    const int whiteQueenRook = Square::get(Column::A, 1);
-    const int whiteKingRook = Square::get(Column::H, 1);
+    
     if (canWhiteCastleKingside && move.destination == whiteKingRook) {
         canWhiteCastleKingside = false;
     }
@@ -494,6 +500,19 @@ void GameState::appendQueenMoves(std::vector<Move> &results, int square) const {
     board.appendUnobstructedMovesInDirection(results, square, squareMask, side, Direction::Northwest);
 }
 
+namespace {
+
+const int squareF1 = Square::get(Column::F, 1);
+const int squareG1 = Square::get(Column::G, 1);
+const int squareD1 = Square::get(Column::D, 1);
+const int squareC1 = Square::get(Column::C, 1);
+const int squareF8 = Square::get(Column::F, 8);
+const int squareG8 = Square::get(Column::G, 8);
+const int squareD8 = Square::get(Column::D, 8);
+const int squareC8 = Square::get(Column::C, 8);
+
+}
+
 void GameState::appendCastleMoves(std::vector<Move> &results) const {
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const int kingLocation = Square::getSetBit(board.kings & currentSide);
@@ -501,34 +520,34 @@ void GameState::appendCastleMoves(std::vector<Move> &results) const {
         if (canWhiteCastleKingside) {
             constexpr Bitboard castleMask = 96ULL;
             if (!((board.whites | board.blacks) & castleMask) &&
-                !board.isUnderAttack(Square::get(Column::F, 1), side) &&
-                !board.isUnderAttack(Square::get(Column::G, 1), side)) {
-                results.push_back(Move(kingLocation, Square::get(Column::G, 1)));
+                !board.isUnderAttack(squareF1, side) &&
+                !board.isUnderAttack(squareG1, side)) {
+                results.push_back(Move(kingLocation, squareG1));
             }
         }
         if (canWhiteCastleQueenside) {
             constexpr Bitboard castleMask = 14ULL;
             if (!((board.whites | board.blacks) & castleMask) &&
-                !board.isUnderAttack(Square::get(Column::D, 1), side) &&
-                !board.isUnderAttack(Square::get(Column::C, 1), side)) {
-                results.push_back(Move(kingLocation, Square::get(Column::C, 1)));
+                !board.isUnderAttack(squareD1, side) &&
+                !board.isUnderAttack(squareC1, side)) {
+                results.push_back(Move(kingLocation, squareC1));
             }
         }
     } else {
         if (canBlackCastleKingside) {
             constexpr Bitboard castleMask = 6917529027641081856ULL;
             if (!((board.whites | board.blacks) & castleMask) &&
-                !board.isUnderAttack(Square::get(Column::F, 8), side) &&
-                !board.isUnderAttack(Square::get(Column::G, 8), side)) {
-                results.push_back(Move(kingLocation, Square::get(Column::G, 8)));
+                !board.isUnderAttack(squareF8, side) &&
+                !board.isUnderAttack(squareG8, side)) {
+                results.push_back(Move(kingLocation, squareG8));
             }
         }
         if (canBlackCastleQueenside) {
             constexpr Bitboard castleMask = 1008806316530991104ULL;
             if (!((board.whites | board.blacks) & castleMask) &&
-                !board.isUnderAttack(Square::get(Column::D, 8), side) &&
-                !board.isUnderAttack(Square::get(Column::C, 8), side)) {
-                results.push_back(Move(kingLocation, Square::get(Column::C, 8)));
+                !board.isUnderAttack(squareD8, side) &&
+                !board.isUnderAttack(squareC8, side)) {
+                results.push_back(Move(kingLocation, squareC8));
             }
         }
     }
@@ -576,7 +595,7 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
     const int originalPawnRow = (side == Side::White) ? 2 : 7;
     const int pawnDirection = (side == Side::White) ? 1 : -1;
     const int prePromotionRow = (side == Side::White) ? 7 : 2;
-    const bool canPromote = (Square::getRow(square) == prePromotionRow) ? true : false;
+    const bool canPromote = (Square::getRow(square) == prePromotionRow);
     const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
     const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
     if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, oppSide)) {
@@ -585,7 +604,8 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
                 Move(square, leftCaptureSquare, PieceType::Queen),
                 Move(square, leftCaptureSquare, PieceType::Rook),
                 Move(square, leftCaptureSquare, PieceType::Bishop),
-                Move(square, leftCaptureSquare, PieceType::Knight)};
+                Move(square, leftCaptureSquare, PieceType::Knight)
+            };
             results.insert(results.end(), res.begin(), res.end());
         } else {
             results.push_back(Move(square, leftCaptureSquare));
@@ -597,7 +617,8 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
                 Move(square, rightCaptureSquare, PieceType::Queen),
                 Move(square, rightCaptureSquare, PieceType::Rook),
                 Move(square, rightCaptureSquare, PieceType::Bishop),
-                Move(square, rightCaptureSquare, PieceType::Knight)};
+                Move(square, rightCaptureSquare, PieceType::Knight)
+            };
             results.insert(results.end(), res.begin(), res.end());
         } else {
             results.push_back(Move(square, rightCaptureSquare));
@@ -610,7 +631,8 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
                 Move(square, forwardSquare, PieceType::Queen),
                 Move(square, forwardSquare, PieceType::Rook),
                 Move(square, forwardSquare, PieceType::Bishop),
-                Move(square, forwardSquare, PieceType::Knight)};
+                Move(square, forwardSquare, PieceType::Knight)
+            };
             results.insert(results.end(), res.begin(), res.end());
         } else {
             results.push_back(Move(square, forwardSquare));
@@ -631,7 +653,8 @@ void GameState::appendConvertedPawnMoves(std::vector<Move> &results, int origin,
             Move(origin, destination, PieceType::Queen),
             Move(origin, destination, PieceType::Rook),
             Move(origin, destination, PieceType::Bishop),
-            Move(origin, destination, PieceType::Knight)};
+            Move(origin, destination, PieceType::Knight)
+        };
         results.insert(results.end(), promotionMoves.begin(), promotionMoves.end());
     } else {
         results.push_back(Move(origin, destination));
@@ -695,7 +718,8 @@ void GameState::appendNonQuietLegalPieceMoves(std::vector<Move> &results, int sq
             board.captureInDirection(squareMask, side, Direction::Northeast),
             board.captureInDirection(squareMask, side, Direction::Northwest),
             board.captureInDirection(squareMask, side, Direction::Southeast),
-            board.captureInDirection(squareMask, side, Direction::Southwest)};
+            board.captureInDirection(squareMask, side, Direction::Southwest)
+        };
         for (int destination : captureDestinations) {
             if (destination == -1) {
                 continue;
@@ -707,7 +731,8 @@ void GameState::appendNonQuietLegalPieceMoves(std::vector<Move> &results, int sq
             board.captureInDirection(squareMask, side, Direction::North),
             board.captureInDirection(squareMask, side, Direction::East),
             board.captureInDirection(squareMask, side, Direction::South),
-            board.captureInDirection(squareMask, side, Direction::West)};
+            board.captureInDirection(squareMask, side, Direction::West)
+        };
         for (int destination : captureDestinations) {
             if (destination == -1) {
                 continue;
@@ -723,7 +748,8 @@ void GameState::appendNonQuietLegalPieceMoves(std::vector<Move> &results, int sq
             board.captureInDirection(squareMask, side, Direction::Northeast),
             board.captureInDirection(squareMask, side, Direction::Northwest),
             board.captureInDirection(squareMask, side, Direction::Southeast),
-            board.captureInDirection(squareMask, side, Direction::Southwest)};
+            board.captureInDirection(squareMask, side, Direction::Southwest)
+        };
         for (int destination : captureDestinations) {
             if (destination == -1) {
                 continue;

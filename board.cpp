@@ -440,7 +440,7 @@ int Board::captureInDirection(Bitboard squareMask, Side side, Direction directio
     }
 }
 
-//We assume that square and movingPiece are in line.
+// We assume that square and movingPiece are in line.
 int Board::getPinningOrAttackingSquare(int square, int movingPiece, Side side) const {
     const Side oppSide = (side == Side::White) ? Side::Black : Side::White;
     // Determine if we are looking for bishop or rook based on the direction vector

@@ -12,6 +12,8 @@
 #include <tuple>
 #include <vector>
 
+typedef std::uint64_t Bitboard;
+
 namespace Square {
 
 int get(int, int);
@@ -30,21 +32,21 @@ bool inLine(int a, int );
 /* Returns -1 if square is out of range */
 int getInDirection(int square, int x, int y);
 
-std::uint64_t getInDirection(std::uint64_t square, Direction direction);
+Bitboard getInDirection(Bitboard square, Direction direction);
 
 int getInYDirection(int square, int y);
 
 std::string toString(int square);
 
-int getSetBit(std::uint64_t b);
+int getSetBit(Bitboard b);
 
-int getBitCount(std::uint64_t b);
+int getBitCount(Bitboard b);
 
-std::uint64_t getMask(int square);
+Bitboard getMask(int square);
 
-std::uint64_t getKnightAttacks(std::uint64_t square);
+Bitboard getKnightAttacks(Bitboard square);
 
-std::uint64_t getKingAttacks(std::uint64_t square);
+Bitboard getKingAttacks(Bitboard square);
 
 } // namespace Square
 
