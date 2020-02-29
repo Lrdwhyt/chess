@@ -2,6 +2,7 @@
 #include "ucicontroller.h"
 
 #include <bitset>
+#include <chrono>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -37,10 +38,12 @@ void waitForInput() {
             std::cout << "5/5 tests passed" << std::endl;
         } else if (input.length() >= 5 && input.substr(0, 5) == "perft") {
             const int perftDepth = stoi(input.substr(6, std::string::npos));
-            const double start = std::time(0);
+            //const double start = std::time(0);
+            const auto start = std::chrono::steady_clock::now();
             const int perftResult = Perft::perft(gamestate, perftDepth);
-            const double end = std::time(0);
-            std::cout << "perft(" << perftDepth << ") = " << perftResult << " in " << (end - start) << "s" << std::endl;
+            const auto end = std::chrono::steady_clock::now();
+            const auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (end - start).count();
+            std::cout << "perft(" << perftDepth << ") = " << perftResult << " in " << duration << "ms" << std::endl;
         }
     }
 }
