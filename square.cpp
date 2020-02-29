@@ -20,8 +20,12 @@ int Square::get(int x, int y) {
 
 int Square::getRow(int square) {
     // square / 8 + 1
-    return ((static_cast<unsigned int>(square) & 0b111000) >> 3) + 1;
+    return ((static_cast<unsigned int>(square) >> 3) & 0b111) + 1;
     //return static_cast<unsigned int>(square) / 8 + 1;
+}
+
+int Square::getRow2(int square) {
+    return (static_cast<unsigned int>(square) & 0b111000);
 }
 
 int Square::getColumn(int square) {
@@ -159,7 +163,6 @@ bool Square::inLine(int a, int b) {
 }
 
 std::string Square::toString(int square) {
-    //char col = Square::getColumn(square) + 'a' - 1;
     char col = Square::getColumn(square) + 'a';
     return std::string(1, col) + std::to_string(Square::getRow(square));
 }

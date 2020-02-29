@@ -171,7 +171,7 @@ void Board::addPiece(int square, int piece) {
 
 void Board::deletePiece(int square) {
     const Bitboard squareMask = Board::getMask(square);
-    if (whites & Board::getMask(square)) {
+    if (whites & squareMask) {
         whites ^= squareMask;
     } else {
         blacks ^= squareMask;
@@ -558,7 +558,7 @@ bool Board::isLegalPieceMove(int origin, int destination) const {
 bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
     const Bitboard curSide = (side == Side::White) ? whites : blacks;
     const int kingLocation = Square::getSetBit(kings & curSide);
-    if (Square::getRow(kingLocation) != Square::getRow(capturer)) {
+    if (Square::getRow2(kingLocation) != Square::getRow2(capturer)) {
         return false;
     }
     const int x = (Square::getColumn(kingLocation) > Square::getColumn(capturer)) ? -1 : 1;

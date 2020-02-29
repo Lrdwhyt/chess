@@ -4,6 +4,14 @@
 
 #include <iostream>
 
+namespace {
+
+const int row2 = 0b001000;
+const int row3 = 0b010000;
+const int row7 = 0b110000;
+
+}
+
 /* Initialise game state to the starting position */
 GameState::GameState() {
     board.setToStartPosition();
@@ -59,7 +67,7 @@ GameState::GameState(std::string fenString) {
     std::string enPassantString = fenString.substr(0, index);
     if (enPassantString.length() == 2) {
         int enPassantSquare = Square::fromString(enPassantString);
-        if (Square::getRow(enPassantSquare) == 3) {
+        if (Square::getRow2(enPassantSquare) == row3) {
             moveHistory.push_back(Move(Square::getInYDirection(enPassantSquare, -1),
                                        Square::getInYDirection(enPassantSquare, 1)));
         } else { // 6
@@ -156,8 +164,8 @@ void GameState::processMove(Move move) {
         }
     } else if (board.pawns & originMask && move.isPawnCapture() && board.isEmpty(move.destination)) { // en passant
         // Remove pawn captured via en passant
-        const int pawnDirection = side == Side::White ? 1 : -1;
-        board.deletePiece(Square::get(Square::getColumn(move.destination), Square::getRow(move.destination) - pawnDirection));
+        const int pawnDirection = side == Side::White ? -1 : 1;
+        board.deletePiece(Square::getInYDirection(move.destination, pawnDirection));
     }
     if (!board.isEmpty(move.destination)) {
         board.deletePiece(move.destination);
@@ -592,10 +600,10 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
         }
     }
     const Side oppSide = (side == Side::White) ? Side::Black : Side::White;
-    const int originalPawnRow = (side == Side::White) ? 2 : 7;
+    const int originalPawnRow = (side == Side::White) ? row2 : row7;
     const int pawnDirection = (side == Side::White) ? 1 : -1;
-    const int prePromotionRow = (side == Side::White) ? 7 : 2;
-    const bool canPromote = (Square::getRow(square) == prePromotionRow);
+    const int prePromotionRow = (side == Side::White) ? row7 : row2;
+    const bool canPromote = (Square::getRow2(square) == prePromotionRow);
     const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
     const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
     if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, oppSide)) {
@@ -636,7 +644,7 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
             results.insert(results.end(), res.begin(), res.end());
         } else {
             results.push_back(Move(square, forwardSquare));
-            if (Square::getRow(square) == originalPawnRow) {
+            if (Square::getRow2(square) == originalPawnRow) {
                 const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
                 if (board.isEmpty(forwardTwoSquares)) {
                     results.push_back(Move(square, forwardTwoSquares));
@@ -647,8 +655,8 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
 }
 
 void GameState::appendConvertedPawnMoves(std::vector<Move> &results, int origin, int destination) const {
-    if ((side == Side::White && Square::getRow(origin) == 7) ||
-        (side == Side::Black && Square::getRow(origin) == 2)) {
+    if ((side == Side::White && Square::getRow2(origin) == row7) ||
+        (side == Side::Black && Square::getRow2(origin) == row2)) {
         std::array<Move, 4> promotionMoves = {
             Move(origin, destination, PieceType::Queen),
             Move(origin, destination, PieceType::Rook),
@@ -773,8 +781,8 @@ void GameState::appendNonQuietPawnMoves(std::vector<Move> &results, int square) 
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
     const int originalPawnRow = (side == Side::White) ? 2 : 7;
     const int pawnDirection = (side == Side::White) ? 1 : -1;
-    const int prePromotionRow = (side == Side::White) ? 7 : 2;
-    const bool canPromote = (Square::getRow(square) == prePromotionRow);
+    const int prePromotionRow = (side == Side::White) ? row7 : row2;
+    const bool canPromote = (Square::getRow2(square) == prePromotionRow);
     const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
     const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
     if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
@@ -842,7 +850,7 @@ bool GameState::canEnPassant(int square) const {
     if (!(board.pawns & Square::getMask(lastMovedPiece))) {
         return false; // Previous moved piece wasn't a pawn
     }
-    if (Square::getRow(square) != Square::getRow(lastMovedPiece)) {
+    if (Square::getRow2(square) != Square::getRow2(lastMovedPiece)) {
         return false; // We are not in the same row as the pawn
     }
     //if (std::abs(Square::getColumn(square) - Square::getColumn(lastMovedPiece)) != 1) {
