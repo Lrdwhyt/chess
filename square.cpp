@@ -14,18 +14,19 @@ constexpr Bitboard notGHColumn = 18229723555195321596ULL;
 }
 
 int Square::get(int x, int y) {
-    //return (y - 1) * 8 + x - 1;
-    return (static_cast<unsigned int>(y) << 3) + x - 9;
+    // (y - 1) * 8 + x;
+    return (static_cast<unsigned int>(y) << 3) + x - 8;
 }
 
 int Square::getRow(int square) {
-    // allow compiler to optimise by casting to unsigned int
-    return static_cast<unsigned int>(square) / 8 + 1;
+    // square / 8 + 1
+    return ((static_cast<unsigned int>(square) & 0b111000) >> 3) + 1;
+    //return static_cast<unsigned int>(square) / 8 + 1;
 }
 
 int Square::getColumn(int square) {
-    // allow compiler to optimise by casting to unsigned int
-    return static_cast<unsigned int>(square) % 8 + 1;
+    // square % 8
+    return (static_cast<unsigned int>(square) & 0b111);
 }
 
 int Square::fromString(std::string const &str) {
@@ -119,7 +120,7 @@ std::vector<int> Square::fromAtoBInclusive(int a, int b) {
 int Square::getInDirection(int square, int x, int y) {
     const int newX = Square::getColumn(square) + x;
     const int newY = Square::getRow(square) + y;
-    if (newX <= 0 || newX > 8 || newY <= 0 || newY > 8) {
+    if (newX < 0 || newX >= 8 || newY <= 0 || newY > 8) {
         return -1; // Square is out of range
     } else {
         return Square::get(newX, newY);
@@ -158,7 +159,8 @@ bool Square::inLine(int a, int b) {
 }
 
 std::string Square::toString(int square) {
-    char col = Square::getColumn(square) + 'a' - 1;
+    //char col = Square::getColumn(square) + 'a' - 1;
+    char col = Square::getColumn(square) + 'a';
     return std::string(1, col) + std::to_string(Square::getRow(square));
 }
 
