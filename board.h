@@ -26,6 +26,7 @@ private:
     int squareAttackingInDirection(Bitboard squareMask, Side side, Direction direction) const;
     bool isAttackedInDirection(int square, Side side, int x, int y) const;
     bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
+    bool wouldBeAttackedInDirection(Bitboard square, Bitboard origin, Side side, Direction d) const;
 
 public:
     Bitboard whites;

@@ -34,7 +34,6 @@ Board::Board(std::string fenString) {
     int x = 0;
     int y = 8;
     for (int i = 0; i < fenString.length(); ++i) {
-        ++x;
         const char c = fenString[i];
         if (c == '/') {
             --y;
@@ -42,7 +41,7 @@ Board::Board(std::string fenString) {
             continue;
         } else {
             if (isdigit(c)) {
-                x += (c - '0' - 1);
+                x += (c - '0');
                 continue;
             } else {
                 const int piece = Piece::fromString(c);
@@ -50,6 +49,7 @@ Board::Board(std::string fenString) {
                 addPiece(square, piece);
             }
         }
+        ++x;
     }
 }
 
@@ -261,12 +261,12 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
     if (isAttackedByKnight(square, side)) {
         return true;
     }
+    const Bitboard squareMask = Board::getMask(square);
     const Bitboard oppSide = (side == Side::White) ? blacks : whites;
-    if (Square::getKingAttacks(Board::getMask(square)) & kings & oppSide) {
+    if (Square::getKingAttacks(squareMask) & kings & oppSide) {
         return true;
     }
     // Check the two possible squares that an enemy pawn could be checking from
-    const Bitboard squareMask = Board::getMask(square);
     Bitboard pawnLocationFirst;
     Bitboard pawnLocationSecond;
     if (side == Side::White) {
@@ -280,16 +280,16 @@ bool Board::wouldBeUnderAttack(int square, int origin, Side side) const {
         (pawnLocationSecond && pawns & pawnLocationSecond && oppSide & pawnLocationSecond)) {
         return true;
     }
-
+    const Bitboard originMask = Square::getMask(origin);
     // If any ray attacker exists in any corresponding direction, we are in check.
-    return (wouldBeAttackedInDirection(square, origin, side, 0, 1) ||
-            wouldBeAttackedInDirection(square, origin, side, 0, -1) ||
-            wouldBeAttackedInDirection(square, origin, side, 1, 0) ||
-            wouldBeAttackedInDirection(square, origin, side, -1, 0) ||
-            wouldBeAttackedInDirection(square, origin, side, 1, -1) ||
-            wouldBeAttackedInDirection(square, origin, side, 1, 1) ||
-            wouldBeAttackedInDirection(square, origin, side, -1, -1) ||
-            wouldBeAttackedInDirection(square, origin, side, -1, 1));
+    return (wouldBeAttackedInDirection(squareMask, originMask, side, Direction::North) ||
+            wouldBeAttackedInDirection(squareMask, originMask, side, Direction::Northeast) ||
+            wouldBeAttackedInDirection(squareMask, originMask, side, Direction::Northwest) ||
+            wouldBeAttackedInDirection(squareMask, originMask, side, Direction::South) ||
+            wouldBeAttackedInDirection(squareMask, originMask, side, Direction::Southeast) ||
+            wouldBeAttackedInDirection(squareMask, originMask, side, Direction::Southwest) ||
+            wouldBeAttackedInDirection(squareMask, originMask, side, Direction::East) ||
+            wouldBeAttackedInDirection(squareMask, originMask, side, Direction::West));
 }
 
 std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
@@ -510,6 +510,27 @@ bool Board::wouldBeAttackedInDirection(int square, int origin, Side side, int x,
             return false;
         } else if (isSide(square, oppSide)) {
             return (enemyVariablePiece & Board::getMask(square));
+        }
+    }
+}
+
+bool Board::wouldBeAttackedInDirection(Bitboard square, Bitboard origin, Side side, Direction d) const {
+    const Bitboard sameSide = (side == Side::White) ? whites : blacks;
+    const Bitboard oppSide = (side == Side::White) ? blacks : whites;
+    // Determine if we are looking for bishop or rook based on the direction vector
+    const Bitboard enemyVariablePiece = queens | ((d == Direction::North || d == Direction::South || d == Direction::East || d == Direction::West) ? rooks : bishops);
+    while (true) {
+        square = Square::getInDirection(square, d);
+        if (square == 0) {
+            return false;
+        }
+        if (square == origin) {
+            continue;
+        }
+        if (square & sameSide) {
+            return false;
+        } else if (square & oppSide) {
+            return (enemyVariablePiece & square);
         }
     }
 }
