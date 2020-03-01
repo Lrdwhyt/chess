@@ -240,14 +240,22 @@ bool Board::isUnderAttack(int square, Side side) const {
     }
 
     // If any ray attacker exists in any corresponding direction, we are in check.
-    return (isAttackedInDirection(square, side, 0, 1) ||
+    return (isAttackedInDirection(squareMask, side, Direction::North) ||
+            isAttackedInDirection(squareMask, side, Direction::Northeast) ||
+            isAttackedInDirection(squareMask, side, Direction::Northwest) ||
+            isAttackedInDirection(squareMask, side, Direction::South) ||
+            isAttackedInDirection(squareMask, side, Direction::Southeast) ||
+            isAttackedInDirection(squareMask, side, Direction::Southwest) ||
+            isAttackedInDirection(squareMask, side, Direction::East) ||
+            isAttackedInDirection(squareMask, side, Direction::West));
+    /*return (isAttackedInDirection(square, side, 0, 1) ||
             isAttackedInDirection(square, side, 0, -1) ||
             isAttackedInDirection(square, side, 1, 0) ||
             isAttackedInDirection(square, side, -1, 0) ||
             isAttackedInDirection(square, side, 1, -1) ||
             isAttackedInDirection(square, side, 1, 1) ||
             isAttackedInDirection(square, side, -1, -1) ||
-            isAttackedInDirection(square, side, -1, 1));
+            isAttackedInDirection(square, side, -1, 1));*/
 }
 
 bool Board::isAttackedByKnight(int square, Side side) const {
@@ -298,7 +306,6 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
     const Bitboard oppSide = (side == Side::White) ? blacks : whites;
     const Bitboard curSide = (side == Side::White) ? whites : blacks;
     const Bitboard squareMask = kings & curSide;
-    const int square = Square::getSetBit(kings & curSide);
     // Check all knight spots
     const Bitboard knightLocation = Square::getKnightAttacks(squareMask) & knights & oppSide;
     if (knightLocation) {
@@ -306,7 +313,6 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
         directAttacker = true;
     } else {
         // Check the two possible squares that an enemy pawn could be checking from
-        const Bitboard squareMask = Board::getMask(square);
         Bitboard pawnLocationFirst;
         Bitboard pawnLocationSecond;
         if (side == Side::White) {
@@ -327,21 +333,20 @@ std::tuple<CheckType, int> Board::getInCheckStatus(Side side) const {
     }
     // If any ray attacker exists in any corresponding direction, we are in check.
     if (directAttacker) {
-        if (isAttackedInDirection(square, side, 0, 1) ||
-            isAttackedInDirection(square, side, 0, -1) ||
-            isAttackedInDirection(square, side, 1, 0) ||
-            isAttackedInDirection(square, side, -1, 0) ||
-            isAttackedInDirection(square, side, 1, -1) ||
-            isAttackedInDirection(square, side, 1, 1) ||
-            isAttackedInDirection(square, side, -1, -1) ||
-            isAttackedInDirection(square, side, -1, 1)) {
+        if (isAttackedInDirection(squareMask, side, Direction::North) ||
+            isAttackedInDirection(squareMask, side, Direction::Northeast) ||
+            isAttackedInDirection(squareMask, side, Direction::Northwest) ||
+            isAttackedInDirection(squareMask, side, Direction::South) ||
+            isAttackedInDirection(squareMask, side, Direction::Southeast) ||
+            isAttackedInDirection(squareMask, side, Direction::Southwest) ||
+            isAttackedInDirection(squareMask, side, Direction::East) ||
+            isAttackedInDirection(squareMask, side, Direction::West)) {
             return std::make_tuple(CheckType::Double, -1);
         } else {
             return std::make_tuple(CheckType::Direct, attackerSquare);
         }
     } else {
         // Check number of ray attackers
-        const Bitboard squareMask = Board::getMask(square);
         int attackerCount = 0;
         int attackerSquareTemp;
         attackerSquareTemp = squareAttackingInDirection(squareMask, side, Direction::North);
@@ -490,6 +495,24 @@ bool Board::isAttackedInDirection(int square, Side side, int x, int y) const {
             return false;
         } else if (isSide(square, oppSide)) {
             return (enemyVariablePiece & Board::getMask(square));
+        }
+    }
+}
+
+bool Board::isAttackedInDirection(Bitboard square, Side side, Direction d) const {
+    const Bitboard sameSide = (side == Side::White) ? whites : blacks;
+    const Bitboard oppSide = (side == Side::White) ? blacks : whites;
+    // Determine if we are looking for bishop or rook based on the direction vector
+    const Bitboard enemyVariablePiece = queens | ((d == Direction::North || d == Direction::South || d == Direction::East || d == Direction::West) ? rooks : bishops);
+    while (true) {
+        square = Square::getInDirection(square, d);
+        if (square == 0) {
+            return false;
+        }
+        if (square & sameSide) {
+            return false;
+        } else if (square & oppSide) {
+            return (enemyVariablePiece & square);
         }
     }
 }

@@ -20,14 +20,6 @@
 typedef std::uint64_t Bitboard;
 
 class Board {
-private:
-    int at(int square) const;
-    bool isAttackedByKnight(int square, Side side) const;
-    int squareAttackingInDirection(Bitboard squareMask, Side side, Direction direction) const;
-    bool isAttackedInDirection(int square, Side side, int x, int y) const;
-    bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
-    bool wouldBeAttackedInDirection(Bitboard square, Bitboard origin, Side side, Direction d) const;
-
 public:
     Bitboard whites;
     Bitboard blacks;
@@ -77,6 +69,15 @@ public:
     bool isInCheck(Side side) const;
 
     Bitboard getMask(int square) const;
+
+private:
+    int at(int square) const;
+    bool isAttackedByKnight(int square, Side side) const;
+    int squareAttackingInDirection(Bitboard squareMask, Side side, Direction direction) const;
+    bool isAttackedInDirection(int square, Side side, int x, int y) const;
+    bool isAttackedInDirection(Bitboard square, Side side, Direction d) const;
+    bool wouldBeAttackedInDirection(int square, int origin, Side side, int x, int y) const;
+    bool wouldBeAttackedInDirection(Bitboard square, Bitboard origin, Side side, Direction d) const;
 };
 
 #endif
