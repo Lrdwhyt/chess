@@ -20,8 +20,8 @@ int Square::get(int x, int y) {
 
 int Square::getRow(int square) {
     // square / 8 + 1
-    return ((static_cast<unsigned int>(square) >> 3) & 0b111) + 1;
     //return static_cast<unsigned int>(square) / 8 + 1;
+    return ((static_cast<unsigned int>(square) >> 3) & 0b111) + 1;
 }
 
 int Square::getRow2(int square) {

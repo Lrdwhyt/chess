@@ -356,12 +356,14 @@ std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
             if (Square::inLine(kingLocation, square)) {
                 const int pinningSquare = board.getPinningOrAttackingSquare(kingLocation, square, side);
                 if (pinningSquare != -1) {
-                    // <---pinningSquare----square----kingLocation--->
-                    // where checkingSquare is on another line.
-                    // In this case, piece cannot move.
-                    // The other possibility:
-                    // <-square--pinningSquare=checkingSquare--kingLocation->
-                    // where piece has one valid move, which is to capture checkingSquare
+                    /*
+                    <---pinningSquare----square----kingLocation--->
+                    where checkingSquare is on another line.
+                    In this case, piece cannot move.
+                    The other possibility:
+                    <-square--pinningSquare=checkingSquare--kingLocation->
+                    where piece has one valid move, which is to capture checkingSquare
+                    */
                     if (pinningSquare != checkingSquare) {
                         continue;
                     }
@@ -387,10 +389,8 @@ std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
             const std::vector<int> validDestinations = Square::fromAtoBInclusive(kingLocation, checkingSquare);
             for (int destination : validDestinations) {
                 const Move move = Move(square, destination);
-                if (board.knights & squareMask) {
-                    if (move.isKnightMove()) {
-                        results.push_back(move);
-                    }
+                if (board.knights & squareMask && move.isKnightMove()) {
+                    results.push_back(move);
                 } else if (board.isLegalPieceMove(square, destination)) { // Pawn/bishop/rook/queen
                     if (board.isObstructedBetween(square, destination)) {
                         continue;
@@ -402,10 +402,8 @@ std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
                             if (move.isPawnMove(side)) {
                                 appendConvertedPawnMoves(results, square, destination);
                             }
-                        } else {
-                            if (move.isPawnCapture(side)) {
-                                appendConvertedPawnMoves(results, square, destination);
-                            }
+                        } else if (move.isPawnCapture(side)) {
+                            appendConvertedPawnMoves(results, square, destination);
                         }
                     } else {
                         results.push_back(move);
@@ -414,6 +412,7 @@ std::vector<Move> GameState::getMovesInRayCheck(int checkingSquare) const {
             }
         }
     }
+
     return results;
 }
 
@@ -467,6 +466,7 @@ std::vector<Move> GameState::getMovesInDirectCheck(int checkingSquare) const {
         }
     }
     appendKingMoves(results);
+
     return results;
 }
 
@@ -706,6 +706,7 @@ std::vector<Move> GameState::getNonQuietMovesOutsideCheck() const {
             appendNonQuietLegalPieceMoves(results, square);
         }
     }
+
     return results;
 }
 
@@ -779,12 +780,10 @@ void GameState::appendNonQuietPawnMoves(std::vector<Move> &results, int square) 
         }
     }
     const Side enemySide = (side == Side::White) ? Side::Black : Side::White;
-    const int originalPawnRow = (side == Side::White) ? 2 : 7;
     const int pawnDirection = (side == Side::White) ? 1 : -1;
     const int prePromotionRow = (side == Side::White) ? row7 : row2;
     const bool canPromote = (Square::getRow2(square) == prePromotionRow);
     const int leftCaptureSquare = Square::getInDirection(square, -1, pawnDirection);
-    const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
     if (leftCaptureSquare != -1 && board.isSide(leftCaptureSquare, enemySide)) {
         if (canPromote) {
             results.push_back(Move(square, leftCaptureSquare, PieceType::Queen));
@@ -795,6 +794,7 @@ void GameState::appendNonQuietPawnMoves(std::vector<Move> &results, int square) 
             results.push_back(Move(square, leftCaptureSquare));
         }
     }
+    const int rightCaptureSquare = Square::getInDirection(square, 1, pawnDirection);
     if (rightCaptureSquare != -1 && board.isSide(rightCaptureSquare, enemySide)) {
         if (canPromote) {
             results.push_back(Move(square, rightCaptureSquare, PieceType::Queen));
@@ -862,12 +862,17 @@ bool GameState::canEnPassant(int square) const {
     return true;
 }
 
+namespace {
+
+constexpr Bitboard center6by6 = 35604928818740736ULL;
+constexpr Bitboard center4by4 = 66229406269440ULL;
+
+}
+
 // Evaluates position by number of pieces close to center
 int GameState::getPositionEvaluation() const {
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
-    constexpr Bitboard center6by6 = 35604928818740736ULL;
-    constexpr Bitboard center4by4 = 66229406269440ULL;
 
     return 2 * Square::getBitCount(currentSide & center6by6) +
            1 * Square::getBitCount(currentSide & center4by4) +
