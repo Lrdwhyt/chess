@@ -643,13 +643,13 @@ void GameState::appendPawnMoves(std::vector<Move> &results, int square) const {
             };
             results.insert(results.end(), res.begin(), res.end());
         } else {
-            results.push_back(Move(square, forwardSquare));
             if (Square::getRow2(square) == originalPawnRow) {
                 const int forwardTwoSquares = Square::getInYDirection(square, pawnDirection * 2);
                 if (board.isEmpty(forwardTwoSquares)) {
                     results.push_back(Move(square, forwardTwoSquares));
                 }
             }
+            results.push_back(Move(square, forwardSquare));
         }
     }
 }
@@ -880,23 +880,42 @@ int GameState::getPositionEvaluation() const {
            -2 * Square::getBitCount(oppSide & center6by6);
 }
 
+int GameState::getCenteredEvaluation() const {
+    const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
+    const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
+    const int bishops = 8 * Square::getBitCount(currentSide & board.bishops & center6by6) +
+                    8 * Square::getBitCount(currentSide & board.bishops & center4by4) +
+                    -8 * Square::getBitCount(oppSide & board.bishops & center6by6) +
+                    -8 * Square::getBitCount(oppSide & board.bishops & center4by4);
+    const int knights = 5 * Square::getBitCount(currentSide & board.knights & center6by6) +
+                    10 * Square::getBitCount(currentSide & board.knights & center4by4) +
+                    -5 * Square::getBitCount(oppSide & board.knights & center6by6) +
+                    -10 * Square::getBitCount(oppSide & board.knights & center4by4);
+    const int kings = -5 * Square::getBitCount(currentSide & board.kings & center6by6) +
+                    -10 * Square::getBitCount(currentSide & board.kings & center4by4) +
+                    5 * Square::getBitCount(oppSide & board.kings & center6by6) +
+                    10 * Square::getBitCount(oppSide & board.kings & center4by4);
+
+    return bishops + knights + kings;
+}
+
 int GameState::getMaterialEvaluation() const {
     const Bitboard currentSide = (side == Side::White) ? board.whites : board.blacks;
     const Bitboard oppSide = (side == Side::White) ? board.blacks : board.whites;
-    int score = 100 * Square::getBitCount(currentSide & board.pawns) +
+    const int score = 100 * Square::getBitCount(currentSide & board.pawns) +
                 300 * Square::getBitCount(currentSide & (board.bishops | board.knights)) +
                 500 * Square::getBitCount(currentSide & board.rooks) +
-                1050 * Square::getBitCount(currentSide & board.queens) +
+                1000 * Square::getBitCount(currentSide & board.queens) +
                 -100 * Square::getBitCount(oppSide & board.pawns) +
                 -300 * Square::getBitCount(oppSide & (board.bishops | board.knights)) +
                 -500 * Square::getBitCount(oppSide & board.rooks) +
-                -1050 * Square::getBitCount(oppSide & board.queens);
+                -1000 * Square::getBitCount(oppSide & board.queens);
 
     return score;
 }
 
 int GameState::getEvaluation() const {
-    return getMaterialEvaluation() + getPositionEvaluation();
+    return getMaterialEvaluation() + getPositionEvaluation() + getCenteredEvaluation();
 }
 
 bool GameState::isLastMovedPieceUnderAttack() const {

@@ -108,6 +108,7 @@ public:
      */
     std::vector<Move> getNonQuietMoves() const;
     int getEvaluation() const;
+    int getCenteredEvaluation() const;
     bool isLastMovedPieceUnderAttack() const;
 
     /**
