@@ -24,7 +24,7 @@ int Square::getRow(int square) {
     return ((static_cast<unsigned int>(square) >> 3) & 0b111) + 1;
 }
 
-int Square::getRow2(int square) {
+int Square::getRowB(int square) {
     return (static_cast<unsigned int>(square) & 0b111000);
 }
 
@@ -115,9 +115,10 @@ std::vector<int> Square::fromAtoBInclusive(int a, int b) {
     }
     int current = b;
     while (current != a) {
-        results.push_back(current);
+        results.emplace_back(current);
         current += y * 8 + x;
     }
+    
     return results;
 }
 
@@ -140,6 +141,7 @@ Bitboard Square::getInDirection(Bitboard square, Direction direction) {
         //if (direction == Direction::West || direction == Direction::Northwest || direction == Direction::Southwest) {
         square &= notAColumn;
     }
+
     return (direction < 0) ? square >> -direction : square << direction;
 }
 
@@ -159,6 +161,7 @@ bool Square::inLine(int a, int b) {
     int y2 = static_cast<unsigned int>(b) / 8;
     int x = x2 - x1;
     int y = y2 - y1;
+
     return (x == 0 || y == 0 || std::abs(x) == std::abs(y));
 }
 

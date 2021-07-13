@@ -25,7 +25,7 @@ Move Move::fromString(std::string str) {
     try {
         originSquare = Square::fromString(originSquareString);
         destSquare = Square::fromString(destSquareString);
-    } catch (std::runtime_error err) {
+    } catch (std::runtime_error &err) {
         throw err;
     }
     if (str.length() >= 5) {
@@ -46,7 +46,8 @@ std::string Move::toString() const {
 }
 
 bool Move::isRookMove() const {
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(origin, destination);
 
     // This includes cases where both x and y are 0, i.e. origin == destination
@@ -55,7 +56,8 @@ bool Move::isRookMove() const {
 }
 
 bool Move::isBishopMove() const {
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(origin, destination);
 
     // This includes cases where both x and y are 0, i.e. origin == destination
@@ -64,13 +66,10 @@ bool Move::isBishopMove() const {
 }
 
 bool Move::isQueenMove() const {
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(origin, destination);
-    if (x == 0 || y == 0 || abs(x) == abs(y)) {
-        return true;
-    } else {
-        return false;
-    }
+    return (x == 0 || y == 0 || abs(x) == abs(y));
 }
 
 bool Move::isKnightMove() const {
@@ -82,26 +81,30 @@ bool Move::isKingMove() const {
     return (1ULL << destination & Square::getKingAttacks(1ULL << origin));
 }
 
+namespace {
+
+const int squareC1 = Square::get(Column::C, 1);
+const int squareE1 = Square::get(Column::E, 1);
+const int squareG1 = Square::get(Column::G, 1);
+const int squareC8 = Square::get(Column::C, 8);
+const int squareE8 = Square::get(Column::E, 8);
+const int squareG8 = Square::get(Column::G, 8);
+
+}
+
 bool Move::isCastleMove() const {
-    if (origin == Square::get(Column::E, 1)) {
-        if (destination == Square::get(Column::C, 1) || destination == Square::get(Column::G, 1)) {
-            return true;
-        } else {
-            return false;
-        }
-    } else if (origin == Square::get(Column::E, 8)) {
-        if (destination == Square::get(Column::C, 8) || destination == Square::get(Column::G, 8)) {
-            return true;
-        } else {
-            return false;
-        }
+    if (origin == squareE1) {
+        return (destination == squareC1 || destination == squareG1);
+    } else if (origin == squareE8) {
+        return (destination == squareC8 || destination == squareG8);
     } else {
         return false;
     }
 }
 
 bool Move::isPawnMove() const {
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (x != 0) {
         return false;
@@ -120,7 +123,8 @@ bool Move::isPawnMove() const {
 }
 
 bool Move::isPawnMove(Side side) const {
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(origin, destination);
     const Bitboard originMask = 1ULL << origin;
     if (x != 0) {
@@ -171,14 +175,17 @@ bool Move::isTwoSquarePawnMove(Side side) const {
 }
 
 bool Move::isPawnCapture() const {
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(origin, destination);
+
     return (abs(x) == 1 && abs(y) == 1); // Pawn capture
 }
 
 bool Move::isPawnCapture(Side side) const {
     const int pawnDirection = (side == Side::White) ? 1 : -1;
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(origin, destination);
     if (abs(x) == 1 && abs(y) == 1) {
         return (y == pawnDirection);

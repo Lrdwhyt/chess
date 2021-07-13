@@ -28,7 +28,7 @@ std::vector<std::tuple<Move, int>> Perft::divide(GameState const &gamestate, int
         GameState branch = GameState(gamestate);
         branch.processMove(move);
         int total = perft(branch, depth - 1);
-        results.push_back(std::make_tuple(move, total));
+        results.emplace_back(std::make_tuple(move, total));
     }
     return results;
 }

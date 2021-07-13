@@ -22,7 +22,7 @@ std::tuple<int, int> diff(int a, int b);
 
 /* Get row of square (0-63) */
 int getRow(int squareIndex);
-int getRow2(int squareIndex);
+int getRowB(int squareIndex);
 
 /* Get column of square (0-63) */
 int getColumn(int squareIndex);

@@ -76,20 +76,20 @@ void Board::setToStartPosition() {
 }
 
 std::string Board::toString() const {
-    std::string s = "|---+---+---+---+---+---+---+---|";
-    s += "\n";
-    for (int i = 8; i >= 1; --i) { // Rows
-        s += "|";
-        for (int r = Column::A; r <= Column::H; ++r) { // Columns
-            s += " " + Piece::getString(at(Square::get(r, i))) + " |";
+    std::string result = "|---+---+---+---+---+---+---+---|";
+    result += "\n";
+    for (int row = 8; row >= 1; --row) { // Rows
+        result += "|";
+        for (int col = Column::A; col <= Column::H; ++col) { // Columns
+            result += " " + Piece::getString(at(Square::get(col, row))) + " |";
         }
-        s += " " + std::to_string(i);
-        s += "\n";
-        s += "|---+---+---+---+---+---+---+---|";
-        s += "\n";
+        result += " " + std::to_string(row);
+        result += "\n";
+        result += "|---+---+---+---+---+---+---+---|";
+        result += "\n";
     }
-    s += "  A   B   C   D   E   F   G   H";
-    return s;
+    result += "  A   B   C   D   E   F   G   H";
+    return result;
 }
 
 void Board::print() const {
@@ -449,7 +449,8 @@ int Board::captureInDirection(Bitboard squareMask, Side side, Direction directio
 int Board::getPinningOrAttackingSquare(int square, int movingPiece, Side side) const {
     const Side oppSide = (side == Side::White) ? Side::Black : Side::White;
     // Determine if we are looking for bishop or rook based on the direction vector
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(square, movingPiece);
     if (x < 0) {
         x = -1;
@@ -581,7 +582,7 @@ bool Board::isLegalPieceMove(int origin, int destination) const {
 bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
     const Bitboard curSide = (side == Side::White) ? whites : blacks;
     const int kingLocation = Square::getSetBit(kings & curSide);
-    if (Square::getRow2(kingLocation) != Square::getRow2(capturer)) {
+    if (Square::getRowB(kingLocation) != Square::getRowB(capturer)) {
         return false;
     }
     const int x = (Square::getColumn(kingLocation) > Square::getColumn(capturer)) ? -1 : 1;
@@ -618,7 +619,7 @@ void Board::appendUnobstructedMovesInDirection(std::vector<Move> &results, int s
         if (sameSide & squareMask) {
             break;
         }
-        results.push_back(Move(square, Square::getSetBit(squareMask)));
+        results.emplace_back(Move(square, Square::getSetBit(squareMask)));
         if (oppSide & squareMask) {
             break;
         }
@@ -634,7 +635,8 @@ bool Board::isSide(int square, Side side) const {
 }
 
 bool Board::isObstructedBetween(int a, int b) const {
-    int x, y;
+    int x;
+    int y;
     std::tie(x, y) = Square::diff(a, b);
     if (x > 1) {
         x = 1;
