@@ -51,7 +51,7 @@ std::string Piece::getString(int piece) {
         case PieceType::Pawn:
             return "P";
 
-            /* Black pieces are negative */
+        /* Black pieces are negative */
 
         case -PieceType::Rook:
             return "r";
@@ -82,7 +82,7 @@ int Piece::get(Side s, int pieceType) {
 }
 
 int Piece::getType(int piece) {
-    return abs(piece);
+    return std::abs(piece);
 }
 
 Side Piece::getSide(int piece) {
@@ -91,4 +91,6 @@ Side Piece::getSide(int piece) {
     } else if (piece < 0) {
         return Side::Black;
     }
+
+    return Side::None;
 }

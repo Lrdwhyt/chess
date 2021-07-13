@@ -248,14 +248,6 @@ bool Board::isUnderAttack(int square, Side side) const {
             isAttackedInDirection(squareMask, side, Direction::Southwest) ||
             isAttackedInDirection(squareMask, side, Direction::East) ||
             isAttackedInDirection(squareMask, side, Direction::West));
-    /*return (isAttackedInDirection(square, side, 0, 1) ||
-            isAttackedInDirection(square, side, 0, -1) ||
-            isAttackedInDirection(square, side, 1, 0) ||
-            isAttackedInDirection(square, side, -1, 0) ||
-            isAttackedInDirection(square, side, 1, -1) ||
-            isAttackedInDirection(square, side, 1, 1) ||
-            isAttackedInDirection(square, side, -1, -1) ||
-            isAttackedInDirection(square, side, -1, 1));*/
 }
 
 bool Board::isAttackedByKnight(int square, Side side) const {
@@ -599,11 +591,7 @@ bool Board::willEnPassantCheck(int capturer, int capturee, Side side) const {
         if (isSide(square, side)) {
             return false;
         } else if (isSide(square, oppSide)) {
-            if (queens & Board::getMask(square) || rooks & Board::getMask(square)) {
-                return true;
-            } else {
-                return false;
-            }
+            return (queens & Board::getMask(square) || rooks & Board::getMask(square));
         }
     }
 }
@@ -619,7 +607,7 @@ void Board::appendUnobstructedMovesInDirection(std::vector<Move> &results, int s
         if (sameSide & squareMask) {
             break;
         }
-        results.emplace_back(Move(square, Square::getSetBit(squareMask)));
+        results.emplace_back(square, Square::getSetBit(squareMask));
         if (oppSide & squareMask) {
             break;
         }

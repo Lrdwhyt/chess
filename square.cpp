@@ -40,7 +40,7 @@ int Square::fromString(std::string const &str) {
     int squareCol;
 
     if (!(1 <= squareRow && squareRow <= 8)) {
-        std::string err = std::string("Invalid row specified: ");
+        std::string err = "Invalid row specified: ";
         err.push_back(squareRowChar);
         throw std::runtime_error(err);
     }
@@ -79,7 +79,7 @@ int Square::fromString(std::string const &str) {
             break;
 
         default:
-            std::string err = std::string("Invalid column specified: ");
+            std::string err = "Invalid column specified: ";
             err.push_back(squareColChar);
             throw std::runtime_error(err);
     }
@@ -118,7 +118,7 @@ std::vector<int> Square::fromAtoBInclusive(int a, int b) {
         results.emplace_back(current);
         current += y * 8 + x;
     }
-    
+
     return results;
 }
 

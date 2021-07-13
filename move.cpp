@@ -62,14 +62,14 @@ bool Move::isBishopMove() const {
 
     // This includes cases where both x and y are 0, i.e. origin == destination
     // That is checked elsewhere to reduce redundancy
-    return (abs(x) == abs(y));
+    return (std::abs(x) == std::abs(y));
 }
 
 bool Move::isQueenMove() const {
     int x;
     int y;
     std::tie(x, y) = Square::diff(origin, destination);
-    return (x == 0 || y == 0 || abs(x) == abs(y));
+    return (x == 0 || y == 0 || std::abs(x) == std::abs(y));
 }
 
 bool Move::isKnightMove() const {
@@ -97,9 +97,9 @@ bool Move::isCastleMove() const {
         return (destination == squareC1 || destination == squareG1);
     } else if (origin == squareE8) {
         return (destination == squareC8 || destination == squareG8);
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 bool Move::isPawnMove() const {
@@ -117,9 +117,9 @@ bool Move::isPawnMove() const {
         return (secondRow & originMask); // White move forward two spaces
     } else if (y == -2) {
         return (seventhRow & originMask); // Black move forward two spaces
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 bool Move::isPawnMove(Side side) const {
@@ -131,21 +131,9 @@ bool Move::isPawnMove(Side side) const {
         return false;
     }
     if (side == Side::White) {
-        if (y == 1) {
-            return true;
-        } else if (y == 2 && secondRow & originMask) {
-            return true;
-        } else {
-            return false;
-        }
+        return (y == 1) || (y == 2 && secondRow & originMask);
     } else if (side == Side::Black) {
-        if (y == -1) {
-            return true;
-        } else if (y == -2 && seventhRow & originMask) {
-            return true;
-        } else {
-            return false;
-        }
+        return (y == -1) || (y == -2 && seventhRow & originMask);
     }
 
     return false;
@@ -179,7 +167,7 @@ bool Move::isPawnCapture() const {
     int y;
     std::tie(x, y) = Square::diff(origin, destination);
 
-    return (abs(x) == 1 && abs(y) == 1); // Pawn capture
+    return (std::abs(x) == 1 && std::abs(y) == 1); // Pawn capture
 }
 
 bool Move::isPawnCapture(Side side) const {
@@ -187,9 +175,9 @@ bool Move::isPawnCapture(Side side) const {
     int x;
     int y;
     std::tie(x, y) = Square::diff(origin, destination);
-    if (abs(x) == 1 && abs(y) == 1) {
+    if (std::abs(x) == 1 && std::abs(y) == 1) {
         return (y == pawnDirection);
-    } else {
-        return false;
     }
+
+    return false;
 }
