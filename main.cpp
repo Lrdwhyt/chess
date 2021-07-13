@@ -24,23 +24,23 @@ void waitForInput() {
             gamestate.getBoard().print();
         } else if (input.length() >= 12 && input.substr(0, 12) == "perft divide") {
             const int perftDepth = stoi(input.substr(13, std::string::npos));
-            const double start = std::time(0);
-            const std::vector<std::tuple<Move, int>> perftDivideResult = Perft::divide(gamestate, perftDepth);
-            const double end = std::time(0);
-            int total = 0;
-            for (std::tuple<Move, int> move : perftDivideResult) {
+            const auto start = std::chrono::steady_clock::now();
+            const std::vector<std::tuple<Move, long long>> perftDivideResult = Perft::divide(gamestate, perftDepth);
+            const auto end = std::chrono::steady_clock::now();
+            long long total = 0;
+            for (std::tuple<Move, long long> const &move : perftDivideResult) {
                 total += std::get<1>(move);
                 std::cout << "perft(" << perftDepth << ")/" << std::get<0>(move).toString() << ": " << std::get<1>(move) << " moves" << std::endl;
             }
-            std::cout << "perft(" << perftDepth << ") = " << total << " in " << (end - start) << "s" << std::endl;
+            const auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (end - start).count();
+            std::cout << "perft(" << perftDepth << ") = " << total << " in " << duration << "ms" << std::endl;
         } else if (input.length() >= 10 && input.substr(0, 10) == "perft test") {
             Perft::test();
             std::cout << "5/5 tests passed" << std::endl;
         } else if (input.length() >= 5 && input.substr(0, 5) == "perft") {
             const int perftDepth = stoi(input.substr(6, std::string::npos));
-            //const double start = std::time(0);
             const auto start = std::chrono::steady_clock::now();
-            const int perftResult = Perft::perft(gamestate, perftDepth);
+            const long long perftResult = Perft::perft(gamestate, perftDepth);
             const auto end = std::chrono::steady_clock::now();
             const auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (end - start).count();
             std::cout << "perft(" << perftDepth << ") = " << perftResult << " in " << duration << "ms" << std::endl;

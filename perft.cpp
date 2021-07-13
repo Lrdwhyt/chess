@@ -4,7 +4,7 @@
 
 #include <assert.h>
 
-int Perft::perft(GameState const &gamestate, int depth) {
+long long Perft::perft(GameState const &gamestate, int depth) {
     std::vector<Move> moves = gamestate.generateLegalMoves();
     if (depth == 1) {
         return moves.size();
@@ -12,7 +12,7 @@ int Perft::perft(GameState const &gamestate, int depth) {
     if (depth == 0) {
         return 1;
     }
-    int total = 0;
+    long long total = 0;
     for (Move const &move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);
@@ -21,13 +21,13 @@ int Perft::perft(GameState const &gamestate, int depth) {
     return total;
 }
 
-std::vector<std::tuple<Move, int>> Perft::divide(GameState const &gamestate, int depth) {
-    std::vector<std::tuple<Move, int>> results;
+std::vector<std::tuple<Move, long long>> Perft::divide(GameState const &gamestate, int depth) {
+    std::vector<std::tuple<Move, long long>> results;
     std::vector<Move> moves = gamestate.generateLegalMoves();
     for (Move const &move : moves) {
         GameState branch = GameState(gamestate);
         branch.processMove(move);
-        int total = perft(branch, depth - 1);
+        long long total = perft(branch, depth - 1);
         results.emplace_back(std::make_tuple(move, total));
     }
     return results;
