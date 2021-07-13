@@ -17,7 +17,7 @@ Move::Move(int o, int d)
 Move::Move(int o, int d, int piece)
     : origin(o), destination(d), promotion(piece) {}
 
-Move Move::fromString(std::string str) {
+Move Move::fromString(std::string const &str) {
     std::string originSquareString = str.substr(0, 2);
     std::string destSquareString = str.substr(2, 2);
     int destSquare;
@@ -147,7 +147,7 @@ bool Move::isPawnMove(Side side) const {
             return false;
         }
     }
-    
+
     return false;
 }
 

@@ -9,7 +9,7 @@ const std::string LOGFILE = "debug.log";
 
 UciController::UciController() {}
 
-void UciController::send(std::string msg) {
+void UciController::send(std::string const &msg) {
     std::ofstream outputFile(LOGFILE, std::ios::app);
     outputFile << "-> " << msg << std::endl;
     std::cout << msg << std::endl;
@@ -35,7 +35,7 @@ void UciController::waitForInput() {
     }
 }
 
-bool UciController::handleIn(std::string input) {
+bool UciController::handleIn(std::string const &input) {
     if (input == "ucinewgame") {
         initialisedGame = false;
     } else if (input == "isready") {
@@ -52,7 +52,7 @@ bool UciController::handleIn(std::string input) {
     return true;
 }
 
-void UciController::updatePosition(std::string position) {
+void UciController::updatePosition(std::string const &position) {
     gamestate = GameState::loadFromUciString(position);
 }
 

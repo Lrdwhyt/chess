@@ -22,7 +22,7 @@ Board::Board() {
     kings = 0;
 }
 
-Board::Board(std::string fenString) {
+Board::Board(std::string const &fenString) {
     whites = 0;
     blacks = 0;
     pawns = 0;
@@ -655,7 +655,7 @@ bool Board::isObstructedBetween(int a, int b) const {
         }
         current += y * 8 + x;
     }
-    
+
     return false;
 }
 

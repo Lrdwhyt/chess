@@ -26,7 +26,7 @@ public:
     Move();
     Move(int, int);
     Move(int, int, int);
-    static Move fromString(std::string);
+    static Move fromString(std::string const &str);
     std::string toString() const;
 
     /*

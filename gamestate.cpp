@@ -61,7 +61,7 @@ GameState::GameState(std::string fenString) {
     if (castleString.find("q") != std::string::npos) {
         canBlackCastleQueenside = true;
     }
-    
+
     fenString.erase(0, index + 1);
     index = fenString.find(" ");
     std::string enPassantString = fenString.substr(0, index);
@@ -117,7 +117,7 @@ const int whiteKingRook = Square::get(Column::H, 1);
 void GameState::processMove(Move move) {
     const Bitboard originMask = Square::getMask(move.origin);
     // Update ability to castle
-    
+
     if (canWhiteCastleKingside && move.destination == whiteKingRook) {
         canWhiteCastleKingside = false;
     }
@@ -337,7 +337,7 @@ std::vector<Move> GameState::getMovesOutsideCheck() const {
         pawnSquares &= pawnSquares - 1;
     }
     appendKingMoves(moves);
-    
+
     return moves;
 }
 
@@ -859,7 +859,7 @@ bool GameState::canEnPassant(int square) const {
         // We already know that they're on the same row, so this is safe
         return false; // Pawns are not on adjacent columns
     }
-    
+
     return true;
 }
 
@@ -921,7 +921,7 @@ int GameState::getEvaluation() const {
 
 bool GameState::isLastMovedPieceUnderAttack() const {
     const Side oppSide = (side == Side::White) ? Side::Black : Side::White;
-    
+
     return board.isUnderAttack(moveHistory.back().destination, oppSide);
 }
 

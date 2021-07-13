@@ -30,7 +30,7 @@ public:
     Bitboard queens;
     Bitboard kings;
     Board();
-    Board(std::string fenString);
+    Board(std::string const &fenString);
     Board(Board const &);
     void setToStartPosition();
     void print() const;
@@ -61,7 +61,7 @@ public:
     int captureInDirection(Bitboard squareMask, Side side, Direction direction) const;
 
     bool isSide(int square, Side side) const;
-    
+
     /* Determine if a piece can travel from A to B without being obstructed */
     bool isObstructedBetween(int a, int b) const;
 
