@@ -5,12 +5,12 @@
 #include <assert.h>
 
 long long Perft::perft(GameState const &gamestate, int depth) {
+    if (depth == 0) {
+        return 1;
+    }
     std::vector<Move> moves = gamestate.generateLegalMoves();
     if (depth == 1) {
         return moves.size();
-    }
-    if (depth == 0) {
-        return 1;
     }
     long long total = 0;
     for (Move const &move : moves) {
